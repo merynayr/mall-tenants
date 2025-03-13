@@ -1,11 +1,10 @@
 package access
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/merynayr/mall-tenants/internal/config"
 	"github.com/merynayr/mall-tenants/internal/service"
+	"github.com/merynayr/mall-tenants/internal/sys"
 )
 
 // Middleware структура для проверки доступа
@@ -29,7 +28,7 @@ func (m *Middleware) Check() gin.HandlerFunc {
 
 		user, err := m.accessService.Check(c, endpoint)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "access denied"})
+			sys.HandleError(c, sys.AccessDeniedError)
 			return
 		}
 

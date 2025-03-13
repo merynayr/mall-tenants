@@ -18,10 +18,6 @@ const (
 // Check проверяет, имеет ли пользователь доступ к эндпоинту
 func (s *srv) Check(ctx *gin.Context, endpointAddress string) (*model.User, error) {
 
-	if _, ok := s.userAccesses[endpointAddress]; !ok {
-		return nil, nil
-	}
-
 	authHeader := ctx.GetHeader(authHeader)
 	if authHeader == "" {
 		return nil, errors.New(sys.ErrAuthHeaderNotProvided)
@@ -41,6 +37,21 @@ func (s *srv) Check(ctx *gin.Context, endpointAddress string) (*model.User, erro
 	user, err := s.userService.GetUserByEmail(ctx.Request.Context(), claims.Email)
 	if err != nil {
 		return nil, err
+	}
+
+	// Супер админ имеет доступ ко всем эндпоинтам
+	if claims.Role == 2 {
+		return user, nil
+	}
+
+	// Моедратор имеет доступ ко всем эндпоинтам
+	if claims.Role == 1 {
+		return user, nil
+	}
+
+	// смотрим, есть ли доступ у пользователя
+	if _, ok := s.userAccesses[endpointAddress]; !ok {
+		return nil, sys.AccessDeniedError
 	}
 
 	return user, nil

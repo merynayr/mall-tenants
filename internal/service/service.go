@@ -24,3 +24,10 @@ type AuthService interface {
 type AccessService interface {
 	Check(ctx *gin.Context, endpointAddress string) (*model.User, error)
 }
+
+// PremiseService интерфейс сервисного слоя access
+type PremiseService interface {
+	GetPremisesByCode(ctx context.Context, code int64) (*model.Premises, error)
+	CreatePremise(ctx context.Context, premise model.Premises) error
+	UpdatePremise(ctx context.Context, premise model.Premises) error
+}

@@ -13,12 +13,16 @@ import (
 	"github.com/merynayr/mall-tenants/internal/repository"
 	"github.com/merynayr/mall-tenants/internal/service"
 
-	authAPI "github.com/merynayr/mall-tenants/internal/api/auth"
+	auth "github.com/merynayr/mall-tenants/internal/api/auth"
+	mall "github.com/merynayr/mall-tenants/internal/api/mall"
 
 	accessService "github.com/merynayr/mall-tenants/internal/service/access"
 	authService "github.com/merynayr/mall-tenants/internal/service/auth"
 
 	userRepository "github.com/merynayr/mall-tenants/internal/repository/user"
+
+	premiseRepository "github.com/merynayr/mall-tenants/internal/repository/premises"
+	premiseService "github.com/merynayr/mall-tenants/internal/service/premises"
 
 	"github.com/merynayr/mall-tenants/internal/middleware"
 )
@@ -37,8 +41,12 @@ type serviceProvider struct {
 
 	userRepository repository.UserRepository
 
-	authAPI     *authAPI.API
+	authAPI     *auth.API
 	authService service.AuthService
+
+	mallAPI           *mall.API
+	premiseService    service.PremiseService
+	premiseRepository repository.PremiseRepository
 
 	middleware    middleware.Middleware
 	accessService service.AccessService
@@ -163,9 +171,9 @@ func (s *serviceProvider) UserRepository(ctx context.Context) repository.UserRep
 }
 
 // AuthAPI инициализирует api слой auth
-func (s *serviceProvider) AuthAPI(ctx context.Context) *authAPI.API {
+func (s *serviceProvider) AuthAPI(ctx context.Context) *auth.API {
 	if s.authAPI == nil {
-		s.authAPI = authAPI.NewAPI(s.AuthService(ctx), s.AuthConfig())
+		s.authAPI = auth.NewAPI(s.AuthService(ctx), s.AuthConfig())
 	}
 
 	return s.authAPI
@@ -206,4 +214,32 @@ func (s *serviceProvider) AccessService(_ context.Context) service.AccessService
 	}
 
 	return s.accessService
+}
+
+// MallAPI инициализирует api слой Mall
+func (s *serviceProvider) MallAPI(ctx context.Context) *mall.API {
+	if s.mallAPI == nil {
+		s.mallAPI = mall.NewAPI(s.PremiseService(ctx))
+	}
+
+	return s.mallAPI
+}
+
+// PremiseService иницилизирует сервисный слой для помещений
+func (s *serviceProvider) PremiseService(ctx context.Context) service.PremiseService {
+	if s.premiseService == nil {
+		s.premiseService = premiseService.NewService(
+			s.PremiseRepository(ctx),
+		)
+	}
+
+	return s.premiseService
+}
+
+func (s *serviceProvider) PremiseRepository(ctx context.Context) repository.PremiseRepository {
+	if s.premiseRepository == nil {
+		s.premiseRepository = premiseRepository.NewRepository(s.DBClient(ctx))
+	}
+
+	return s.premiseRepository
 }

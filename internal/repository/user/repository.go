@@ -65,7 +65,7 @@ func (r *repo) CreateUser(ctx context.Context, req *model.RegisterRequest) (int6
 		}
 	}()
 
-	query, args, err := sq.Insert("users").
+	query, args, err := sq.Insert(usersTable).
 		PlaceholderFormat(sq.Dollar).
 		Columns(
 			EmailColumn,
@@ -77,7 +77,7 @@ func (r *repo) CreateUser(ctx context.Context, req *model.RegisterRequest) (int6
 			passHash,
 			role,
 		).
-		Suffix("RETURNING user_id").
+		Suffix("RETURNING " + UserIDColumn).
 		ToSql()
 
 	if err != nil {
@@ -112,7 +112,7 @@ func (r *repo) CreateUser(ctx context.Context, req *model.RegisterRequest) (int6
 			req.Phone,
 			req.Requisites,
 		).
-		Suffix("RETURNING client_id").
+		Suffix("RETURNING " + ClientIDColumn).
 		ToSql()
 
 	if err != nil {

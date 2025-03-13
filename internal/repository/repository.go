@@ -13,3 +13,10 @@ type UserRepository interface {
 	GetUserByEmail(ctx context.Context, email string) (*model.User, bool, error)
 	IsEmailExist(ctx context.Context, email string) (bool, error)
 }
+
+// PremiseRepository - интерфейс репо слоя для помещений
+type PremiseRepository interface {
+	GetPremisesByCode(ctx context.Context, code int64) (*model.Premises, bool, error)
+	CreatePremise(ctx context.Context, premise *model.Premises) error
+	UpdatePremise(ctx context.Context, premise *model.Premises) error
+}

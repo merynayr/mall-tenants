@@ -116,17 +116,20 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 
 	router := gin.Default()
 
+	a.serviceProvider.AuthAPI(ctx)
+	a.serviceProvider.authAPI.RegisterRoutes(router)
+
+	a.serviceProvider.MallAPI(ctx)
+	a.serviceProvider.mallAPI.RegisterRoutes(router)
+
 	mw := a.serviceProvider.Middleware(ctx)
 	router.Use(mw.TimeoutMiddleware(time.Second * 5))
 	router.Use(mw.Access().AddAccessTokenFromCookie())
 	router.Use(mw.Access().Check())
 
-	a.serviceProvider.AuthAPI(ctx)
-	a.serviceProvider.authAPI.RegisterRoutes(router)
-
 	corsMiddleware := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedMethods:   []string{"GET", "POST", "PATCH", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Content-Type", "Content-Length", "Authorization"},
 		AllowCredentials: true,
 	})

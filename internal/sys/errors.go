@@ -4,7 +4,7 @@ import "github.com/merynayr/mall-tenants/internal/sys/codes"
 
 // Константы с текстами ошибок
 const (
-	ErrItemNotFound            = "item not found"
+	ErrNotFound                = "not found"
 	ErrNotEnoughCoins          = "not enough coins"
 	ErrSelfTransferNotAllowed  = "you can't transfer money to yourself"
 	ErrInvalidRefreshToken     = "invalid refresh token"
@@ -24,7 +24,7 @@ const (
 // Готовые объекты ошибок с комментариями
 var (
 	// ItemNotFoundError возникает, когда запрашиваемый объект не найден. Код ошибки: 404 (Not Found)
-	ItemNotFoundError = NewCommonError(ErrItemNotFound, codes.NotFound)
+	NotFoundError = NewCommonError(ErrNotFound, codes.NotFound)
 
 	// NotEnoughCoinsError возникает, когда у пользователя недостаточно монет для перевода. Код ошибки: 400 (Bad Request)
 	NotEnoughCoinsError = NewCommonError(ErrNotEnoughCoins, codes.BadRequest)

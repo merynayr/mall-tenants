@@ -114,6 +114,164 @@
                     }
                 }
             }
+        },
+        "/mall/": {
+            "post": {
+                "description": "Создаёт новое помещение",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "create"
+                ],
+                "summary": "Создать помещение",
+                "parameters": [
+                    {
+                        "description": "Информация о помещении",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Premises"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Обновляет данные о помещении",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "update"
+                ],
+                "summary": "Обновить помещение",
+                "parameters": [
+                    {
+                        "description": "Информация о помещении",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Premises"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Помещение не найдено",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/mall/{code}": {
+            "get": {
+                "description": "Получает данные о помещении по коду",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "premises"
+                ],
+                "summary": "Получить данные о помещении",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Код помещения",
+                        "name": "code",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Premises"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Помещение не найдено",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -143,6 +301,46 @@
                     "type": "string"
                 }
             }
+        },
+        "model.Premises": {
+            "type": "object",
+            "properties": {
+                "air_conditioning": {
+                    "type": "string"
+                },
+                "area": {
+                    "type": "integer"
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "floor": {
+                    "type": "integer"
+                },
+                "rent_per_month": {
+                    "type": "integer"
+                },
+                "rental_condition": {
+                    "type": "string"
+                },
+                "security_system": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/model.PremisesType"
+                }
+            }
+        },
+        "model.PremisesType": {
+            "type": "string",
+            "enum": [
+                "retail",
+                "service"
+            ],
+            "x-enum-varnames": [
+                "Retail",
+                "Service"
+            ]
         },
         "model.RegisterRequest": {
             "type": "object",
