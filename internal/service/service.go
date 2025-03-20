@@ -31,3 +31,10 @@ type PremiseService interface {
 	CreatePremise(ctx context.Context, premise model.Premises) error
 	UpdatePremise(ctx context.Context, premise model.Premises) error
 }
+
+// RentalService - интерфейс репо слоя для аренд
+type RentalService interface {
+	GetRentalByID(ctx context.Context, code int64) (*model.Rental, error)
+	CreateRental(ctx context.Context, rental model.Rental) error
+	UpdateRental(ctx context.Context, rental model.Rental) error
+}

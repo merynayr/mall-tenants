@@ -15,6 +15,7 @@ import (
 
 	auth "github.com/merynayr/mall-tenants/internal/api/auth"
 	mall "github.com/merynayr/mall-tenants/internal/api/mall"
+	"github.com/merynayr/mall-tenants/internal/api/rental"
 
 	accessService "github.com/merynayr/mall-tenants/internal/service/access"
 	authService "github.com/merynayr/mall-tenants/internal/service/auth"
@@ -23,6 +24,9 @@ import (
 
 	premiseRepository "github.com/merynayr/mall-tenants/internal/repository/premises"
 	premiseService "github.com/merynayr/mall-tenants/internal/service/premises"
+
+	rentalRepository "github.com/merynayr/mall-tenants/internal/repository/rentals"
+	rentalService "github.com/merynayr/mall-tenants/internal/service/rentals"
 
 	"github.com/merynayr/mall-tenants/internal/middleware"
 )
@@ -47,6 +51,10 @@ type serviceProvider struct {
 	mallAPI           *mall.API
 	premiseService    service.PremiseService
 	premiseRepository repository.PremiseRepository
+
+	rentalAPI        *rental.API
+	rentalService    service.RentalService
+	rentalRepository repository.RentalRepository
 
 	middleware    middleware.Middleware
 	accessService service.AccessService
@@ -242,4 +250,30 @@ func (s *serviceProvider) PremiseRepository(ctx context.Context) repository.Prem
 	}
 
 	return s.premiseRepository
+}
+
+// RentalAPI инициализирует API-слой для аренды
+func (s *serviceProvider) RentalAPI(ctx context.Context) *rental.API {
+	if s.rentalAPI == nil {
+		s.rentalAPI = rental.NewAPI(s.RentalService(ctx))
+	}
+	return s.rentalAPI
+}
+
+// RentalService инициализирует сервисный слой для аренды
+func (s *serviceProvider) RentalService(ctx context.Context) service.RentalService {
+	if s.rentalService == nil {
+		s.rentalService = rentalService.NewService(
+			s.RentalRepository(ctx),
+		)
+	}
+	return s.rentalService
+}
+
+// RentalRepository инициализирует репозиторий для аренды
+func (s *serviceProvider) RentalRepository(ctx context.Context) repository.RentalRepository {
+	if s.rentalRepository == nil {
+		s.rentalRepository = rentalRepository.NewRepository(s.DBClient(ctx))
+	}
+	return s.rentalRepository
 }

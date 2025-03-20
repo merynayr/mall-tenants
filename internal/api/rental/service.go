@@ -1,28 +1,28 @@
-package mall
+package rental
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/merynayr/mall-tenants/internal/service"
 )
 
-// API premise структура
+// API rental структура
 type API struct {
-	premiseService service.PremiseService
+	rentalService service.RentalService
 }
 
 // NewAPI возвращает новый объект имплементации API-слоя mall
-func NewAPI(premiseService service.PremiseService) *API {
+func NewAPI(rentalService service.RentalService) *API {
 	return &API{
-		premiseService: premiseService,
+		rentalService: rentalService,
 	}
 }
 
 // RegisterRoutes регистрирует маршруты
 func (api *API) RegisterRoutes(router *gin.Engine) {
-	mallGroup := router.Group("/mall")
+	rentalGroup := router.Group("/rental")
 	{
-		mallGroup.GET("/:code", api.GetPremisesByCode)
-		mallGroup.PATCH("/", api.UpdatePremise)
-		mallGroup.POST("/", api.CreatePremise)
+		rentalGroup.GET("/:id", api.GetRentalByID)
+		rentalGroup.PATCH("/:id", api.UpdateRental)
+		rentalGroup.POST("/", api.CreateRental)
 	}
 }

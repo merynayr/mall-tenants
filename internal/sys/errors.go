@@ -19,6 +19,7 @@ const (
 	ErrUserExist               = "user already exist"
 	ErrRecipientNotFound       = "recipient not found"
 	ErrPasswordsDoNotMatch     = "password and confirm password do not match"
+	ErrExist                   = "already exist"
 )
 
 // Готовые объекты ошибок с комментариями
@@ -67,4 +68,7 @@ var (
 
 	// PasswordsDoNotMatchError возникает, когда пароль и повтор пароля не сопадают. Код ошибки: 400 (Bad Request)
 	PasswordsDoNotMatchError = NewCommonError(ErrPasswordsDoNotMatch, codes.BadRequest)
+
+	// ExistError возникает, когда создаваемый объект уже существует. Код ошибки: 409 (Conflict)
+	ExistError = NewCommonError(ErrExist, codes.Conflict)
 )

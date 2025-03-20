@@ -20,3 +20,11 @@ type PremiseRepository interface {
 	CreatePremise(ctx context.Context, premise *model.Premises) error
 	UpdatePremise(ctx context.Context, premise *model.Premises) error
 }
+
+// RentalRepository - интерфейс репо слоя для аренд
+type RentalRepository interface {
+	GetRentalByID(ctx context.Context, id int64) (*model.Rental, bool, error)
+	CreateRental(ctx context.Context, rental *model.Rental) error
+	UpdateRental(ctx context.Context, rental *model.Rental) error
+	CheckRentalOverlap(ctx context.Context, spaceCode int64, startDate int64, endDate int64) (bool, error)
+}

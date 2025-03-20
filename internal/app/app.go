@@ -122,6 +122,9 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 	a.serviceProvider.MallAPI(ctx)
 	a.serviceProvider.mallAPI.RegisterRoutes(router)
 
+	a.serviceProvider.RentalAPI(ctx)
+	a.serviceProvider.rentalAPI.RegisterRoutes(router)
+
 	mw := a.serviceProvider.Middleware(ctx)
 	router.Use(mw.TimeoutMiddleware(time.Second * 5))
 	router.Use(mw.Access().AddAccessTokenFromCookie())

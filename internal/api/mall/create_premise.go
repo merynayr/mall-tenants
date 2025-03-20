@@ -11,7 +11,7 @@ import (
 // CreatePremise создание помещения
 // @Summary Создать помещение
 // @Description Создаёт новое помещение
-// @Tags create
+// @Tags premises
 // @Accept  json
 // @Produce  json
 // @Param body body model.Premises true "Информация о помещении"

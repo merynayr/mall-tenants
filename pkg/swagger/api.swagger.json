@@ -125,7 +125,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "create"
+                    "premises"
                 ],
                 "summary": "Создать помещение",
                 "parameters": [
@@ -172,7 +172,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "update"
+                    "premises"
                 ],
                 "summary": "Обновить помещение",
                 "parameters": [
@@ -272,6 +272,177 @@
                     }
                 }
             }
+        },
+        "/rental/": {
+            "post": {
+                "description": "Создает новый договор аренды",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rental"
+                ],
+                "summary": "Создать аренду",
+                "parameters": [
+                    {
+                        "description": "Данные аренды",
+                        "name": "rental",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Rental"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.Rental"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/rental/{id}": {
+            "get": {
+                "description": "Получает данные о аренде по коду",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rental"
+                ],
+                "summary": "Получить данные о аренде",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Код аренды",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Rental"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Аренда не найдена",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Обновляет данные аренды по коду",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rental"
+                ],
+                "summary": "Обновить аренду",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Код аренды",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Обновленные данные аренды",
+                        "name": "rental",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Rental"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Rental"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Аренда не найдена",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -320,10 +491,10 @@
                 "rent_per_month": {
                     "type": "integer"
                 },
-                "rental_condition": {
+                "security_system": {
                     "type": "string"
                 },
-                "security_system": {
+                "status": {
                     "type": "string"
                 },
                 "type": {
@@ -378,6 +549,35 @@
                     "type": "string"
                 },
                 "requisites": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Rental": {
+            "type": "object",
+            "properties": {
+                "client_id": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "end_date": {
+                    "type": "integer"
+                },
+                "paid_months": {
+                    "type": "integer"
+                },
+                "rental_id": {
+                    "type": "integer"
+                },
+                "space_code": {
+                    "type": "integer"
+                },
+                "start_date": {
+                    "type": "integer"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }

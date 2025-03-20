@@ -11,7 +11,7 @@ import (
 // UpdatePremise обновляет данные о помещении
 // @Summary Обновить помещение
 // @Description Обновляет данные о помещении
-// @Tags update
+// @Tags premises
 // @Accept  json
 // @Produce  json
 // @Param body body model.Premises true "Информация о помещении"
