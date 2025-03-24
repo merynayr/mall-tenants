@@ -53,7 +53,7 @@ func (r *repo) CreateRental(ctx context.Context, rental *model.Rental) error {
 			rental.StartDate,
 			rental.EndDate,
 			rental.PaidMonths,
-			time.Now(),
+			time.Now().UTC(),
 		).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
@@ -124,16 +124,16 @@ func (r *repo) GetRentalByID(ctx context.Context, id int64) (*model.Rental, bool
 func (r *repo) UpdateRental(ctx context.Context, rental *model.Rental) error {
 	builder := sq.Update(RentalTable)
 
-	if rental.StartDate != 0 {
+	if !rental.StartDate.IsZero() {
 		builder = builder.Set(StartDateColumn, rental.StartDate)
 	}
-	if rental.EndDate != 0 {
+	if !rental.EndDate.IsZero() {
 		builder = builder.Set(EndDateColumn, rental.EndDate)
 	}
 	if rental.PaidMonths != 0 {
 		builder = builder.Set(PaidMonthsColumn, rental.PaidMonths)
 	}
-	builder = builder.Set(UpdatedAtColumn, time.Now())
+	builder = builder.Set(UpdatedAtColumn, time.Now().UTC())
 
 	query, args, err := builder.PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{IDColumn: rental.RentalID}).
@@ -159,28 +159,4 @@ func (r *repo) UpdateRental(ctx context.Context, rental *model.Rental) error {
 	}
 
 	return nil
-}
-
-func (r *repo) CheckRentalOverlap(ctx context.Context, spaceCode int64, startDate int64, endDate int64) (bool, error) {
-	query := `
-	SELECT COUNT(*) 
-	FROM rentals 
-	WHERE space_code = $1 
-	AND ((start_date BETWEEN $2 AND $3) 
-	OR (end_date BETWEEN $2 AND $3) 
-	OR ($2 BETWEEN start_date AND end_date))
-	`
-
-	q := db.Query{
-		Name:     "rental_repository.CheckRentalOverlap",
-		QueryRaw: query,
-	}
-
-	var count int
-	err := r.db.DB().QueryRowContext(ctx, q, spaceCode, startDate, endDate).Scan(&count)
-	if err != nil {
-		return false, err
-	}
-
-	return count > 0, nil
 }

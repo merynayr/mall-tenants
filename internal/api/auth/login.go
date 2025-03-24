@@ -12,7 +12,7 @@ import (
 // Login аутентификация и получение JWT-токена
 // @Summary Аутентификация
 // @Description Аутентифицирует пользователя и возвращает JWT-токен
-// @Tags auth
+// @Tags user
 // @Accept  json
 // @Produce  json
 // @Param body body model.AuthRequest true "Данные для аутентификации"

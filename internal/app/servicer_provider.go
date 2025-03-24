@@ -15,6 +15,7 @@ import (
 
 	auth "github.com/merynayr/mall-tenants/internal/api/auth"
 	mall "github.com/merynayr/mall-tenants/internal/api/mall"
+	"github.com/merynayr/mall-tenants/internal/api/payment"
 	"github.com/merynayr/mall-tenants/internal/api/rental"
 
 	accessService "github.com/merynayr/mall-tenants/internal/service/access"
@@ -27,6 +28,9 @@ import (
 
 	rentalRepository "github.com/merynayr/mall-tenants/internal/repository/rentals"
 	rentalService "github.com/merynayr/mall-tenants/internal/service/rentals"
+
+	paymentRepository "github.com/merynayr/mall-tenants/internal/repository/payments"
+	paymentService "github.com/merynayr/mall-tenants/internal/service/payments"
 
 	"github.com/merynayr/mall-tenants/internal/middleware"
 )
@@ -55,6 +59,10 @@ type serviceProvider struct {
 	rentalAPI        *rental.API
 	rentalService    service.RentalService
 	rentalRepository repository.RentalRepository
+
+	paymentAPI        *payment.API
+	paymentService    service.PaymentService
+	paymentRepository repository.PaymentRepository
 
 	middleware    middleware.Middleware
 	accessService service.AccessService
@@ -265,6 +273,8 @@ func (s *serviceProvider) RentalService(ctx context.Context) service.RentalServi
 	if s.rentalService == nil {
 		s.rentalService = rentalService.NewService(
 			s.RentalRepository(ctx),
+			s.PremiseRepository(ctx),
+			s.TxManager(ctx),
 		)
 	}
 	return s.rentalService
@@ -276,4 +286,33 @@ func (s *serviceProvider) RentalRepository(ctx context.Context) repository.Renta
 		s.rentalRepository = rentalRepository.NewRepository(s.DBClient(ctx))
 	}
 	return s.rentalRepository
+}
+
+// PaymentAPI инициализирует API-слой для платежей
+func (s *serviceProvider) PaymentAPI(ctx context.Context) *payment.API {
+	if s.paymentAPI == nil {
+		s.paymentAPI = payment.NewAPI(s.PaymentService(ctx))
+	}
+	return s.paymentAPI
+}
+
+// PaymentService инициализирует сервисный слой для платежей
+func (s *serviceProvider) PaymentService(ctx context.Context) service.PaymentService {
+	if s.paymentService == nil {
+		s.paymentService = paymentService.NewService(
+			s.PaymentRepository(ctx),
+			s.RentalRepository(ctx),
+			s.PremiseRepository(ctx),
+			s.TxManager(ctx),
+		)
+	}
+	return s.paymentService
+}
+
+// PaymentRepository инициализирует репозиторий для платежей
+func (s *serviceProvider) PaymentRepository(ctx context.Context) repository.PaymentRepository {
+	if s.paymentRepository == nil {
+		s.paymentRepository = paymentRepository.NewRepository(s.DBClient(ctx))
+	}
+	return s.paymentRepository
 }

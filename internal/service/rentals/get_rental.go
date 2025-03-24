@@ -13,7 +13,7 @@ func (s *srv) GetRentalByID(ctx context.Context, code int64) (*model.Rental, err
 		return &model.Rental{}, err
 	}
 	if !exist {
-		return &model.Rental{}, sys.NotFoundError
+		return &model.Rental{}, sys.RentalNotFoundError
 	}
 
 	return rental, nil

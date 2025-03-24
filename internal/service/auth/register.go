@@ -13,6 +13,7 @@ func (s *srv) Register(ctx context.Context, req model.RegisterRequest) (*model.A
 	if req.Password != req.ConfirmPassword {
 		return nil, sys.PasswordsDoNotMatchError
 	}
+
 	var userInfo *model.AuthRequest
 	_, exist, err := s.userRepository.GetUserByEmail(ctx, req.Email)
 	if err != nil {

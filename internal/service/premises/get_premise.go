@@ -13,7 +13,7 @@ func (s *srv) GetPremisesByCode(ctx context.Context, code int64) (*model.Premise
 		return &model.Premises{}, err
 	}
 	if !exist {
-		return &model.Premises{}, sys.NotFoundError
+		return &model.Premises{}, sys.PremiseNotFoundError
 	}
 
 	return premise, nil

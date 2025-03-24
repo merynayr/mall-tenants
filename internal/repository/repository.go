@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/merynayr/mall-tenants/internal/model"
 )
@@ -26,5 +27,13 @@ type RentalRepository interface {
 	GetRentalByID(ctx context.Context, id int64) (*model.Rental, bool, error)
 	CreateRental(ctx context.Context, rental *model.Rental) error
 	UpdateRental(ctx context.Context, rental *model.Rental) error
-	CheckRentalOverlap(ctx context.Context, spaceCode int64, startDate int64, endDate int64) (bool, error)
+}
+
+// PaymentRepository - интерфейс репо слоя для платежей
+type PaymentRepository interface {
+	CreatePayment(ctx context.Context, payment *model.Payment) error
+	GetPaymentByID(ctx context.Context, id int64) (*model.Payment, bool, error)
+	GetLastPayment(ctx context.Context, rentID int64) (*model.Payment, bool, error)
+	GetOverduePayments(ctx context.Context, rentID int64) ([]model.Payment, error)
+	GetPaymentByRentIDAndPeriod(ctx context.Context, rentID int64, startDate, endDate time.Time) (bool, error)
 }

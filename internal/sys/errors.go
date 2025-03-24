@@ -20,6 +20,14 @@ const (
 	ErrRecipientNotFound       = "recipient not found"
 	ErrPasswordsDoNotMatch     = "password and confirm password do not match"
 	ErrExist                   = "already exist"
+	ErrPaymentNotFound         = "payment not found"
+	ErrInvalidPaymentAmount    = "invalid payment amount"
+	ErrPaymentAlreadyExists    = "payment already exists"
+	ErrRentalNotFound          = "rental not found"
+	ErrOverduePaymentsNotFound = "overdue payments not found"
+	ErrPremiseNotFound         = "premise not found"
+	ErrPremiseOccupied         = "premise is already occupied"
+	ErrPremiseUnderRepair      = "premise is under repair and unavailable"
 )
 
 // Готовые объекты ошибок с комментариями
@@ -71,4 +79,28 @@ var (
 
 	// ExistError возникает, когда создаваемый объект уже существует. Код ошибки: 409 (Conflict)
 	ExistError = NewCommonError(ErrExist, codes.Conflict)
+
+	// PaymentNotFoundError возникает, когда запрашиваемый платеж не найден. Код ошибки: 404 (Not Found)
+	PaymentNotFoundError = NewCommonError(ErrPaymentNotFound, codes.NotFound)
+
+	// InvalidPaymentAmountError возникает, когда сумма платежа некорректна. Код ошибки: 400 (Bad Request)
+	InvalidPaymentAmountError = NewCommonError(ErrInvalidPaymentAmount, codes.BadRequest)
+
+	// PaymentAlreadyExistsError возникает, когда платеж уже существует. Код ошибки: 409 (Conflict)
+	PaymentAlreadyExistsError = NewCommonError(ErrPaymentAlreadyExists, codes.Conflict)
+
+	// RentalNotFoundError возникает, когда запрашиваемая аренда не найдена. Код ошибки: 404 (Not Found)
+	RentalNotFoundError = NewCommonError(ErrRentalNotFound, codes.NotFound)
+
+	// OverduePaymentsNotFoundError возникает, когда просроченные платежи не найдены. Код ошибки: 404 (Not Found)
+	OverduePaymentsNotFoundError = NewCommonError(ErrOverduePaymentsNotFound, codes.NotFound)
+
+	// PremiseNotFoundError возникает, когда запрашиваемое помещение не найдено. Код ошибки: 404 (Not Found)
+	PremiseNotFoundError = NewCommonError(ErrPremiseNotFound, codes.NotFound)
+
+	// PremiseOccupiedError возникает, когда помещение уже занято. Код ошибки: 409 (Conflict)
+	PremiseOccupiedError = NewCommonError(ErrPremiseOccupied, codes.Conflict)
+
+	// PremiseUnderRepairError возникает, когда помещение в ремонте и недоступно. Код ошибки: 403 (Forbidden)
+	PremiseUnderRepairError = NewCommonError(ErrPremiseUnderRepair, codes.Forbidden)
 )

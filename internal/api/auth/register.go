@@ -12,7 +12,7 @@ import (
 // Register регистрация и получение JWT-токена
 // @Summary Регистрация
 // @Description Регистрирует пользователя и возвращает JWT-токен
-// @Tags register
+// @Tags user
 // @Accept  json
 // @Produce  json
 // @Param body body model.RegisterRequest true "Данные для регистрации"
