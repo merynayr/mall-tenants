@@ -6,7 +6,7 @@ services:
   app:
     container_name: mall-tenants
     build:
-      context: . 
+      context: ./backend 
       dockerfile: Dockerfile
     ports:
       - "${HTTP_PORT}:${HTTP_PORT}" 
@@ -15,6 +15,8 @@ services:
       db:
         condition: service_healthy
     restart: always
+    env_file:
+      - .env
 
   # Сервис для PostgreSQL
   db:
@@ -39,7 +41,7 @@ services:
   migrate:
     container_name: migrator
     build:
-      context: . 
+      context: ./backend
       dockerfile: migration.Dockerfile
     restart: on-failure
     depends_on:
@@ -48,5 +50,5 @@ services:
     environment:
       DB_HOST: db
     env_file:
-      - .env 
+      - .env
 

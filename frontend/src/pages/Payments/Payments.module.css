@@ -1,0 +1,8 @@
+.tenants ul {
+  list-style: none;
+  padding: 0;
+}
+
+.tenants li {
+  margin: 0.5rem 0;
+}
