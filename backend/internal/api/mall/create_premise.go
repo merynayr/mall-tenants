@@ -19,7 +19,7 @@ import (
 // @Failure 400 {object} sys.ErrorResponse
 // @Failure 401 {object} sys.ErrorResponse
 // @Failure 500 {object} sys.ErrorResponse
-// @Router /mall/ [post]
+// @Router /premise/ [post]
 func (a *API) CreatePremise(c *gin.Context) {
 	var req model.Premises
 

@@ -20,7 +20,7 @@ import (
 // @Failure 401 {object} sys.ErrorResponse
 // @Failure 404 {object} sys.ErrorResponse "Помещение не найдено"
 // @Failure 500 {object} sys.ErrorResponse
-// @Router /mall/ [patch]
+// @Router /premise/ [patch]
 func (a *API) UpdatePremise(c *gin.Context) {
 	var req model.Premises
 

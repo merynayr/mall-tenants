@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"io"
 
 	"github.com/gin-gonic/gin"
 	"github.com/merynayr/mall-tenants/internal/model"
@@ -27,9 +28,15 @@ type AccessService interface {
 
 // PremiseService интерфейс сервисного слоя access
 type PremiseService interface {
+	GetAllPremises(ctx context.Context) ([]model.Premises, error)
 	GetPremisesByCode(ctx context.Context, code int64) (*model.Premises, error)
 	CreatePremise(ctx context.Context, premise model.Premises) error
 	UpdatePremise(ctx context.Context, premise model.Premises) error
+
+	SaveFloorPlan(ctx context.Context, floor int64, reader io.Reader) error
+	GetFloorPlanContent(ctx context.Context, floor int64) ([]byte, error)
+	AddPolygon(ctx context.Context, poly *model.PremisePolygon) error
+	GetPolygons(ctx context.Context) ([]*model.PremisePolygon, error)
 }
 
 // RentalService - интерфейс репо слоя для аренд

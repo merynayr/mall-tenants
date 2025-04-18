@@ -1,5 +1,6 @@
 volumes:
   postgres_volume_local:
+  assets_volume:
 
 services:
   # Сервис для приложения
@@ -11,6 +12,8 @@ services:
     ports:
       - "${HTTP_PORT}:${HTTP_PORT}" 
       - "${SWAGGER_PORT}:${SWAGGER_PORT}" 
+    volumes:
+      - assets_volume:/app/assets/floor_plans
     depends_on:
       db:
         condition: service_healthy

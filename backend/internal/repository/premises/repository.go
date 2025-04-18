@@ -26,6 +26,22 @@ const (
 	AirConditioningColumn = "air_conditioning"
 )
 
+// Названия столбцов для таблицы polygons
+const (
+	PolygonsTable       = "polygons"
+	PolygonCodeColumn   = "premise_code"
+	PolygonPointsColumn = "points"
+	PolygonLabelColumn  = "label"
+)
+
+// Названия таблиц и колонок
+const (
+	FloorPlansTable = "floor_plans"
+
+	IDColumn       = "id"
+	FilenameColumn = "filename"
+)
+
 // Структура репо с клиентом базы данных (интерфейсом)
 type repo struct {
 	db db.Client
@@ -178,4 +194,194 @@ func (r *repo) GetPremisesByCode(ctx context.Context, code int64) (*model.Premis
 	}
 
 	return &premise, true, nil
+}
+
+// GetAllPremises возвращает список всех помещений
+func (r *repo) GetAllPremises(ctx context.Context) ([]model.Premises, error) {
+	query, args, err := sq.Select(
+		CodeColumn,
+		FloorColumn,
+		AreaColumn,
+		TypeColumn,
+		RentPerMonthColumn,
+		StatusColumn,
+		SecuritySystemColumn,
+		AirConditioningColumn,
+	).
+		From(PremisesTable).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	q := db.Query{
+		Name:     "premises_repository.GetAllPremises",
+		QueryRaw: query,
+	}
+
+	rows, err := r.db.DB().QueryContext(ctx, q, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var premises []model.Premises
+	for rows.Next() {
+		var p model.Premises
+		err := rows.Scan(
+			&p.Code,
+			&p.Floor,
+			&p.Area,
+			&p.Type,
+			&p.RentPerMonth,
+			&p.Status,
+			&p.SecuritySystem,
+			&p.AirConditioning,
+		)
+		if err != nil {
+			return nil, err
+		}
+		premises = append(premises, p)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return premises, nil
+}
+
+// CreateFloorPlan — создание записи о плане этажа
+func (r *repo) CreateFloorPlan(ctx context.Context, plan *model.FloorPlan) error {
+	query, args, err := sq.Insert(FloorPlansTable).
+		Columns(FloorColumn, FilenameColumn).
+		Values(plan.Floor, plan.Filename).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	q := db.Query{
+		Name:     "floor_plan_repository.CreateFloorPlan",
+		QueryRaw: query,
+	}
+
+	_, err = r.db.DB().ExecContext(ctx, q, args...)
+	return err
+}
+
+// GetFloorPlanByFloor — получить план по этажу
+func (r *repo) GetFloorPlanByFloor(ctx context.Context, floor int64) (*model.FloorPlan, error) {
+	query, args, err := sq.Select(IDColumn, FloorColumn, FilenameColumn).
+		From(FloorPlansTable).
+		Where(sq.Eq{FloorColumn: floor}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	q := db.Query{
+		Name:     "floor_plan_repository.GetFloorPlanByFloor",
+		QueryRaw: query,
+	}
+
+	var plan model.FloorPlan
+	err = r.db.DB().ScanOneContext(ctx, &plan, q, args...)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &plan, nil
+}
+
+// AddPolygon сохраняет полигон для помещения
+func (r *repo) AddPolygon(ctx context.Context, poly *model.PremisePolygon) error {
+	query, args, err := sq.Insert(PolygonsTable).
+		Columns(
+			PolygonCodeColumn,
+			PolygonPointsColumn,
+			PolygonLabelColumn,
+		).
+		Values(
+			poly.PremiseCode,
+			poly.Points,
+			poly.Label,
+		).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return err
+	}
+
+	q := db.Query{
+		Name:     "premises_repository.AddPolygon",
+		QueryRaw: query,
+	}
+
+	_, err = r.db.DB().ExecContext(ctx, q, args...)
+	return err
+}
+
+// GetAllPolygons возвращает все полигоны для всех помещений
+func (r *repo) GetAllPolygons(ctx context.Context) ([]*model.PremisePolygon, error) {
+	query, args, err := sq.Select(
+		PolygonCodeColumn,
+		PolygonPointsColumn,
+		PolygonLabelColumn,
+	).
+		From(PolygonsTable).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	q := db.Query{
+		Name:     "premises_repository.GetAllPolygons",
+		QueryRaw: query,
+	}
+
+	var polys []*model.PremisePolygon
+	rows, err := r.db.DB().QueryContext(ctx, q, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var p model.PremisePolygon
+		if err := rows.Scan(&p.PremiseCode, &p.Points, &p.Label); err != nil {
+			return nil, err
+		}
+		polys = append(polys, &p)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return polys, nil
+}
+
+// CheckPremiseCode уникальность кода помещения
+func (r *repo) CheckPremiseCode(ctx context.Context, code int64) (bool, error) {
+	query := "SELECT EXISTS(SELECT 1 FROM polygons WHERE premise_code = $1);"
+
+	q := db.Query{
+		Name:     "premises_repository.CheckPremiseCode",
+		QueryRaw: query,
+	}
+
+	var exists bool
+	err := r.db.DB().QueryRowContext(ctx, q, code).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
 }

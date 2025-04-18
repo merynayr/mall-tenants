@@ -33,3 +33,15 @@ type Premises struct {
 	SecuritySystem  string       `json:"security_system"`
 	AirConditioning string       `json:"air_conditioning"`
 }
+
+type PremisePolygon struct {
+	PremiseCode int64  `json:"premise_code"`
+	Points      string `json:"points"`
+	Label       string `json:"label"`
+}
+
+type FloorPlan struct {
+	ID       int64  `db:"id"`
+	Floor    int64  `db:"floor"`
+	Filename string `db:"filename"`
+}

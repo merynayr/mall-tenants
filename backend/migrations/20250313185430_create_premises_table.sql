@@ -20,5 +20,5 @@ CREATE TABLE premises (
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE premises;
+DROP TABLE IF EXISTS premises;
 -- +goose StatementEnd

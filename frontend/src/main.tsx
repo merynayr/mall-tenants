@@ -1,13 +1,15 @@
-import React, { lazy } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import { RouterProvider, createBrowserRouter  } from 'react-router-dom';
 import { Layout } from '@/layout/Menu/Layout';
 import Clients from '@/pages/Clients/Clients';
+import DrawTesterPage from '@/pages/Menu/Menu';
 import Payments from '@/pages/Payments/Payments';
-import Premises from '@/pages/Premises/Premises';
+import PagePremises from '@/pages/Premise/Premise';
+import PremiseInfo from '@/pages/PremiseInfo/PremiseInfo';
 
-const Menu = lazy(() => import('@/pages/Menu/Menu'));
+// const Menu = lazy(() => import('@/pages/Menu/Menu'));
 
 const router = createBrowserRouter([
 	{
@@ -16,11 +18,15 @@ const router = createBrowserRouter([
 		children: [
 			{
 				path: '/',
-				element: <Menu />
+				element: <DrawTesterPage />
 			},
 			{
 				path: '/premises',
-				element: <Premises />
+				element: <PagePremises />
+			},
+			{
+				path: '/premise/:id',
+				element: <PremiseInfo /> 
 			},
 			{
 				path: '/clients',
@@ -29,6 +35,10 @@ const router = createBrowserRouter([
 			{
 				path: '/payments',
 				element: <Payments />
+			},
+			{
+				path: '/rents',
+				element: <></>
 			}
 		]
 	},

@@ -13,4 +13,4 @@ CREATE TABLE rentals (
 );
 
 -- +goose Down
-DROP TABLE rentals;
+DROP TABLE IF EXISTS rentals;

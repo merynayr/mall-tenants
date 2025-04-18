@@ -1,4 +1,4 @@
-include backend/.env
+include .env
 
 LOCAL_MIGRATION_DIR=.$(MIGRATION_DIR)
 LOCAL_MIGRATION_DSN="host=localhost port=${DB_PORT} dbname=${DB_DB} user=${DB_USER} password=${DB_PASSWORD} sslmode=disable"
@@ -24,7 +24,7 @@ docker-build:
 
 rebuild:
 	docker compose up -d --build app
-
+	
 docker-run:
 	docker compose up -d
 

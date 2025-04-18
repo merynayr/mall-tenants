@@ -8,4 +8,4 @@ CREATE TABLE payments (
 );
 
 -- +goose Down
-DROP TABLE payments;
+DROP TABLE IF EXISTS payments;

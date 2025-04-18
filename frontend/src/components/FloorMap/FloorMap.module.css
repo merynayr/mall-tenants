@@ -1,0 +1,28 @@
+.floor-map {
+  width: 100%;
+  height: auto;
+}
+
+.premise {
+  stroke: #444;
+  stroke-width: 2;
+  cursor: pointer;
+  transition: fill 0.3s;
+}
+
+.premise.available {
+  fill: rgba(0, 200, 0, 0.4);
+}
+
+.premise.occupied {
+  fill: rgba(200, 0, 0, 0.4);
+}
+
+.premise.maintenance {
+  fill: rgba(200, 200, 0, 0.4);
+}
+
+.premise:hover {
+  fill-opacity: 0.7;
+  stroke: #000;
+}

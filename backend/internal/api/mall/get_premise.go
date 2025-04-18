@@ -20,7 +20,7 @@ import (
 // @Failure 401 {object} sys.ErrorResponse
 // @Failure 404 {object} sys.ErrorResponse "Помещение не найдено"
 // @Failure 500 {object} sys.ErrorResponse
-// @Router /mall/{code} [get]
+// @Router /premise/{code} [get]
 func (a *API) GetPremisesByCode(c *gin.Context) {
 	codeParam := c.Param("code")
 
