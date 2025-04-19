@@ -128,6 +128,9 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 	a.serviceProvider.PaymentAPI(ctx)
 	a.serviceProvider.paymentAPI.RegisterRoutes(router)
 
+	a.serviceProvider.FloorPlanAPI(ctx)
+	a.serviceProvider.floorPlanAPI.RegisterRoutes(router)
+
 	mw := a.serviceProvider.Middleware(ctx)
 	router.Use(mw.TimeoutMiddleware(time.Second * 5))
 	router.Use(mw.Access().AddAccessTokenFromCookie())

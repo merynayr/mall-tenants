@@ -2,9 +2,10 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS polygons (
     id SERIAL PRIMARY KEY,             
-    premise_code INT NOT NULL,           
+    premise_code INT NOT NULL,        
+    floor INTEGER NOT NULL,   
     points TEXT NOT NULL,                
-    label VARCHAR(255) NOT NULL,         
+    label VARCHAR(255),         
     CONSTRAINT fk_premise_code FOREIGN KEY (premise_code) REFERENCES premises(code)
 );
 -- +goose StatementEnd

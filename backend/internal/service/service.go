@@ -32,11 +32,6 @@ type PremiseService interface {
 	GetPremisesByCode(ctx context.Context, code int64) (*model.Premises, error)
 	CreatePremise(ctx context.Context, premise model.Premises) error
 	UpdatePremise(ctx context.Context, premise model.Premises) error
-
-	SaveFloorPlan(ctx context.Context, floor int64, reader io.Reader) error
-	GetFloorPlanContent(ctx context.Context, floor int64) ([]byte, error)
-	AddPolygon(ctx context.Context, poly *model.PremisePolygon) error
-	GetPolygons(ctx context.Context) ([]*model.PremisePolygon, error)
 }
 
 // RentalService - интерфейс репо слоя для аренд
@@ -52,4 +47,12 @@ type PaymentService interface {
 	GetPaymentByID(ctx context.Context, id int64) (*model.Payment, error)
 	GetLastPaymentByRentalID(ctx context.Context, rentalID int64) (*model.Payment, error)
 	GetOverduePayments(ctx context.Context, rentalID int64) ([]model.Payment, error)
+}
+
+// FloorPlanService интерфейс сервисного слоя access
+type FloorPlanService interface {
+	SaveFloorPlan(ctx context.Context, floor int64, reader io.Reader) error
+	GetFloorPlanContent(ctx context.Context, floor int64) ([]byte, error)
+	AddPolygon(ctx context.Context, poly *model.PremisePolygon) error
+	GetPolygons(ctx context.Context, floor int64) ([]*model.PremisePolygon, error)
 }

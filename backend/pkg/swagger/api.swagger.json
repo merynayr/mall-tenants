@@ -115,6 +115,106 @@
                 }
             }
         },
+        "/floor-plan/polygons/{code}": {
+            "post": {
+                "description": "Сохраняет новые координаты и подпись полигона",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "floor-plans"
+                ],
+                "summary": "Добавить полигон для помещения",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Код помещения",
+                        "name": "code",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Данные полигона",
+                        "name": "poly",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.PremisePolygon"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.PremisePolygon"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/floor-plan/polygons/{floor}": {
+            "get": {
+                "description": "Возвращает список полигонов (points+label) для указанного помещения",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "floor-plans"
+                ],
+                "summary": "Получить полигоны помещения",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Номер этажа",
+                        "name": "floor",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.PremisePolygon"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/floor-plan/{floor}": {
             "get": {
                 "description": "Возвращает raw SVG‑контент для указанного этажа",
@@ -574,44 +674,6 @@
                 }
             }
         },
-        "/premise/polygons": {
-            "get": {
-                "description": "Возвращает список полигонов (points+label) для указанного помещения",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "premises"
-                ],
-                "summary": "Получить полигоны помещения",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.PremisePolygon"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/sys.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/sys.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/premise/{code}": {
             "get": {
                 "description": "Получает данные о помещении по коду",
@@ -655,59 +717,6 @@
                     },
                     "404": {
                         "description": "Помещение не найдено",
-                        "schema": {
-                            "$ref": "#/definitions/sys.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/sys.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/premise/{code}/polygons": {
-            "post": {
-                "description": "Сохраняет новые координаты и подпись полигона",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "premises"
-                ],
-                "summary": "Добавить полигон для помещения",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Код помещения",
-                        "name": "code",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Данные полигона",
-                        "name": "poly",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.PremisePolygon"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/model.PremisePolygon"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/sys.ErrorResponse"
                         }

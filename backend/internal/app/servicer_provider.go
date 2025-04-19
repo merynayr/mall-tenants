@@ -14,9 +14,14 @@ import (
 	"github.com/merynayr/mall-tenants/internal/service"
 
 	auth "github.com/merynayr/mall-tenants/internal/api/auth"
+
 	mall "github.com/merynayr/mall-tenants/internal/api/mall"
 	"github.com/merynayr/mall-tenants/internal/api/payment"
 	"github.com/merynayr/mall-tenants/internal/api/rental"
+
+	floorPlan "github.com/merynayr/mall-tenants/internal/api/floorPlan"
+	floorPlanRepository "github.com/merynayr/mall-tenants/internal/repository/floorPlan"
+	floorPlanService "github.com/merynayr/mall-tenants/internal/service/floorPlan"
 
 	accessService "github.com/merynayr/mall-tenants/internal/service/access"
 	authService "github.com/merynayr/mall-tenants/internal/service/auth"
@@ -55,6 +60,10 @@ type serviceProvider struct {
 	mallAPI           *mall.API
 	premiseService    service.PremiseService
 	premiseRepository repository.PremiseRepository
+
+	floorPlanAPI        *floorPlan.API
+	floorPlanService    service.FloorPlanService
+	floorPlanRepository repository.FloorPlanRepository
 
 	rentalAPI        *rental.API
 	rentalService    service.RentalService
@@ -258,6 +267,34 @@ func (s *serviceProvider) PremiseRepository(ctx context.Context) repository.Prem
 	}
 
 	return s.premiseRepository
+}
+
+// FloorPlanAPI инициализирует api слой Floor Plan
+func (s *serviceProvider) FloorPlanAPI(ctx context.Context) *floorPlan.API {
+	if s.floorPlanAPI == nil {
+		s.floorPlanAPI = floorPlan.NewAPI(s.FloorPlanService(ctx))
+	}
+
+	return s.floorPlanAPI
+}
+
+// FloorPlanService иницилизирует сервисный слой для помещений
+func (s *serviceProvider) FloorPlanService(ctx context.Context) service.FloorPlanService {
+	if s.floorPlanService == nil {
+		s.floorPlanService = floorPlanService.NewService(
+			s.FloorPlanRepository(ctx),
+		)
+	}
+
+	return s.floorPlanService
+}
+
+func (s *serviceProvider) FloorPlanRepository(ctx context.Context) repository.FloorPlanRepository {
+	if s.floorPlanRepository == nil {
+		s.floorPlanRepository = floorPlanRepository.NewRepository(s.DBClient(ctx))
+	}
+
+	return s.floorPlanRepository
 }
 
 // RentalAPI инициализирует API-слой для аренды

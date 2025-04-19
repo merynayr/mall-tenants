@@ -21,12 +21,6 @@ type PremiseRepository interface {
 	GetPremisesByCode(ctx context.Context, code int64) (*model.Premises, bool, error)
 	CreatePremise(ctx context.Context, premise *model.Premises) error
 	UpdatePremise(ctx context.Context, premise *model.Premises) error
-
-	CreateFloorPlan(ctx context.Context, plan *model.FloorPlan) error
-	GetFloorPlanByFloor(ctx context.Context, floor int64) (*model.FloorPlan, error)
-	AddPolygon(ctx context.Context, poly *model.PremisePolygon) error
-	GetAllPolygons(ctx context.Context) ([]*model.PremisePolygon, error)
-	CheckPremiseCode(ctx context.Context, code int64) (bool, error)
 }
 
 // RentalRepository - интерфейс репо слоя для аренд
@@ -43,4 +37,13 @@ type PaymentRepository interface {
 	GetLastPayment(ctx context.Context, rentID int64) (*model.Payment, bool, error)
 	GetOverduePayments(ctx context.Context, rentID int64) ([]model.Payment, error)
 	GetPaymentByRentIDAndPeriod(ctx context.Context, rentID int64, startDate, endDate time.Time) (bool, error)
+}
+
+// FloorPlanRepository - интерфейс репо слоя для плана здания
+type FloorPlanRepository interface {
+	CreateFloorPlan(ctx context.Context, plan *model.FloorPlan) error
+	GetFloorPlanByFloor(ctx context.Context, floor int64) (*model.FloorPlan, error)
+	AddPolygon(ctx context.Context, poly *model.PremisePolygon) error
+	GetAllPolygons(ctx context.Context, floor int64) ([]*model.PremisePolygon, error)
+	CheckPremiseCode(ctx context.Context, code int64) (bool, error)
 }

@@ -4,7 +4,7 @@ import './index.css';
 import { RouterProvider, createBrowserRouter  } from 'react-router-dom';
 import { Layout } from '@/layout/Menu/Layout';
 import Clients from '@/pages/Clients/Clients';
-import DrawTesterPage from '@/pages/Menu/Menu';
+import PremisesMapperPage from '@/pages/Menu/Menu';
 import Payments from '@/pages/Payments/Payments';
 import PagePremises from '@/pages/Premise/Premise';
 import PremiseInfo from '@/pages/PremiseInfo/PremiseInfo';
@@ -18,7 +18,7 @@ const router = createBrowserRouter([
 		children: [
 			{
 				path: '/',
-				element: <DrawTesterPage />
+				element: <PremisesMapperPage />
 			},
 			{
 				path: '/premises',
