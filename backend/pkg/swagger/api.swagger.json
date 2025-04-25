@@ -117,7 +117,7 @@
         },
         "/floor-plan/polygons/{code}": {
             "post": {
-                "description": "Сохраняет новые координаты и подпись полигона",
+                "description": "Возвращает список полигонов (points+label) для указанного помещения",
                 "consumes": [
                     "application/json"
                 ],
@@ -127,7 +127,7 @@
                 "tags": [
                     "floor-plans"
                 ],
-                "summary": "Добавить полигон для помещения",
+                "summary": "Получить полигоны помещения",
                 "parameters": [
                     {
                         "type": "integer",
@@ -135,23 +135,11 @@
                         "name": "code",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "Данные полигона",
-                        "name": "poly",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.PremisePolygon"
-                        }
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/model.PremisePolygon"
-                        }
+                    "200": {
+                        "description": "OK"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -950,6 +938,9 @@
         "model.PremisePolygon": {
             "type": "object",
             "properties": {
+                "floor": {
+                    "type": "integer"
+                },
                 "label": {
                     "type": "string"
                 },

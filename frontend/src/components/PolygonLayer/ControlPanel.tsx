@@ -7,6 +7,8 @@ interface ControlPanelProps {
   onReset: () => void;
   floor: number;
   onFloorChange: (val: number) => void;
+	DeletePolygon: (code: number | null) => void;
+	selectedPolygonIndex: number | null;
 }
 
 export const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -15,22 +17,35 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
 	onFinish,
 	onReset,
 	floor,
-	onFloorChange
+	onFloorChange,
+	DeletePolygon,
+	selectedPolygonIndex
 }) => (
 	<div className={styles.panel}>
 		<div className={styles.topRow}>
-			<button onClick={onStart} disabled={isDrawing}>Начать рисовать</button>
-			<button onClick={onFinish} disabled={!isDrawing}>Завершить фигуру</button>
-			<button onClick={onReset}>Сбросить</button>
 			<div className={styles.floorInput}>
 				<label>Этаж:</label>
 				<input
-				 type="number"
-				 value={floor}
-				 onChange={(e) => onFloorChange(Number(e.target.value))} 
+					className={styles.input}
+					type="number"
+					value={floor}
+					onChange={(e) => onFloorChange(Number(e.target.value))}
 				/>
 			</div>
-		</div>
 
+			<div className={styles.verticalDivider} />
+
+			<div className={styles.buttonGroup}>
+				<button onClick={onStart} disabled={isDrawing}>Начать рисовать</button>
+				<button onClick={onFinish} disabled={!isDrawing}>Завершить фигуру</button>
+				<button onClick={onReset}>Сбросить</button>
+				<button
+					onClick={() => DeletePolygon(selectedPolygonIndex)}
+					disabled={selectedPolygonIndex === null}
+				>
+        Удалить выделенное
+				</button>
+			</div>
+		</div>
 	</div>
 );

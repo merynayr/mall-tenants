@@ -30,6 +30,7 @@ func (api *API) RegisterRoutes(router *gin.Engine) {
 		floorGroup.GET("/:floor", api.GetFloorPlan)
 		floorGroup.POST("/polygons/:code", api.AddPolygon)
 		floorGroup.GET("/polygons/:floor", api.GetPolygons)
+		floorGroup.DELETE("polygons/:code", api.DeletePolygon)
 	}
 }
 
@@ -168,4 +169,32 @@ func (api *API) GetPolygons(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, polys)
+}
+
+// DeletePolygon возвращает все полигоны по помещению
+// @Summary      Получить полигоны помещения
+// @Description  Возвращает список полигонов (points+label) для указанного помещения
+// @Tags         floor-plans
+// @Accept       json
+// @Produce      json
+// @Param        code path int64  true  "Код помещения"
+// @Success      200
+// @Failure      400  {object}  sys.ErrorResponse
+// @Failure      500  {object}  sys.ErrorResponse
+// @Router       /floor-plan/polygons/{code} [post]
+func (api *API) DeletePolygon(c *gin.Context) {
+	codeParam := c.Param("code")
+	code, err := strconv.ParseInt(codeParam, 10, 64)
+	if err != nil {
+		sys.HandleError(c, err)
+		return
+	}
+
+	err = api.floorplanService.DeletPolygon(c.Request.Context(), code)
+	if err != nil {
+		sys.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, "")
 }

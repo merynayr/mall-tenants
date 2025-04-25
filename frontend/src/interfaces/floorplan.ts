@@ -5,11 +5,13 @@ export type Polygon = {
   points: Point[];
   label: string;
   premiseCode: number;
+  status: string;
 };
 
 export type PolygonFromAPI = {
   floor: number;
   points: string;
   label: string;
-  premise_code: number;
+  premiseCode: number;
+  status: string;
 };

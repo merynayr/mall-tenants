@@ -15,6 +15,8 @@ export function PremisesMapperPage() {
 	const [svgData, setSvgData] = useState<string | null>(null);
 	const [floor, setFloor] = useState<number>(1);
 	const [showModal, setShowModal] = useState(false);
+	const [selectedPolygonIndex, setSelectedPolygonIndex] = useState<number | null>(null);
+
 
 	useEffect(() => {
 		setSvgData('');
@@ -23,6 +25,17 @@ export function PremisesMapperPage() {
 		fetchFloorPlan(floor);
 		fetchPolygons(floor);
 	}, [floor]);
+
+	const finishDrawing = async () => {
+		if (currentPoints.length >= 3) {
+			setShowModal(true);
+		}
+	};		
+
+	const resetCurrent = () => {
+		setCurrentPoints([]);
+		setIsDrawing(false);
+	};
 
 	const fetchFloorPlan = async (floor: number) => {
 		try {
@@ -43,7 +56,8 @@ export function PremisesMapperPage() {
 				}),
 				floor: poly.floor,
 				label: poly.label,
-				premiseCode: poly.premise_code
+				premiseCode: poly.premiseCode,
+				status: poly.status
 			}));
 			setPolygons(parsed);
 		} catch (e) {
@@ -53,7 +67,6 @@ export function PremisesMapperPage() {
 
 	const savePolygon = async (polygon: Polygon): Promise<boolean> => {
 		try {
-			console.log('Текущий этаж при сохранении:', floor);
 			await axios.post(`${PREFIX}/floor-plan/polygons/${polygon.premiseCode}`, {
 				floor: polygon.floor,
 				points: polygon.points.map(p => `${p.x},${p.y}`).join(' '),
@@ -83,12 +96,6 @@ export function PremisesMapperPage() {
 		}
 	};
 
-	const finishDrawing = async () => {
-		if (currentPoints.length >= 3) {
-			setShowModal(true);
-		}
-	};
-
 	const handleSavePolygonInfo = async (info: { premiseCode: number; note: string }) => {
 		if (info.premiseCode <= 0) {
 			alert('Введите корректный код помещения');
@@ -98,7 +105,8 @@ export function PremisesMapperPage() {
 			floor: floor,
 			points: currentPoints,
 			label: info.note,
-			premiseCode: info.premiseCode
+			premiseCode: info.premiseCode,
+			status: ''
 		};
 		const isSaved = await savePolygon(newPolygon);
 		if (isSaved) {
@@ -111,9 +119,24 @@ export function PremisesMapperPage() {
 		}
 	};
 
-	const resetCurrent = () => {
-		setCurrentPoints([]);
-		setIsDrawing(false);
+	const DeletePolygon = async () => {
+		if (selectedPolygonIndex === null) return;
+	
+		const polygonToDelete = polygons[selectedPolygonIndex];
+	
+		const confirmDelete = window.confirm(`Удалить полигон с кодом помещения ${polygonToDelete.premiseCode}?`);
+		if (!confirmDelete) return;
+	
+		try {
+			await axios.delete(`${PREFIX}/floor-plan/polygons/${polygonToDelete.premiseCode}`);
+			const newPolygons = [...polygons];
+			newPolygons.splice(selectedPolygonIndex, 1);
+			setPolygons(newPolygons);
+			setSelectedPolygonIndex(null);
+		} catch (error) {
+			alert('Ошибка при удалении полигона');
+			console.error(error);
+		}
 	};
 
 	return (
@@ -127,14 +150,19 @@ export function PremisesMapperPage() {
 				onReset={resetCurrent}
 				floor={floor}
 				onFloorChange={(val) => setFloor(val)}
+				DeletePolygon={DeletePolygon}
+				selectedPolygonIndex={selectedPolygonIndex}
 			/>
 
 			<svg
 				className={styles.canvas}
 				width={800}
 				height={500}
-				onClick={handleSvgClick}
 				onContextMenu={handleSvgRightClick} 
+				onClick={(e) => {
+					handleSvgClick(e);
+					setSelectedPolygonIndex(null); 
+				}}
 			>
 				{svgData && (
 					<image
@@ -148,7 +176,11 @@ export function PremisesMapperPage() {
 					/>
 				)}
 
-				<PolygonLayer polygons={polygons} />
+				<PolygonLayer
+					polygons={polygons}
+					selectedIndex={selectedPolygonIndex}
+					onSelect={setSelectedPolygonIndex}
+				/>
 				<DrawingOverlay currentPoints={currentPoints} />
 			</svg>
 

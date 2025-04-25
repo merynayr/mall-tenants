@@ -36,10 +36,19 @@ type Premises struct {
 
 // PremisePolygon представляет собой модель данных для полигонов на плане здания
 type PremisePolygon struct {
-	PremiseCode int64  `json:"premise_code"`
+	PremiseCode int64  `json:"premiseCode"`
 	Floor       int64  `json:"floor"`
 	Points      string `json:"points"`
 	Label       string `json:"label"`
+}
+
+// Polygons представляет собой модель данных для полигонов на плане здания
+type Polygons struct {
+	PremiseCode int64  `json:"premiseCode" db:"premise_code"`
+	Floor       int64  `json:"floor" db:"floor"`
+	Points      string `json:"points" db:"points"`
+	Label       string `json:"label" db:"label"`
+	Status      string `json:"status" db:"status"`
 }
 
 // FloorPlan представляет собой модель данных плана здания

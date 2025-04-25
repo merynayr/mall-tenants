@@ -54,5 +54,6 @@ type FloorPlanService interface {
 	SaveFloorPlan(ctx context.Context, floor int64, reader io.Reader) error
 	GetFloorPlanContent(ctx context.Context, floor int64) ([]byte, error)
 	AddPolygon(ctx context.Context, poly *model.PremisePolygon) error
-	GetPolygons(ctx context.Context, floor int64) ([]*model.PremisePolygon, error)
+	GetPolygons(ctx context.Context, floor int64) ([]*model.Polygons, error)
+	DeletPolygon(ctx context.Context, premiseCode int64) error
 }

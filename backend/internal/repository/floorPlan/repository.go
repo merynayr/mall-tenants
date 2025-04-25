@@ -110,7 +110,7 @@ func (r *repo) AddPolygon(ctx context.Context, poly *model.PremisePolygon) error
 	}
 
 	q := db.Query{
-		Name:     "premises_repository.AddPolygon",
+		Name:     "floor_plan_repository.AddPolygon",
 		QueryRaw: query,
 	}
 
@@ -118,15 +118,18 @@ func (r *repo) AddPolygon(ctx context.Context, poly *model.PremisePolygon) error
 	return err
 }
 
-// GetAllPolygons возвращает все полигоны для всех помещений
-func (r *repo) GetAllPolygons(ctx context.Context, floor int64) ([]*model.PremisePolygon, error) {
-	query, args, err := sq.Select(
-		PolygonCodeColumn,
-		PolygonPointsColumn,
-		PolygonLabelColumn,
-	).
-		From(PolygonsTable).
-		Where(sq.Eq{FloorColumn: floor}).
+func (r *repo) GetAllPolygons(ctx context.Context, floor int64) ([]*model.Polygons, error) {
+	query, args, err := sq.
+		Select(
+			"p.premise_code",
+			"pr.floor",
+			"p.points",
+			"p.label",
+			"pr.status",
+		).
+		From(PolygonsTable + " AS p").
+		Join("premises AS pr ON p.premise_code = pr.code").
+		Where(sq.Eq{"pr.floor": floor}).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
@@ -134,11 +137,11 @@ func (r *repo) GetAllPolygons(ctx context.Context, floor int64) ([]*model.Premis
 	}
 
 	q := db.Query{
-		Name:     "premises_repository.GetAllPolygons",
+		Name:     "floor_plan_repository.GetAllPolygons",
 		QueryRaw: query,
 	}
 
-	var polys []*model.PremisePolygon
+	var polys []*model.Polygons
 	rows, err := r.db.DB().QueryContext(ctx, q, args...)
 	if err != nil {
 		return nil, err
@@ -146,8 +149,14 @@ func (r *repo) GetAllPolygons(ctx context.Context, floor int64) ([]*model.Premis
 	defer rows.Close()
 
 	for rows.Next() {
-		var p model.PremisePolygon
-		if err := rows.Scan(&p.PremiseCode, &p.Points, &p.Label); err != nil {
+		var p model.Polygons
+		if err := rows.Scan(
+			&p.PremiseCode,
+			&p.Floor,
+			&p.Points,
+			&p.Label,
+			&p.Status,
+		); err != nil {
 			return nil, err
 		}
 		polys = append(polys, &p)
@@ -163,7 +172,7 @@ func (r *repo) CheckPremiseCode(ctx context.Context, code int64) (bool, error) {
 	query := "SELECT EXISTS(SELECT 1 FROM polygons WHERE premise_code = $1);"
 
 	q := db.Query{
-		Name:     "premises_repository.CheckPremiseCode",
+		Name:     "floor_plan_repository.CheckPremiseCode",
 		QueryRaw: query,
 	}
 
@@ -173,4 +182,27 @@ func (r *repo) CheckPremiseCode(ctx context.Context, code int64) (bool, error) {
 		return false, err
 	}
 	return exists, nil
+}
+
+// DeletPolygon удаляет полигон по id помещения
+func (r *repo) DeletPolygon(ctx context.Context, premiseCode int64) error {
+	query, args, err := sq.Delete(PolygonsTable).
+		Where(sq.Eq{PolygonCodeColumn: premiseCode}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	q := db.Query{
+		Name:     "floor_plan_repository.DeletPolygon",
+		QueryRaw: query,
+	}
+
+	_, err = r.db.DB().ExecContext(ctx, q, args...)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

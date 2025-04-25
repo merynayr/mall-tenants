@@ -33,8 +33,6 @@ export function PagePremises() {
 		}
 	};
 
-
-
 	return <>
 		<div className={styles['head']}>
 			<h1>Помещения</h1>

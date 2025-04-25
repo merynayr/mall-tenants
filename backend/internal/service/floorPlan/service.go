@@ -104,9 +104,17 @@ func (s *srv) AddPolygon(ctx context.Context, poly *model.PremisePolygon) error 
 }
 
 // GetPolygons получает из репозитория все полигоны по коду помещения
-func (s *srv) GetPolygons(ctx context.Context, floor int64) ([]*model.PremisePolygon, error) {
+func (s *srv) GetPolygons(ctx context.Context, floor int64) ([]*model.Polygons, error) {
 	if floor < 1 {
 		return nil, fmt.Errorf("%s", "номер этажа' должен быть положительным")
 	}
 	return s.floorPlanRepository.GetAllPolygons(ctx, floor)
+}
+
+// DeletPolygon удаляет из репозитория полигон по коду помещения
+func (s *srv) DeletPolygon(ctx context.Context, premiseCode int64) error {
+	if premiseCode < 1 {
+		return fmt.Errorf("%s", "номер помещения' должен быть положительным")
+	}
+	return s.floorPlanRepository.DeletPolygon(ctx, premiseCode)
 }

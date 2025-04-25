@@ -2,9 +2,11 @@ import { Point, Polygon } from '@/interfaces/floorplan';
 
 interface PolygonLayerProps {
   polygons: Polygon[];
+	selectedIndex: number | null;
+  onSelect: (index: number) => void;
 }
 
-export const PolygonLayer: React.FC<PolygonLayerProps> = ({ polygons }) => {
+export const PolygonLayer: React.FC<PolygonLayerProps> = ({ polygons, selectedIndex, onSelect }) => {
 	const pointsString = (pts: Point[]) => pts.map((p) => `${p.x},${p.y}`).join(' ');
 
 	const textLabelPosition = (points: Point[]) => {
@@ -14,15 +16,48 @@ export const PolygonLayer: React.FC<PolygonLayerProps> = ({ polygons }) => {
 		return { x, y };
 	};
 
+	const getFillColor = (status: string, isSelected: boolean): string => {
+		if (isSelected) return 'rgba(0,123,255,0.3)';
+		switch (status) {
+		case 'available':
+			return 'rgba(40,167,69,0.3)'; 
+		case 'occupied':
+			return 'rgba(220,53,69,0.3)'; 
+		case 'maintenance':
+			return 'rgba(255,193,7,0.3)'; 
+		default:
+			return 'rgba(108,117,125,0.3)';
+		}
+	};
+	
+	const getStrokeColor = (status: string, isSelected: boolean): string => {
+		if (isSelected) return '#007bff';
+		switch (status) {
+		case 'available':
+			return '#28a745';
+		case 'occupied':
+			return '#dc3545';
+		case 'maintenance':
+			return '#ffc107';
+		default:
+			return '#6c757d';
+		}
+	};
+	
 	return (
 		<>
 			{polygons.map((poly, i) => (
 				<g key={i}>
 					<polygon
 						points={pointsString(poly.points)}
-						fill="rgba(0,200,0,0.3)"
-						stroke="#080"
+						fill={getFillColor(poly.status, i === selectedIndex)}
+						stroke={getStrokeColor(poly.status, i === selectedIndex)}
 						strokeWidth={2}
+						onClick={(e) => {
+							e.stopPropagation();
+							onSelect(i);
+						}}
+						style={{ cursor: 'pointer' }}
 					/>
 					{textLabelPosition(poly.points) && (
 						<text

@@ -44,6 +44,7 @@ type FloorPlanRepository interface {
 	CreateFloorPlan(ctx context.Context, plan *model.FloorPlan) error
 	GetFloorPlanByFloor(ctx context.Context, floor int64) (*model.FloorPlan, error)
 	AddPolygon(ctx context.Context, poly *model.PremisePolygon) error
-	GetAllPolygons(ctx context.Context, floor int64) ([]*model.PremisePolygon, error)
+	GetAllPolygons(ctx context.Context, floor int64) ([]*model.Polygons, error)
 	CheckPremiseCode(ctx context.Context, code int64) (bool, error)
+	DeletPolygon(ctx context.Context, premiseCode int64) error
 }

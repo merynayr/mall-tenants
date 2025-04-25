@@ -4,40 +4,70 @@
   border: 1px solid #ddd;
   border-radius: 8px;
   max-width: 800px;
-  margin-bottom: 16px;
 }
 
 .topRow {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 12px;
-}
-
-.topRow button {
-  padding: 6px 12px;
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.topRow button:disabled {
-  background: #ccc;
-  cursor: not-allowed;
+  align-items: center; /* выравнивание по вертикали */
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: nowrap;
 }
 
 .floorInput {
   display: flex;
   align-items: center;
   gap: 6px;
+  height: 40px;
 }
 
-.drawingInputs {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 8px 12px;
+.floorInput label {
+  font-size: 17px;
+  display: flex;
   align-items: center;
+  height: 100%;
+}
+
+.input {
+  font-size: 17px;
+  font-weight: 400;
+  border: 1px solid #a3b5e7;
+  box-shadow: 15px 20px 45px 0px rgba(233, 233, 233, 0.25);
+  border-radius: 10px;
+  padding: 10px;
+  width: 40px;
+  height: 18px;
+}
+
+.verticalDivider {
+  width: 1px;
+  height: 40px;
+  background-color: #ccc;
+  margin: 0 12px;
+}
+
+.buttonGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 40px;
+}
+
+.buttonGroup button {
+  padding: 8px 14px;
+  font-size: 14px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.buttonGroup button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
 }
