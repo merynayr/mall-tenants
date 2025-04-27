@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/merynayr/mall-tenants/internal/config"
 	"github.com/merynayr/mall-tenants/internal/service"
@@ -22,21 +24,37 @@ func NewAPI(authService service.AuthService, authConfig config.AuthConfig) *API 
 
 // RegisterRoutes регистрирует маршруты
 func (api *API) RegisterRoutes(router *gin.Engine) {
-	authGroup := router.Group("/api")
+	authGroup := router.Group("/auth")
 	{
 		authGroup.POST("/register", api.Register)
-		authGroup.POST("/auth", api.Login)
-		authGroup.POST("/access-token", api.GetAccessToken)
+		authGroup.POST("/login", api.Login)
+		authGroup.POST("/refresh", api.GetAccessToken)
 		authGroup.POST("/refresh-token", api.GetRefreshToken)
 	}
 }
 
 // setCookies устанавливают токены в куки
-func (api *API) setCookies(c *gin.Context, refreshToken string, accessToken string) {
-	if len(refreshToken) > 0 {
-		c.SetCookie("refresh_token", refreshToken, int(api.authConfig.RefreshTokenExp()*2), "/api", "", false, true)
+func (api *API) setCookies(c *gin.Context, refreshToken, accessToken string) {
+	if accessToken != "" {
+		cookie := &http.Cookie{
+			Name:     "access_token",
+			Value:    accessToken,
+			Path:     "/",
+			MaxAge:   int(api.authConfig.AccessTokenExp() * 2),
+			HttpOnly: true,
+			Secure:   false,
+		}
+		http.SetCookie(c.Writer, cookie)
 	}
-	if len(accessToken) > 0 {
-		c.SetCookie("access_token", accessToken, int(api.authConfig.AccessTokenExp()*2), "/api", "", false, true)
+	if refreshToken != "" {
+		cookie := &http.Cookie{
+			Name:     "refresh_token",
+			Value:    refreshToken,
+			Path:     "/",
+			MaxAge:   int(api.authConfig.RefreshTokenExp() * 2),
+			HttpOnly: true,
+			Secure:   false,
+		}
+		http.SetCookie(c.Writer, cookie)
 	}
 }

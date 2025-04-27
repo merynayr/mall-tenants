@@ -14,6 +14,7 @@ import (
 // @Tags rental
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param id path int64 true "Код аренды"
 // @Success 200 {object} model.Rental
 // @Failure 400 {object} sys.ErrorResponse

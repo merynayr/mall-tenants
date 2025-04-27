@@ -8,6 +8,7 @@ const (
 	ErrNotEnoughCoins          = "not enough coins"
 	ErrSelfTransferNotAllowed  = "you can't transfer money to yourself"
 	ErrInvalidRefreshToken     = "invalid refresh token"
+	ErrAccessTokenExpired      = "access token expired"
 	ErrInvalidPassword         = "invalid password"
 	ErrAuthHeaderNotProvided   = "authorization header is not provided"
 	ErrInvalidAuthHeaderFormat = "invalid authorization header format"
@@ -55,6 +56,9 @@ var (
 
 	// InvalidAccessTokenError возникает, когда передан недействительный access-токен. Код ошибки: 401 (Unauthorized)
 	InvalidAccessTokenError = NewCommonError(ErrInvalidAccessToken, codes.Unauthorized)
+
+	// TokenExpiredError — ошибка 401: access токен истёк
+	AccessTokenExpiredError = NewCommonError(ErrAccessTokenExpired, codes.Unauthorized)
 
 	// AccessDeniedError возникает, когда у пользователя недостаточно прав для выполнения операции. Код ошибки: 403 (Forbidden)
 	AccessDeniedError = NewCommonError(ErrAccessDenied, codes.Forbidden)

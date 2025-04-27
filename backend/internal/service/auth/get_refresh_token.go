@@ -24,9 +24,9 @@ func (s *srv) GetRefreshToken(ctx context.Context, oldRefreshToken string) (stri
 		return "", sys.UserNotFoundError
 	}
 
-	userInfo := &model.AuthRequest{
-		Email:    user.Email,
-		Password: user.Password,
+	userInfo := &model.UserClaims{
+		Email: user.Email,
+		Role:  model.UserRole(user.Role),
 	}
 
 	token, err := jwt.GenerateToken(userInfo, s.authCfg.RefreshTokenSecretKey(), s.authCfg.RefreshTokenExp())

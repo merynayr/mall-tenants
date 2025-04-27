@@ -15,6 +15,7 @@ import (
 // @Tags rental
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param id path int64 true "Код аренды"
 // @Param rental body model.Rental true "Обновленные данные аренды"
 // @Success 200 {object} model.Rental

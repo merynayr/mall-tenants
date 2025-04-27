@@ -1,4 +1,4 @@
-package mall
+package premise
 
 import (
 	"github.com/gin-gonic/gin"

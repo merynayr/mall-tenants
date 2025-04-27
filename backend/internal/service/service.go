@@ -16,7 +16,7 @@ type UserService interface {
 // AuthService интерфейс сервисного слоя auth
 type AuthService interface {
 	Register(ctx context.Context, req model.RegisterRequest) (*model.AuthResponse, error)
-	Login(ctx context.Context, username string, password string) (*model.AuthResponse, error)
+	Login(ctx context.Context, email string, password string) (*model.AuthResponse, error)
 	GetRefreshToken(ctx context.Context, oldRefreshToken string) (string, error)
 	GetAccessToken(ctx context.Context, refreshToken string) (string, error)
 }

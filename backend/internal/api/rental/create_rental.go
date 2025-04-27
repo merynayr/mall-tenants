@@ -14,6 +14,7 @@ import (
 // @Tags rental
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param rental body model.Rental true "Данные аренды"
 // @Success 201 {object} model.Rental
 // @Failure 400 {object} sys.ErrorResponse

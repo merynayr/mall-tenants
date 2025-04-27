@@ -7,7 +7,7 @@ type RegisterRequest struct {
 	OrganizationName string `json:"organization_name"`
 	ContactPerson    string `json:"contact_person" binding:"required"`
 	Address          string `json:"address" binding:"required"`
-	Phone            string `json:"phone" binding:"required,e164"`
+	Phone            string `json:"phone" binding:"required"`
 	Requisites       string `json:"requisites" binding:"required"`
 	Email            string `json:"email" binding:"required,email"`
 	Password         string `json:"password" binding:"required,min=1"`
@@ -29,6 +29,6 @@ type AuthResponse struct {
 // UserClaims структура claims jwt-токена
 type UserClaims struct {
 	jwt.StandardClaims
-	Email string `json:"username"`
-	Role  int64  `json:"role"`
+	Email string   `json:"email"`
+	Role  UserRole `json:"role"`
 }

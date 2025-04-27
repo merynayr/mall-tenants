@@ -6,7 +6,7 @@ CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
     email VARCHAR(100) UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
-    role INTEGER NOT NULL
+    role VARCHAR(9) NOT NULL
 );
 
 -- Создание таблицы клиентов

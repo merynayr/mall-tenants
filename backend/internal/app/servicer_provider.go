@@ -13,10 +13,9 @@ import (
 	"github.com/merynayr/mall-tenants/internal/repository"
 	"github.com/merynayr/mall-tenants/internal/service"
 
-	auth "github.com/merynayr/mall-tenants/internal/api/auth"
-
-	mall "github.com/merynayr/mall-tenants/internal/api/mall"
+	"github.com/merynayr/mall-tenants/internal/api/auth"
 	"github.com/merynayr/mall-tenants/internal/api/payment"
+	"github.com/merynayr/mall-tenants/internal/api/premise"
 	"github.com/merynayr/mall-tenants/internal/api/rental"
 
 	floorPlan "github.com/merynayr/mall-tenants/internal/api/floorPlan"
@@ -27,6 +26,7 @@ import (
 	authService "github.com/merynayr/mall-tenants/internal/service/auth"
 
 	userRepository "github.com/merynayr/mall-tenants/internal/repository/user"
+	userService "github.com/merynayr/mall-tenants/internal/service/user"
 
 	premiseRepository "github.com/merynayr/mall-tenants/internal/repository/premises"
 	premiseService "github.com/merynayr/mall-tenants/internal/service/premises"
@@ -52,12 +52,13 @@ type serviceProvider struct {
 	dbClient  db.Client
 	txManager db.TxManager
 
+	userService    service.UserService
 	userRepository repository.UserRepository
 
 	authAPI     *auth.API
 	authService service.AuthService
 
-	mallAPI           *mall.API
+	mallAPI           *premise.API
 	premiseService    service.PremiseService
 	premiseRepository repository.PremiseRepository
 
@@ -187,6 +188,17 @@ func (s *serviceProvider) TxManager(ctx context.Context) db.TxManager {
 	return s.txManager
 }
 
+// UserService иницилизирует сервисный слой auth
+func (s *serviceProvider) UserService(ctx context.Context) service.UserService {
+	if s.userService == nil {
+		s.userService = userService.NewService(
+			s.UserRepository(ctx),
+		)
+	}
+
+	return s.userService
+}
+
 func (s *serviceProvider) UserRepository(ctx context.Context) repository.UserRepository {
 	if s.userRepository == nil {
 		s.userRepository = userRepository.NewRepository(s.DBClient(ctx))
@@ -228,23 +240,23 @@ func (s *serviceProvider) Middleware(ctx context.Context) middleware.Middleware 
 }
 
 // AccessService иницилизирует сервисный слой access
-func (s *serviceProvider) AccessService(_ context.Context) service.AccessService {
+func (s *serviceProvider) AccessService(ctx context.Context) service.AccessService {
 	if s.accessService == nil {
 		uMap, err := s.AccessConfig().UserAccessesMap()
 		if err != nil {
 			log.Fatalf("failed to get user access map: %v", err)
 		}
 
-		s.accessService = accessService.NewService(uMap, s.AuthConfig())
+		s.accessService = accessService.NewService(s.UserService(ctx), uMap, s.AuthConfig())
 	}
 
 	return s.accessService
 }
 
 // MallAPI инициализирует api слой Mall
-func (s *serviceProvider) MallAPI(ctx context.Context) *mall.API {
+func (s *serviceProvider) MallAPI(ctx context.Context) *premise.API {
 	if s.mallAPI == nil {
-		s.mallAPI = mall.NewAPI(s.PremiseService(ctx))
+		s.mallAPI = premise.NewAPI(s.PremiseService(ctx))
 	}
 
 	return s.mallAPI

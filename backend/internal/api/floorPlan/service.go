@@ -40,6 +40,7 @@ func (api *API) RegisterRoutes(router *gin.Engine) {
 // @Tags         floor-plans
 // @Accept       multipart/form-data
 // @Produce      json
+// @Security BearerAuth
 // @Param        floor path     int  true  "Номер этажа"
 // @Param        file  formData file true  "SVG‑файл плана этажа"
 // @Success      201 {object}   map[string]string  "{"message":"floor plan uploaded"}"
@@ -86,6 +87,7 @@ func (api *API) UploadFloorPlan(c *gin.Context) {
 // @Tags         floor-plans
 // @Accept       json
 // @Produce      image/svg+xml
+// @Security BearerAuth
 // @Param        floor path int64 true "Номер этажа"
 // @Success      200 {file}    string              "SVG‑план этажа"
 // @Failure      400 {object}  sys.ErrorResponse   "Неверный номер этажа"
@@ -114,6 +116,7 @@ func (api *API) GetFloorPlan(c *gin.Context) {
 // @Tags         floor-plans
 // @Accept       json
 // @Produce      json
+// @Security BearerAuth
 // @Param        code path     int64                   true  "Код помещения"
 // @Param        poly body     model.PremisePolygon  true  "Данные полигона"
 // @Success      201  {object}  model.PremisePolygon
@@ -149,6 +152,7 @@ func (api *API) AddPolygon(c *gin.Context) {
 // @Tags         floor-plans
 // @Accept       json
 // @Produce      json
+// @Security BearerAuth
 // @Param        floor path int64 true "Номер этажа"
 // @Success      200  {array}   model.PremisePolygon
 // @Failure      400  {object}  sys.ErrorResponse
@@ -177,6 +181,7 @@ func (api *API) GetPolygons(c *gin.Context) {
 // @Tags         floor-plans
 // @Accept       json
 // @Produce      json
+// @Security BearerAuth
 // @Param        code path int64  true  "Код помещения"
 // @Success      200
 // @Failure      400  {object}  sys.ErrorResponse

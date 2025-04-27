@@ -14,7 +14,6 @@ func (s *srv) Register(ctx context.Context, req model.RegisterRequest) (*model.A
 		return nil, sys.PasswordsDoNotMatchError
 	}
 
-	var userInfo *model.AuthRequest
 	_, exist, err := s.userRepository.GetUserByEmail(ctx, req.Email)
 	if err != nil {
 		return nil, err
@@ -27,9 +26,10 @@ func (s *srv) Register(ctx context.Context, req model.RegisterRequest) (*model.A
 	if err != nil {
 		return nil, err
 	}
-	userInfo = &model.AuthRequest{
-		Email:    req.Email,
-		Password: req.Password,
+
+	userInfo := &model.UserClaims{
+		Email: req.Email,
+		Role:  model.RoleClient,
 	}
 
 	refreshToken, err := jwt.GenerateToken(userInfo, s.authCfg.RefreshTokenSecretKey(), s.authCfg.RefreshTokenExp())

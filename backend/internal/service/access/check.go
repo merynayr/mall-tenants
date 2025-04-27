@@ -1,7 +1,6 @@
 package access
 
 import (
-	"errors"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -20,18 +19,18 @@ func (s *srv) Check(ctx *gin.Context, endpointAddress string) (*model.User, erro
 
 	authHeader := ctx.GetHeader(authHeader)
 	if authHeader == "" {
-		return nil, errors.New(sys.ErrAuthHeaderNotProvided)
+		return nil, sys.AuthHeaderNotProvidedError
 	}
 
 	if !strings.HasPrefix(authHeader, authPrefix) {
-		return nil, errors.New(sys.ErrInvalidAuthHeaderFormat)
+		return nil, sys.InvalidAuthHeaderFormatError
 	}
 
 	accessToken := strings.TrimPrefix(authHeader, authPrefix)
 
 	claims, err := jwt.VerifyToken(accessToken, s.authConfig.AccessTokenSecretKey())
 	if err != nil {
-		return nil, errors.New(sys.ErrInvalidAccessToken)
+		return nil, err
 	}
 
 	user, err := s.userService.GetUserByEmail(ctx.Request.Context(), claims.Email)
@@ -39,18 +38,12 @@ func (s *srv) Check(ctx *gin.Context, endpointAddress string) (*model.User, erro
 		return nil, err
 	}
 
-	// Супер админ имеет доступ ко всем эндпоинтам
-	if claims.Role == 2 {
-		return user, nil
+	roleAccessMap, ok := s.userAccesses[model.UserRole(claims.Role)]
+	if !ok {
+		return nil, sys.AccessDeniedError
 	}
 
-	// Моедратор имеет доступ ко всем эндпоинтам
-	if claims.Role == 1 {
-		return user, nil
-	}
-
-	// смотрим, есть ли доступ у пользователя
-	if _, ok := s.userAccesses[endpointAddress]; !ok {
+	if _, allowed := roleAccessMap[endpointAddress]; !allowed {
 		return nil, sys.AccessDeniedError
 	}
 

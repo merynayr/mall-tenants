@@ -119,6 +119,10 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 	a.serviceProvider.AuthAPI(ctx)
 	a.serviceProvider.authAPI.RegisterRoutes(router)
 
+	mw := a.serviceProvider.Middleware(ctx)
+	router.Use(mw.TimeoutMiddleware(time.Second * 5))
+	router.Use(mw.Access().Check())
+
 	a.serviceProvider.MallAPI(ctx)
 	a.serviceProvider.mallAPI.RegisterRoutes(router)
 
@@ -131,13 +135,8 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 	a.serviceProvider.FloorPlanAPI(ctx)
 	a.serviceProvider.floorPlanAPI.RegisterRoutes(router)
 
-	mw := a.serviceProvider.Middleware(ctx)
-	router.Use(mw.TimeoutMiddleware(time.Second * 5))
-	router.Use(mw.Access().AddAccessTokenFromCookie())
-	router.Use(mw.Access().Check())
-
 	corsMiddleware := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
+		AllowedOrigins:   []string{"http://localhost:5173"},
 		AllowedMethods:   []string{"GET", "POST", "PATCH", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Content-Type", "Content-Length", "Authorization"},
 		AllowCredentials: true,

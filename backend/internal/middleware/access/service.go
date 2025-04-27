@@ -3,6 +3,7 @@ package access
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/merynayr/mall-tenants/internal/config"
+	"github.com/merynayr/mall-tenants/internal/logger"
 	"github.com/merynayr/mall-tenants/internal/service"
 	"github.com/merynayr/mall-tenants/internal/sys"
 )
@@ -24,28 +25,19 @@ func NewAccessMiddleware(accessService service.AccessService, authConfig config.
 // Check проверяет доступ к ресурсу
 func (m *Middleware) Check() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		endpoint := c.FullPath()
+		method := c.Request.Method
+		path := c.FullPath()
+		endpoint := method + ":" + path
 
 		user, err := m.accessService.Check(c, endpoint)
 		if err != nil {
-			sys.HandleError(c, sys.AccessDeniedError)
+			logger.Debug(err.Error())
+			sys.HandleError(c, err)
+			c.Abort()
 			return
 		}
 
 		c.Set("user", user)
-		c.Next()
-	}
-}
-
-// AddAccessTokenFromCookie извлекает токен из cookie и добавляет в заголовок Authorization
-func (m *Middleware) AddAccessTokenFromCookie() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		if c.GetHeader("Authorization") == "" {
-			accessToken, err := c.Cookie("access_token")
-			if err == nil {
-				c.Request.Header.Set("Authorization", "Bearer "+accessToken)
-			}
-		}
 		c.Next()
 	}
 }

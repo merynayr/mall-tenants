@@ -1,4 +1,4 @@
-package mall
+package premise
 
 import (
 	"net/http"
@@ -8,20 +8,20 @@ import (
 	"github.com/merynayr/mall-tenants/internal/sys"
 )
 
-// UpdatePremise обновляет данные о помещении
-// @Summary Обновить помещение
-// @Description Обновляет данные о помещении
+// CreatePremise создание помещения
+// @Summary Создать помещение
+// @Description Создаёт новое помещение
 // @Tags premises
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param body body model.Premises true "Информация о помещении"
 // @Success 200
 // @Failure 400 {object} sys.ErrorResponse
 // @Failure 401 {object} sys.ErrorResponse
-// @Failure 404 {object} sys.ErrorResponse "Помещение не найдено"
 // @Failure 500 {object} sys.ErrorResponse
-// @Router /premise/ [patch]
-func (a *API) UpdatePremise(c *gin.Context) {
+// @Router /premise/ [post]
+func (a *API) CreatePremise(c *gin.Context) {
 	var req model.Premises
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -29,7 +29,7 @@ func (a *API) UpdatePremise(c *gin.Context) {
 		return
 	}
 
-	err := a.premiseService.UpdatePremise(c.Request.Context(), req)
+	err := a.premiseService.CreatePremise(c.Request.Context(), req)
 	if err != nil {
 		sys.HandleError(c, err)
 		return

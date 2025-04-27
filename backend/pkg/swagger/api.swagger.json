@@ -11,7 +11,7 @@
     },
     "host": "localhost:8080",
     "paths": {
-        "/api/auth": {
+        "/auth/login": {
             "post": {
                 "description": "Аутентифицирует пользователя и возвращает JWT-токен",
                 "consumes": [
@@ -63,7 +63,7 @@
                 }
             }
         },
-        "/api/register": {
+        "/auth/register": {
             "post": {
                 "description": "Регистрирует пользователя и возвращает JWT-токен",
                 "consumes": [
@@ -117,6 +117,11 @@
         },
         "/floor-plan/polygons/{code}": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Возвращает список полигонов (points+label) для указанного помещения",
                 "consumes": [
                     "application/json"
@@ -158,6 +163,11 @@
         },
         "/floor-plan/polygons/{floor}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Возвращает список полигонов (points+label) для указанного помещения",
                 "consumes": [
                     "application/json"
@@ -205,6 +215,11 @@
         },
         "/floor-plan/{floor}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Возвращает raw SVG‑контент для указанного этажа",
                 "consumes": [
                     "application/json"
@@ -247,6 +262,11 @@
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Принимает multipart/form-data с полем file и сохраняет SVG на диск + в БД",
                 "consumes": [
                     "multipart/form-data"
@@ -301,6 +321,11 @@
         },
         "/payment/": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Создает новый платеж для аренды",
                 "consumes": [
                     "application/json"
@@ -350,6 +375,11 @@
         },
         "/payment/rental/{rentalID}/last": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Получает последний платеж по rentalID",
                 "produces": [
                     "application/json"
@@ -403,6 +433,11 @@
         },
         "/payment/rental/{rentalID}/overdue": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Получает список просроченных платежей по rentalID",
                 "produces": [
                     "application/json"
@@ -459,6 +494,11 @@
         },
         "/payment/{paymentID}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Получает информацию о платеже по его ID",
                 "produces": [
                     "application/json"
@@ -512,6 +552,11 @@
         },
         "/premise": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Получает список помещений",
                 "consumes": [
                     "application/json"
@@ -562,6 +607,11 @@
         },
         "/premise/": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Создаёт новое помещение",
                 "consumes": [
                     "application/json"
@@ -609,6 +659,11 @@
                 }
             },
             "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Обновляет данные о помещении",
                 "consumes": [
                     "application/json"
@@ -664,6 +719,11 @@
         },
         "/premise/{code}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Получает данные о помещении по коду",
                 "consumes": [
                     "application/json"
@@ -720,6 +780,11 @@
         },
         "/rental/": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Создает новый договор аренды",
                 "consumes": [
                     "application/json"
@@ -772,6 +837,11 @@
         },
         "/rental/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Получает данные о аренде по коду",
                 "consumes": [
                     "application/json"
@@ -826,6 +896,11 @@
                 }
             },
             "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Обновляет данные аренды по коду",
                 "consumes": [
                     "application/json"
@@ -947,7 +1022,7 @@
                 "points": {
                     "type": "string"
                 },
-                "premise_code": {
+                "premiseCode": {
                     "type": "integer"
                 }
             }

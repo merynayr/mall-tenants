@@ -39,6 +39,7 @@ func (api *API) RegisterRoutes(router *gin.Engine) {
 // @Tags payment
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param payment body model.Payment true "Данные платежа"
 // @Success 201 "Payment created successfully"
 // @Failure 400 {object} sys.ErrorResponse
@@ -67,6 +68,7 @@ func (api *API) CreatePayment(c *gin.Context) {
 // @Description Получает информацию о платеже по его ID
 // @Tags payment
 // @Produce  json
+// @Security BearerAuth
 // @Param paymentID path int true "ID платежа"
 // @Success 200 {object} model.Payment
 // @Failure 400 {object} sys.ErrorResponse
@@ -97,6 +99,7 @@ func (api *API) GetPaymentByID(c *gin.Context) {
 // @Description Получает последний платеж по rentalID
 // @Tags payment
 // @Produce  json
+// @Security BearerAuth
 // @Param rentalID path int true "ID аренды"
 // @Success 200 {object} model.Payment
 // @Failure 400 {object} sys.ErrorResponse
@@ -127,6 +130,7 @@ func (api *API) GetLastPaymentByRentalID(c *gin.Context) {
 // @Description Получает список просроченных платежей по rentalID
 // @Tags payment
 // @Produce  json
+// @Security BearerAuth
 // @Param rentalID path int true "ID аренды"
 // @Success 200 {array} model.Payment
 // @Failure 400 {object} sys.ErrorResponse

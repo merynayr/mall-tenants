@@ -1,4 +1,4 @@
-package mall
+package premise
 
 import (
 	"net/http"
@@ -13,6 +13,7 @@ import (
 // @Tags premises
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Success 200 {object} []model.Premises
 // @Failure 400 {object} sys.ErrorResponse
 // @Failure 401 {object} sys.ErrorResponse

@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/merynayr/mall-tenants/internal/logger"
 	"github.com/merynayr/mall-tenants/internal/model"
 	"github.com/merynayr/mall-tenants/internal/sys"
 )
@@ -20,11 +21,12 @@ import (
 // @Failure 400 {object} sys.ErrorResponse
 // @Failure 401 {object} sys.ErrorResponse
 // @Failure 500 {object} sys.ErrorResponse
-// @Router /api/auth [post]
+// @Router /auth/login [post]
 func (a *API) Login(c *gin.Context) {
 	var req model.AuthRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
+		logger.Debug(err.Error())
 		sys.HandleError(c, sys.InvalidRequestError)
 		return
 	}

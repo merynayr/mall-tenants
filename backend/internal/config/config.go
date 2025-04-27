@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
+	"github.com/merynayr/mall-tenants/internal/model"
 )
 
 // Load читает .env файл по указанному пути
@@ -47,7 +48,7 @@ type AuthConfig interface {
 
 // AccessConfig интерфейс конфига access сервиса
 type AccessConfig interface {
-	UserAccessesMap() (map[string]struct{}, error)
+	UserAccessesMap() (map[model.UserRole]map[string]struct{}, error)
 }
 
 // PrometheusConfig интерфейс конфига prometheus http-сервера

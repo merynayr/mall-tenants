@@ -11,7 +11,6 @@ import (
 
 // Login валидирует данные пользователя, и если все ок, возвращает token-ы
 func (s *srv) Login(ctx context.Context, email string, password string) (*model.AuthResponse, error) {
-	var userInfo *model.AuthRequest
 	user, exist, err := s.userRepository.GetUserByEmail(ctx, email)
 	if err != nil {
 		return nil, err
@@ -20,14 +19,14 @@ func (s *srv) Login(ctx context.Context, email string, password string) (*model.
 		return nil, sys.UserNotFoundError
 	}
 
-	userInfo = &model.AuthRequest{
-		Email:    user.Email,
-		Password: user.Password,
-	}
-
-	err = hash.CompareHashAndPass(password, userInfo.Password)
+	err = hash.CompareHashAndPass(password, user.Password)
 	if err != nil {
 		return nil, sys.InvalidPasswordError
+	}
+
+	userInfo := &model.UserClaims{
+		Email: email,
+		Role:  model.UserRole(user.Role),
 	}
 
 	refreshToken, err := jwt.GenerateToken(userInfo, s.authCfg.RefreshTokenSecretKey(), s.authCfg.RefreshTokenExp())

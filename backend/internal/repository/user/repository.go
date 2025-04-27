@@ -9,8 +9,6 @@ import (
 	"github.com/merynayr/mall-tenants/internal/client/db"
 	"github.com/merynayr/mall-tenants/internal/model"
 	"github.com/merynayr/mall-tenants/internal/repository"
-	"github.com/merynayr/mall-tenants/internal/repository/user/converter"
-	modelRepo "github.com/merynayr/mall-tenants/internal/repository/user/model"
 	"github.com/merynayr/mall-tenants/internal/utils/hash"
 )
 
@@ -154,8 +152,8 @@ func (r *repo) GetUserByEmail(ctx context.Context, email string) (*model.User, b
 		QueryRaw: query,
 	}
 
-	var user modelRepo.User
-	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&user.ID, &user.Email, &user.Password, &user.Role)
+	var user model.User
+	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&user.UserID, &user.Email, &user.Password, &user.Role)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, false, nil
@@ -163,7 +161,7 @@ func (r *repo) GetUserByEmail(ctx context.Context, email string) (*model.User, b
 		return nil, false, err
 	}
 
-	return converter.ToUserFromRepo(&user), true, nil
+	return &user, true, nil
 }
 
 // UpdateUser обновляет данные пользователя по id
@@ -175,7 +173,7 @@ func (r *repo) UpdateUser(ctx context.Context, user *model.UserUpdate) error {
 		builderUpdate = builderUpdate.Set(nameColumn, &user.Username)
 	}
 
-	if user.Role >= 0 {
+	if user.Role != "" {
 		builderUpdate = builderUpdate.Set(RoleColumn, &user.Role)
 	}
 

@@ -5,9 +5,10 @@
 
 -- Вставка пользователей
 INSERT INTO users (email, password_hash, role) VALUES
-('john.doe@example.com', '$2a$10$x3eW4dqNo8cMqsatIVIBH.ev6SxEOZlktcUoZJjKgNC6Qz5w0eaF.', 0),
-('jane.smith@example.com', '$2a$10$HdBVBZvsv9UaxuXh9Rb9oOpY119DmkZ8ojmVF37Cl8EZXN/f7vXcW', 0),
-('alice.brown@example.com', '$2a$10$sXEo6pqPra1UTAOEtxSV4uQqXKIJvrFJY.N2RmYRsj4CYafcnBvpa', 0);
+('john.doe@example.com', '$2a$10$x3eW4dqNo8cMqsatIVIBH.ev6SxEOZlktcUoZJjKgNC6Qz5w0eaF.', 'client'),
+('jane.smith@example.com', '$2a$10$HdBVBZvsv9UaxuXh9Rb9oOpY119DmkZ8ojmVF37Cl8EZXN/f7vXcW', 'client'),
+('alice.brown@example.com', '$2a$10$sXEo6pqPra1UTAOEtxSV4uQqXKIJvrFJY.N2RmYRsj4CYafcnBvpa', 'client'),
+('1@mail.ru', '$2a$10$0TFVc4ubbYMUYOo.OpDnk.dcVDc.CdEZm5JhL.z.RvzsA0N.UlbpK', 'moderator');
 
 -- Вставка клиентов с использованием последних вставленных пользователей
 INSERT INTO clients (organization_name, contact_person, address, phone, requisites, client_id) VALUES
@@ -30,13 +31,12 @@ INSERT INTO premises (code, floor, area, type, rent_per_month, status, security_
 INSERT INTO rentals (client_id, space_code, start_date, end_date, paid_months, created_at) VALUES
 (1, 3, '2024-01-01T00:00:00Z', '2025-01-01T00:00:00Z', 0, '2024-01-01T10:00:00Z'),
 (2, 4, '2024-02-15T00:00:00Z', '2025-02-15T00:00:00Z', 0, '2024-02-15T11:30:00Z'),
-(3, 5, '2024-03-10T00:00:00Z', '2025-03-10T00:00:00Z', 0, '2024-03-10T09:45:00Z'),
-(1, 6, '2024-04-05T00:00:00Z', '2025-04-05T00:00:00Z', 0, '2024-04-05T12:15:00Z');
+(3, 5, '2024-03-10T00:00:00Z', '2025-03-10T00:00:00Z', 0, '2024-03-10T09:45:00Z');
 
 -- Обновление статуса помещений на 'occupied'
 UPDATE premises
 SET status = 'occupied'
-WHERE code IN (3, 4, 5, 6);
+WHERE code IN (3, 4, 5);
 
 -- -- Вставка платежей
 -- INSERT INTO payments (rent_id, payment_date, amount) VALUES

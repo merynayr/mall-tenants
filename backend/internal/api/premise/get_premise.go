@@ -1,4 +1,4 @@
-package mall
+package premise
 
 import (
 	"net/http"
@@ -14,6 +14,7 @@ import (
 // @Tags premises
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param code path int64 true "Код помещения"
 // @Success 200 {object} model.Premises
 // @Failure 400 {object} sys.ErrorResponse
