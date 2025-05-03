@@ -33,8 +33,6 @@ const (
 	ClientIDColumn         = "client_id"
 )
 
-const role = 0
-
 // Структура репо с клиентом базы данных (интерфейсом)
 type repo struct {
 	db db.Client
@@ -51,18 +49,6 @@ func (r *repo) CreateUser(ctx context.Context, req *model.RegisterRequest) (int6
 		return 0, err
 	}
 
-	txOpts := pgx.TxOptions{IsoLevel: pgx.ReadCommitted}
-	tx, err := r.db.DB().BeginTx(ctx, txOpts)
-	if err != nil {
-		return 0, err
-	}
-	defer func() {
-		err := tx.Rollback(ctx)
-		if err != nil {
-			return
-		}
-	}()
-
 	query, args, err := sq.Insert(usersTable).
 		PlaceholderFormat(sq.Dollar).
 		Columns(
@@ -73,7 +59,7 @@ func (r *repo) CreateUser(ctx context.Context, req *model.RegisterRequest) (int6
 		Values(
 			req.Email,
 			passHash,
-			role,
+			req.Role,
 		).
 		Suffix("RETURNING " + UserIDColumn).
 		ToSql()
@@ -83,7 +69,7 @@ func (r *repo) CreateUser(ctx context.Context, req *model.RegisterRequest) (int6
 	}
 
 	q := db.Query{
-		Name:     "user_repository.CreateUser_UsersTable",
+		Name:     "user_repository.CreateUser",
 		QueryRaw: query,
 	}
 	var userID int64
@@ -91,8 +77,11 @@ func (r *repo) CreateUser(ctx context.Context, req *model.RegisterRequest) (int6
 	if err != nil {
 		return 0, err
 	}
+	return userID, nil
+}
 
-	query, args, err = sq.Insert(clientsTable).
+func (r *repo) CreateClient(ctx context.Context, req *model.RegisterRequest, userID int64) (int64, error) {
+	query, args, err := sq.Insert(clientsTable).
 		PlaceholderFormat(sq.Dollar).
 		Columns(
 			ClientIDColumn,
@@ -117,8 +106,8 @@ func (r *repo) CreateUser(ctx context.Context, req *model.RegisterRequest) (int6
 		return 0, err
 	}
 
-	q = db.Query{
-		Name:     "user_repository.CreateUser_ClientsTable",
+	q := db.Query{
+		Name:     "user_repository.CreateClient",
 		QueryRaw: query,
 	}
 
@@ -127,12 +116,57 @@ func (r *repo) CreateUser(ctx context.Context, req *model.RegisterRequest) (int6
 		return 0, err
 	}
 
-	err = tx.Commit(ctx)
+	return userID, nil
+}
+
+// GetClients получате список всех клиентов с пагинацией
+func (r *repo) GetClients(ctx context.Context, limit, offset uint64) ([]model.Client, error) {
+	query, args, err := sq.Select(
+		ClientIDColumn,
+		OrganizationNameColumn,
+		ContactPersonColumn,
+		AddressColumn,
+		PhoneColumn,
+		RequisitesColumn,
+	).
+		From(clientsTable).
+		Limit(limit).
+		Offset(offset).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	return userID, nil
+	q := db.Query{
+		Name:     "client_repository.GetClients",
+		QueryRaw: query,
+	}
+
+	rows, err := r.db.DB().QueryContext(ctx, q, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var clients []model.Client
+	for rows.Next() {
+		var c model.Client
+		err := rows.Scan(
+			&c.ClientID,
+			&c.OrganizationName,
+			&c.ContactPerson,
+			&c.Address,
+			&c.Phone,
+			&c.Requisites,
+		)
+		if err != nil {
+			return nil, err
+		}
+		clients = append(clients, c)
+	}
+
+	return clients, nil
 }
 
 // GetUserByEmail получает из БД информацию пользователя

@@ -11,6 +11,8 @@ import (
 // UserService интерфейс сервисного слоя user
 type UserService interface {
 	GetUserByEmail(ctx context.Context, name string) (*model.User, error)
+	GetClients(ctx context.Context, limit, offset uint64) ([]model.Client, error)
+	CreateClient(ctx context.Context, req model.RegisterRequest) error
 }
 
 // AuthService интерфейс сервисного слоя auth

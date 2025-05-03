@@ -176,8 +176,8 @@ func (api *API) GetPolygons(c *gin.Context) {
 }
 
 // DeletePolygon возвращает все полигоны по помещению
-// @Summary      Получить полигоны помещения
-// @Description  Возвращает список полигонов (points+label) для указанного помещения
+// @Summary      Удалить полигоны по code помещения
+// @Description  Удаляет полигоны для указанного помещения
 // @Tags         floor-plans
 // @Accept       json
 // @Produce      json
@@ -186,7 +186,7 @@ func (api *API) GetPolygons(c *gin.Context) {
 // @Success      200
 // @Failure      400  {object}  sys.ErrorResponse
 // @Failure      500  {object}  sys.ErrorResponse
-// @Router       /floor-plan/polygons/{code} [post]
+// @Router       /floor-plan/polygons/{code} [DELETE]
 func (api *API) DeletePolygon(c *gin.Context) {
 	codeParam := c.Param("code")
 	code, err := strconv.ParseInt(codeParam, 10, 64)

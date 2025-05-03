@@ -38,6 +38,7 @@ func VerifyToken(tokenStr string, secretKey []byte) (*model.UserClaims, error) {
 			return secretKey, nil
 		},
 	)
+
 	if err != nil {
 		if ve, ok := err.(*jwt.ValidationError); ok && ve.Errors == jwt.ValidationErrorExpired {
 			return nil, sys.AccessTokenExpiredError

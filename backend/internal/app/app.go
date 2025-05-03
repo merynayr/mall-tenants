@@ -123,6 +123,9 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 	router.Use(mw.TimeoutMiddleware(time.Second * 5))
 	router.Use(mw.Access().Check())
 
+	a.serviceProvider.UserAPI(ctx)
+	a.serviceProvider.userAPI.RegisterRoutes(router)
+
 	a.serviceProvider.MallAPI(ctx)
 	a.serviceProvider.mallAPI.RegisterRoutes(router)
 
@@ -136,7 +139,7 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 	a.serviceProvider.floorPlanAPI.RegisterRoutes(router)
 
 	corsMiddleware := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:5173"},
+		AllowedOrigins:   []string{"http://localhost:5173", "http://localhost:8090"},
 		AllowedMethods:   []string{"GET", "POST", "PATCH", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Content-Type", "Content-Length", "Authorization"},
 		AllowCredentials: true,

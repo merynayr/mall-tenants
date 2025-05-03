@@ -10,9 +10,11 @@ import (
 // UserRepository - интерфейс репо слоя user
 type UserRepository interface {
 	CreateUser(ctx context.Context, req *model.RegisterRequest) (int64, error)
+	CreateClient(ctx context.Context, req *model.RegisterRequest, userID int64) (int64, error)
 	UpdateUser(ctx context.Context, user *model.UserUpdate) error
 	GetUserByEmail(ctx context.Context, email string) (*model.User, bool, error)
 	IsEmailExist(ctx context.Context, email string) (bool, error)
+	GetClients(ctx context.Context, limit, offset uint64) ([]model.Client, error)
 }
 
 // PremiseRepository - интерфейс репо слоя для помещений

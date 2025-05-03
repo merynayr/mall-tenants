@@ -29,9 +29,9 @@ type UserUpdate struct {
 
 // Client модель клиента сервисного слоя
 type Client struct {
-	ClientID         int    `json:"client_id"`
-	OrganizationName string `json:"organization_name"`
-	ContactPerson    string `json:"contact_person"`
+	ClientID         int    `json:"id"`
+	OrganizationName string `json:"organizationName"`
+	ContactPerson    string `json:"contactPerson"`
 	Address          string `json:"address"`
 	Phone            string `json:"phone"`
 	Requisites       string `json:"requisites"`

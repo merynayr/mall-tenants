@@ -42,17 +42,17 @@ var (
 	// SelfTransferNotAllowedError возникает, когда пользователь пытается перевести монеты самому себе. Код ошибки: 400 (Bad Request)
 	SelfTransferNotAllowedError = NewCommonError(ErrSelfTransferNotAllowed, codes.BadRequest)
 
-	// InvalidRefreshTokenError возникает, когда передан недействительный refresh-токен. Код ошибки: 401 (Unauthorized)
-	InvalidRefreshTokenError = NewCommonError(ErrInvalidRefreshToken, codes.Unauthorized)
+	// InvalidRefreshTokenError возникает, когда передан недействительный refresh-токен. Код ошибки: 403 (Forbidden)
+	InvalidRefreshTokenError = NewCommonError(ErrInvalidRefreshToken, codes.Forbidden)
 
-	// InvalidPasswordError возникает, когда введён неверный пароль. Код ошибки: 401 (Unauthorized)
-	InvalidPasswordError = NewCommonError(ErrInvalidPassword, codes.Unauthorized)
+	// InvalidPasswordError возникает, когда введён неверный пароль. Код ошибки: 403 (Forbidden)
+	InvalidPasswordError = NewCommonError(ErrInvalidPassword, codes.Forbidden)
 
-	// AuthHeaderNotProvidedError возникает, когда отсутствует заголовок авторизации. Код ошибки: 401 (Unauthorized)
-	AuthHeaderNotProvidedError = NewCommonError(ErrAuthHeaderNotProvided, codes.Unauthorized)
+	// AuthHeaderNotProvidedError возникает, когда отсутствует заголовок авторизации. Код ошибки: 403 (Forbidden)
+	AuthHeaderNotProvidedError = NewCommonError(ErrAuthHeaderNotProvided, codes.Forbidden)
 
-	// InvalidAuthHeaderFormatError возникает, когда формат заголовка авторизации неверный. Код ошибки: 401 (Unauthorized)
-	InvalidAuthHeaderFormatError = NewCommonError(ErrInvalidAuthHeaderFormat, codes.Unauthorized)
+	// InvalidAuthHeaderFormatError возникает, когда формат заголовка авторизации неверный. Код ошибки: 403 (Forbidden)
+	InvalidAuthHeaderFormatError = NewCommonError(ErrInvalidAuthHeaderFormat, codes.Forbidden)
 
 	// InvalidAccessTokenError возникает, когда передан недействительный access-токен. Код ошибки: 401 (Unauthorized)
 	InvalidAccessTokenError = NewCommonError(ErrInvalidAccessToken, codes.Unauthorized)

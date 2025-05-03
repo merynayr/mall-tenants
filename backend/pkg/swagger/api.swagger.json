@@ -63,9 +63,9 @@
                 }
             }
         },
-        "/auth/register": {
-            "post": {
-                "description": "Регистрирует пользователя и возвращает JWT-токен",
+        "/clients/": {
+            "get": {
+                "description": "Возвращает список клиентов с пагинацией",
                 "consumes": [
                     "application/json"
                 ],
@@ -73,9 +73,66 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "Клиенты"
                 ],
-                "summary": "Регистрация",
+                "summary": "Получить список клиентов",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 20,
+                        "description": "Максимальное количество клиентов",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Смещение для пагинации",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Client"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Создаёт нового клиента",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Клиенты"
+                ],
+                "summary": "Создать клиента",
                 "parameters": [
                     {
                         "description": "Данные для регистрации",
@@ -122,7 +179,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Возвращает список полигонов (points+label) для указанного помещения",
+                "description": "Сохраняет новые координаты и подпись полигона",
                 "consumes": [
                     "application/json"
                 ],
@@ -132,7 +189,63 @@
                 "tags": [
                     "floor-plans"
                 ],
-                "summary": "Получить полигоны помещения",
+                "summary": "Добавить полигон для помещения",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Код помещения",
+                        "name": "code",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Данные полигона",
+                        "name": "poly",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.PremisePolygon"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.PremisePolygon"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Удаляет полигоны для указанного помещения",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "floor-plans"
+                ],
+                "summary": "Удалить полигоны по code помещения",
                 "parameters": [
                     {
                         "type": "integer",
@@ -993,6 +1106,29 @@
                 }
             }
         },
+        "model.Client": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "contactPerson": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "organizationName": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "requisites": {
+                    "type": "string"
+                }
+            }
+        },
         "model.Payment": {
             "type": "object",
             "properties": {
@@ -1104,6 +1240,9 @@
                 },
                 "requisites": {
                     "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/model.UserRole"
                 }
             }
         },
@@ -1135,6 +1274,20 @@
                     "type": "string"
                 }
             }
+        },
+        "model.UserRole": {
+            "description": "Доступные роли: cleint, moderator, director",
+            "type": "string",
+            "enum": [
+                "client",
+                "moderator",
+                "director"
+            ],
+            "x-enum-varnames": [
+                "RoleClient",
+                "RoleModerator",
+                "RoleDirector"
+            ]
         },
         "sys.ErrorResponse": {
             "type": "object"

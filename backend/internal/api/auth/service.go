@@ -26,7 +26,6 @@ func NewAPI(authService service.AuthService, authConfig config.AuthConfig) *API 
 func (api *API) RegisterRoutes(router *gin.Engine) {
 	authGroup := router.Group("/auth")
 	{
-		authGroup.POST("/register", api.Register)
 		authGroup.POST("/login", api.Login)
 		authGroup.POST("/refresh", api.GetAccessToken)
 		authGroup.POST("/refresh-token", api.GetRefreshToken)

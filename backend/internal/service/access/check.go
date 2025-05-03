@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/merynayr/mall-tenants/internal/logger"
 	"github.com/merynayr/mall-tenants/internal/model"
 	"github.com/merynayr/mall-tenants/internal/sys"
 	"github.com/merynayr/mall-tenants/internal/utils/jwt"
@@ -30,6 +31,7 @@ func (s *srv) Check(ctx *gin.Context, endpointAddress string) (*model.User, erro
 
 	claims, err := jwt.VerifyToken(accessToken, s.authConfig.AccessTokenSecretKey())
 	if err != nil {
+		logger.Debug(err.Error())
 		return nil, err
 	}
 

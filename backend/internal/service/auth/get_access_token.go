@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/merynayr/mall-tenants/internal/model"
 	"github.com/merynayr/mall-tenants/internal/sys"
@@ -13,7 +12,7 @@ import (
 func (s *srv) GetAccessToken(ctx context.Context, refreshToken string) (string, error) {
 	claims, err := jwt.VerifyToken(refreshToken, s.authCfg.RefreshTokenSecretKey())
 	if err != nil {
-		return "", fmt.Errorf(sys.ErrInvalidAccessToken)
+		return "", err
 	}
 
 	user, exist, err := s.userRepository.GetUserByEmail(ctx, claims.Email)

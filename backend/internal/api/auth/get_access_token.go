@@ -19,7 +19,7 @@ func (a *API) GetAccessToken(c *gin.Context) {
 
 	token, err := a.authService.GetAccessToken(c.Request.Context(), refreshToken)
 	if err != nil {
-		sys.HandleError(c, sys.InvalidAccessTokenError)
+		sys.HandleError(c, err)
 		return
 	}
 

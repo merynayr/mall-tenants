@@ -17,6 +17,7 @@ import (
 	"github.com/merynayr/mall-tenants/internal/api/payment"
 	"github.com/merynayr/mall-tenants/internal/api/premise"
 	"github.com/merynayr/mall-tenants/internal/api/rental"
+	"github.com/merynayr/mall-tenants/internal/api/user"
 
 	floorPlan "github.com/merynayr/mall-tenants/internal/api/floorPlan"
 	floorPlanRepository "github.com/merynayr/mall-tenants/internal/repository/floorPlan"
@@ -52,6 +53,7 @@ type serviceProvider struct {
 	dbClient  db.Client
 	txManager db.TxManager
 
+	userAPI        *user.API
 	userService    service.UserService
 	userRepository repository.UserRepository
 
@@ -188,11 +190,21 @@ func (s *serviceProvider) TxManager(ctx context.Context) db.TxManager {
 	return s.txManager
 }
 
+// UserAPI инициализирует api слой user
+func (s *serviceProvider) UserAPI(ctx context.Context) *user.API {
+	if s.userAPI == nil {
+		s.userAPI = user.NewAPI(s.UserService(ctx))
+	}
+
+	return s.userAPI
+}
+
 // UserService иницилизирует сервисный слой auth
 func (s *serviceProvider) UserService(ctx context.Context) service.UserService {
 	if s.userService == nil {
 		s.userService = userService.NewService(
 			s.UserRepository(ctx),
+			s.TxManager(ctx),
 		)
 	}
 
