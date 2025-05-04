@@ -29,7 +29,7 @@ func (m *Middleware) Check() gin.HandlerFunc {
 		path := c.FullPath()
 		endpoint := method + ":" + path
 
-		user, err := m.accessService.Check(c, endpoint)
+		email, err := m.accessService.Check(c, endpoint)
 		if err != nil {
 			logger.Debug(err.Error())
 			sys.HandleError(c, err)
@@ -37,7 +37,7 @@ func (m *Middleware) Check() gin.HandlerFunc {
 			return
 		}
 
-		c.Set("user", user)
+		c.Set("email", email)
 		c.Next()
 	}
 }

@@ -1,9 +1,11 @@
 package rental
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/merynayr/mall-tenants/internal/logger"
 	"github.com/merynayr/mall-tenants/internal/model"
 	"github.com/merynayr/mall-tenants/internal/sys"
 )
@@ -24,10 +26,11 @@ import (
 func (a *API) CreateRental(c *gin.Context) {
 	var rental model.Rental
 	if err := c.ShouldBindJSON(&rental); err != nil {
+		logger.Error(err.Error())
 		sys.HandleError(c, sys.InvalidRequestError)
 		return
 	}
-
+	fmt.Println(rental)
 	err := a.rentalService.CreateRental(c.Request.Context(), rental)
 	if err != nil {
 		sys.HandleError(c, err)

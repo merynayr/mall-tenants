@@ -10,7 +10,7 @@ import (
 
 // UserService интерфейс сервисного слоя user
 type UserService interface {
-	GetUserByEmail(ctx context.Context, name string) (*model.User, error)
+	GetUserByEmail(ctx context.Context, email string) (*model.User, error)
 	GetClients(ctx context.Context, limit, offset uint64) ([]model.Client, error)
 	CreateClient(ctx context.Context, req model.RegisterRequest) error
 }
@@ -25,7 +25,7 @@ type AuthService interface {
 
 // AccessService интерфейс сервисного слоя access
 type AccessService interface {
-	Check(ctx *gin.Context, endpointAddress string) (*model.User, error)
+	Check(ctx *gin.Context, endpointAddress string) (string, error)
 }
 
 // PremiseService интерфейс сервисного слоя access

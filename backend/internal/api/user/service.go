@@ -29,6 +29,7 @@ func (api *API) RegisterRoutes(router *gin.Engine) {
 	{
 		authGroup.GET("/", api.GetClients)
 		authGroup.POST("/", api.CreateClient)
+		authGroup.GET("/profile", api.GetProfile)
 	}
 }
 
@@ -38,6 +39,7 @@ func (api *API) RegisterRoutes(router *gin.Engine) {
 // @Tags         Клиенты
 // @Accept       json
 // @Produce      json
+// @Security BearerAuth
 // @Param        limit  query     int  false  "Максимальное количество клиентов" default(20)
 // @Param        offset query     int  false  "Смещение для пагинации" default(0)
 // @Success      200    {array}   model.Client
@@ -98,4 +100,27 @@ func (api *API) CreateClient(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, nil)
+}
+
+// GetProfile godoc
+// @Summary      Получить информацию о клиенте
+// @Description  Возвращает информацию о клиенте по email (query-параметр)
+// @Tags         Клиенты
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200    {object}  model.Client
+// @Failure      400    {object}  sys.ErrorResponse
+// @Failure      500    {object}  sys.ErrorResponse
+// @Router       /clients/profile [get]
+func (api *API) GetProfile(c *gin.Context) {
+	email := c.GetString("email")
+	client, err := api.userService.GetUserByEmail(c.Request.Context(), email)
+	if err != nil {
+		sys.HandleError(c, err)
+		return
+	}
+	client.Password = ""
+
+	c.JSON(http.StatusOK, client)
 }
