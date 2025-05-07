@@ -160,3 +160,56 @@ func (r *repo) UpdateRental(ctx context.Context, rental *model.Rental) error {
 
 	return nil
 }
+func (r *repo) GetAgreements(ctx context.Context, limit, offset uint64) ([]model.Agreements, error) {
+	query, args, err := sq.Select(
+		"r."+IDColumn,
+		"r."+SpaceIDColumn,
+		"c.organization_name",
+		"r."+StartDateColumn,
+		"r."+EndDateColumn,
+		"r."+PaidMonthsColumn,
+		"r."+CreatedAtColumn,
+	).
+		From(RentalTable + " r").
+		Join("clients c ON c.client_id = r.client_id").
+		PlaceholderFormat(sq.Dollar).
+		Limit(limit).
+		Offset(offset).
+		ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	q := db.Query{
+		Name:     "rental_repository.GetAgreements",
+		QueryRaw: query,
+	}
+
+	rows, err := r.db.DB().QueryContext(ctx, q, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var rentals []model.Agreements
+
+	for rows.Next() {
+		var rental model.Agreements
+		err := rows.Scan(
+			&rental.RentalID,
+			&rental.SpaceID,
+			&rental.ClientName,
+			&rental.StartDate,
+			&rental.EndDate,
+			&rental.PaidMonths,
+			&rental.CreatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		rentals = append(rentals, rental)
+	}
+
+	return rentals, nil
+}

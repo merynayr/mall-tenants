@@ -1,9 +1,13 @@
 package rentals
 
 import (
+	"context"
+
 	"github.com/merynayr/mall-tenants/internal/client/db"
+	"github.com/merynayr/mall-tenants/internal/model"
 	"github.com/merynayr/mall-tenants/internal/repository"
 	"github.com/merynayr/mall-tenants/internal/service"
+	"github.com/merynayr/mall-tenants/internal/sys"
 )
 
 type srv struct {
@@ -23,4 +27,20 @@ func NewService(
 		premiseRepository: premiseRepo,
 		txManager:         txManager,
 	}
+}
+
+func (s *srv) GetAgreements(ctx context.Context, limit, offset uint64) ([]model.Agreements, error) {
+	if limit <= 0 {
+		limit = 20
+	}
+
+	rental, err := s.rentalRepository.GetAgreements(ctx, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	if len(rental) == 0 {
+		return nil, sys.RentalNotFoundError
+	}
+
+	return rental, nil
 }

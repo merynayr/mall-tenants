@@ -29,7 +29,14 @@ func (s *userService) GetClients(ctx context.Context, limit, offset uint64) ([]m
 	if limit <= 0 {
 		limit = 20
 	}
-	return s.userRepository.GetClients(ctx, limit, offset)
+	clients, err := s.userRepository.GetClients(ctx, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	if len(clients) == 0 {
+		return nil, sys.NotFoundError
+	}
+	return clients, nil
 }
 
 func (s *userService) GetUserByEmail(ctx context.Context, email string) (*model.User, error) {

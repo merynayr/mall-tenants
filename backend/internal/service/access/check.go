@@ -1,6 +1,8 @@
 package access
 
 import (
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/merynayr/mall-tenants/internal/logger"
 	"github.com/merynayr/mall-tenants/internal/model"
@@ -10,13 +12,27 @@ import (
 
 const (
 	authCookieName = "access_token"
+	authHeader     = "Authorization"
+	authPrefix     = "Bearer "
 )
 
 // Check проверяет, имеет ли пользователь доступ к эндпоинту
 func (s *srv) Check(ctx *gin.Context, endpointAddress string) (string, error) {
 	accessToken, err := ctx.Cookie(authCookieName)
 	if err != nil {
-		return "", sys.AuthHeaderNotProvidedError
+		authHeader := ctx.GetHeader(authHeader)
+		if authHeader == "" {
+			return "", sys.AuthHeaderNotProvidedError
+		}
+
+		if !strings.HasPrefix(authHeader, authPrefix) {
+			return "", sys.InvalidAuthHeaderFormatError
+		}
+
+		accessToken = strings.TrimPrefix(authHeader, authPrefix)
+		if len(accessToken) == 0 {
+			return "", sys.AuthHeaderNotProvidedError
+		}
 	}
 
 	claims, err := jwt.VerifyToken(accessToken, s.authConfig.AccessTokenSecretKey())

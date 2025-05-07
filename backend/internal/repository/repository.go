@@ -30,6 +30,7 @@ type RentalRepository interface {
 	GetRentalByID(ctx context.Context, id int64) (*model.Rental, bool, error)
 	CreateRental(ctx context.Context, rental *model.Rental) error
 	UpdateRental(ctx context.Context, rental *model.Rental) error
+	GetAgreements(ctx context.Context, limit, offset uint64) ([]model.Agreements, error)
 }
 
 // PaymentRepository - интерфейс репо слоя для платежей

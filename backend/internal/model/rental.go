@@ -13,3 +13,15 @@ type Rental struct {
 	CreatedAt  time.Time  `json:"created_at"`
 	UpdatedAt  *time.Time `json:"updated_at,omitempty"`
 }
+
+// Agreements представляет собой модель данных для аренды
+type Agreements struct {
+	RentalID   int64      `json:"rental_id,omitempty"`
+	SpaceID    int64      `json:"space_code"`
+	ClientName string     `json:"client_name"`
+	StartDate  time.Time  `json:"start_date"`
+	EndDate    time.Time  `json:"end_date"`
+	PaidMonths int64      `json:"paid_months"`
+	CreatedAt  time.Time  `json:"created_at"`
+	UpdatedAt  *time.Time `json:"updated_at,omitempty"`
+}

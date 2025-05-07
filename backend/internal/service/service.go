@@ -41,6 +41,7 @@ type RentalService interface {
 	GetRentalByID(ctx context.Context, code int64) (*model.Rental, error)
 	CreateRental(ctx context.Context, rental model.Rental) error
 	UpdateRental(ctx context.Context, rental model.Rental) error
+	GetAgreements(ctx context.Context, limit, offset uint64) ([]model.Agreements, error)
 }
 
 // PaymentService - интерфейс репо слоя для платежей
