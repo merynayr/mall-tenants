@@ -46,10 +46,15 @@ type RentalService interface {
 
 // PaymentService - интерфейс репо слоя для платежей
 type PaymentService interface {
-	CreatePayment(ctx context.Context, payment model.Payment) error
-	GetPaymentByID(ctx context.Context, id int64) (*model.Payment, error)
-	GetLastPaymentByRentalID(ctx context.Context, rentalID int64) (*model.Payment, error)
-	GetOverduePayments(ctx context.Context, rentalID int64) ([]model.Payment, error)
+	// CreatePayment(ctx context.Context, payment model.Payment) error
+	// GetPaymentByID(ctx context.Context, id int64) (*model.Payment, error)
+	// GetLastPaymentByRentalID(ctx context.Context, rentalID int64) (*model.Payment, error)
+	// GetOverduePayments(ctx context.Context, rentalID int64) ([]model.Payment, error)
+	CreatePayment(ctx context.Context, p model.Payment) (int64, error)
+	MarkAsPaid(ctx context.Context, id int64) error
+	MarkPaymentsAsPaid(ctx context.Context, paymentIDs []int64) error
+	GetByID(ctx context.Context, id int64) (model.Payment, error)
+	ListPayments(ctx context.Context, filter model.PaymentFilter) ([]model.Payment, error)
 }
 
 // FloorPlanService интерфейс сервисного слоя access

@@ -2,12 +2,13 @@ package payments
 
 import (
 	"context"
+	"errors"
+	"time"
 
 	"github.com/merynayr/mall-tenants/internal/client/db"
 	"github.com/merynayr/mall-tenants/internal/model"
 	"github.com/merynayr/mall-tenants/internal/repository"
 	"github.com/merynayr/mall-tenants/internal/service"
-	"github.com/merynayr/mall-tenants/internal/sys"
 )
 
 type srv struct {
@@ -32,96 +33,78 @@ func NewService(
 	}
 }
 
-// CreatePayment создаёт новый платёж
-func (s *srv) CreatePayment(ctx context.Context, payment model.Payment) error {
-	rental, exists, err := s.rentalRepository.GetRentalByID(ctx, payment.RentID)
-	if err != nil {
-		return err
-	}
-	if !exists {
-		return sys.RentalNotFoundError
+func (s *srv) CreatePayment(ctx context.Context, p model.Payment) (int64, error) {
+	// можно добавить валидацию, например:
+	if p.Amount <= 0 {
+		return 0, errors.New("amount must be greater than 0")
 	}
 
-	premise, exist, err := s.premiseRepository.GetPremisesByCode(ctx, rental.SpaceID)
-	if err != nil {
-		return err
-	}
-	if !exist {
-		return sys.PremiseNotFoundError
+	return s.paymentRepository.CreatePayment(ctx, p)
+}
+
+func (s *srv) MarkAsPaid(ctx context.Context, id int64) error {
+	return s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
+		paidAt := time.Now().UTC()
+		return s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
+			err := s.paymentRepository.MarkAsPaid(ctx, id, paidAt)
+			if err != nil {
+				return err
+			}
+
+			payment, err := s.paymentRepository.GetByID(ctx, id)
+			if err != nil {
+				return err
+			}
+
+			rental := &model.Rental{
+				RentalID:   payment.RentalID,
+				PaidMonths: int64(1),
+			}
+
+			err = s.rentalRepository.UpdateRental(ctx, rental)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		})
+	})
+}
+
+func (s *srv) MarkPaymentsAsPaid(ctx context.Context, paymentIDs []int64) error {
+	if len(paymentIDs) == 0 {
+		return nil
 	}
 
-	if payment.Amount < premise.RentPerMonth {
-		return sys.NotEnoughCoinsError
-	}
-
-	err = s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
-		var errTx error
-
-		errTx = s.paymentRepository.CreatePayment(ctx, &payment)
-		if errTx != nil {
-			return errTx
+	return s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
+		err := s.paymentRepository.MarkAsPaidMany(ctx, paymentIDs, time.Now().UTC())
+		if err != nil {
+			return err
 		}
 
-		errTx = s.rentalRepository.UpdateRental(
-			ctx,
-			&model.Rental{
-				RentalID:   rental.RentalID,
-				PaidMonths: rental.PaidMonths + payment.Amount/premise.RentPerMonth,
-			},
-		)
-		if errTx != nil {
-			return errTx
+		payment, err := s.paymentRepository.GetByID(ctx, paymentIDs[0])
+		if err != nil {
+			return err
+		}
+
+		rental := &model.Rental{
+			RentalID:   payment.RentalID,
+			PaidMonths: int64(len(paymentIDs)),
+		}
+
+		err = s.rentalRepository.UpdateRental(ctx, rental)
+		if err != nil {
+			return err
 		}
 
 		return nil
 	})
-
-	return err
 }
 
-// GetPaymentByID получает платёж по его ID
-func (s *srv) GetPaymentByID(ctx context.Context, id int64) (*model.Payment, error) {
-	payment, exists, err := s.paymentRepository.GetPaymentByID(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, sys.PaymentNotFoundError
-	}
-	return payment, nil
+func (s *srv) GetByID(ctx context.Context, id int64) (model.Payment, error) {
+	return s.paymentRepository.GetByID(ctx, id)
 }
 
-// GetLastPaymentByRentalID получает последний платёж по ID аренды
-func (s *srv) GetLastPaymentByRentalID(ctx context.Context, rentalID int64) (*model.Payment, error) {
-	// Проверяем, существует ли аренда
-	_, exists, err := s.rentalRepository.GetRentalByID(ctx, rentalID)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, sys.RentalNotFoundError
-	}
-
-	// Получаем последний платёж
-	payment, found, err := s.paymentRepository.GetLastPayment(ctx, rentalID)
-	if err != nil {
-		return nil, err
-	}
-	if !found {
-		return nil, sys.PaymentNotFoundError
-	}
-
-	return payment, nil
-}
-
-// GetOverduePayments получает список просроченных платежей
-func (s *srv) GetOverduePayments(ctx context.Context, rentalID int64) ([]model.Payment, error) {
-	payments, err := s.paymentRepository.GetOverduePayments(ctx, rentalID)
-	if err != nil {
-		return nil, err
-	}
-	if len(payments) == 0 {
-		return nil, sys.OverduePaymentsNotFoundError
-	}
-	return payments, nil
+func (s *srv) ListPayments(ctx context.Context, filter model.PaymentFilter) ([]model.Payment, error) {
+	return s.paymentRepository.List(ctx, filter)
 }

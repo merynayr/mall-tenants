@@ -477,140 +477,39 @@
                 }
             }
         },
-        "/payment/": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Создает новый платеж для аренды",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "payment"
-                ],
-                "summary": "Создать платеж",
-                "parameters": [
-                    {
-                        "description": "Данные платежа",
-                        "name": "payment",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.Payment"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Payment created successfully"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/sys.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/sys.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/sys.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/payment/rental/{rentalID}/last": {
+        "/payments": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Получает последний платеж по rentalID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "payment"
+                    "payments"
                 ],
-                "summary": "Получить последний платеж",
+                "summary": "Получить список платежей",
                 "parameters": [
+                    {
+                        "enum": [
+                            "true",
+                            "false"
+                        ],
+                        "type": "string",
+                        "description": "Фильтрация по статусу оплаты",
+                        "name": "is_paid",
+                        "in": "query"
+                    },
                     {
                         "type": "integer",
-                        "description": "ID аренды",
-                        "name": "rentalID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Payment"
-                        }
+                        "default": 20,
+                        "description": "Максимальное количество договоров",
+                        "name": "limit",
+                        "in": "query"
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/sys.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/sys.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/sys.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/sys.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/payment/rental/{rentalID}/overdue": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Получает список просроченных платежей по rentalID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "payment"
-                ],
-                "summary": "Получить просроченные платежи",
-                "parameters": [
                     {
                         "type": "integer",
-                        "description": "ID аренды",
-                        "name": "rentalID",
-                        "in": "path",
-                        "required": true
+                        "default": 0,
+                        "description": "Смещение для пагинации",
+                        "name": "offset",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -629,8 +528,131 @@
                             "$ref": "#/definitions/sys.ErrorResponse"
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "summary": "Создать платеж",
+                "parameters": [
+                    {
+                        "description": "Данные платежа",
+                        "name": "payment",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Payment"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/payments/mark-paid": {
+            "patch": {
+                "description": "Обновляет статус is_paid и увеличивает paid_months у аренды",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "summary": "Отметить платежи как оплаченные",
+                "parameters": [
+                    {
+                        "description": "ID платежей",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.MarkPaymentsPaidRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Успешно"
+                    },
+                    "400": {
+                        "description": "Неверный запрос",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/payments/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "summary": "Получить платеж по ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID платежа",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Payment"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/sys.ErrorResponse"
                         }
@@ -650,45 +672,27 @@
                 }
             }
         },
-        "/payment/{paymentID}": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Получает информацию о платеже по его ID",
-                "produces": [
-                    "application/json"
-                ],
+        "/payments/{id}/pay": {
+            "patch": {
                 "tags": [
-                    "payment"
+                    "payments"
                 ],
-                "summary": "Получить платеж",
+                "summary": "Отметить платеж как оплаченный",
                 "parameters": [
                     {
                         "type": "integer",
                         "description": "ID платежа",
-                        "name": "paymentID",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Payment"
-                        }
+                    "204": {
+                        "description": "Платеж отмечен как оплаченный"
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/sys.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/sys.ErrorResponse"
                         }
@@ -1231,20 +1235,46 @@
                 }
             }
         },
+        "model.MarkPaymentsPaidRequest": {
+            "type": "object",
+            "properties": {
+                "payment_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
         "model.Payment": {
             "type": "object",
             "properties": {
                 "amount": {
                     "type": "integer"
                 },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_paid": {
+                    "type": "boolean"
+                },
                 "payment_date": {
                     "type": "string"
                 },
-                "payment_id": {
+                "period_end": {
+                    "type": "string"
+                },
+                "period_start": {
+                    "type": "string"
+                },
+                "rental_id": {
                     "type": "integer"
                 },
-                "rent_id": {
-                    "type": "integer"
+                "updated_at": {
+                    "type": "string"
                 }
             }
         },

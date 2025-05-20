@@ -1,10 +1,14 @@
 -- +goose Up
 CREATE TABLE payments (
     payment_id SERIAL PRIMARY KEY,
-    rent_id INTEGER NOT NULL,
-    payment_date TIMESTAMP DEFAULT NOW(),
+    rental_id INTEGER NOT NULL REFERENCES rentals(rental_id) ON DELETE CASCADE,
+    period_start DATE NOT NULL,
+    period_end DATE NOT NULL,
     amount INTEGER NOT NULL,
-    CONSTRAINT fk_rent FOREIGN KEY (rent_id) REFERENCES rentals(rental_id) ON DELETE CASCADE
+    is_paid BOOLEAN NOT NULL DEFAULT FALSE,
+    payment_date TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
 );
 
 -- +goose Down

@@ -131,8 +131,9 @@ func (r *repo) UpdateRental(ctx context.Context, rental *model.Rental) error {
 		builder = builder.Set(EndDateColumn, rental.EndDate)
 	}
 	if rental.PaidMonths != 0 {
-		builder = builder.Set(PaidMonthsColumn, rental.PaidMonths)
+		builder = builder.Set(PaidMonthsColumn, sq.Expr(PaidMonthsColumn+" + ?", rental.PaidMonths))
 	}
+
 	builder = builder.Set(UpdatedAtColumn, time.Now().UTC())
 
 	query, args, err := builder.PlaceholderFormat(sq.Dollar).
@@ -160,6 +161,7 @@ func (r *repo) UpdateRental(ctx context.Context, rental *model.Rental) error {
 
 	return nil
 }
+
 func (r *repo) GetAgreements(ctx context.Context, limit, offset uint64) ([]model.Agreements, error) {
 	query, args, err := sq.Select(
 		"r."+IDColumn,

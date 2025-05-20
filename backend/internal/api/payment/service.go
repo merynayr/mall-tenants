@@ -1,6 +1,8 @@
 package payment
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -24,134 +26,162 @@ func NewAPI(paymentService service.PaymentService) *API {
 
 // RegisterRoutes регистрирует все маршруты API для работы с платежами
 func (api *API) RegisterRoutes(router *gin.Engine) {
-	paymentGroup := router.Group("/payment")
+	paymentGroup := router.Group("/payments")
 	{
-		paymentGroup.POST("/", api.CreatePayment)
-		paymentGroup.GET("/:paymentID", api.GetPaymentByID)
-		paymentGroup.GET("/rental/:rentalID/last", api.GetLastPaymentByRentalID)
-		paymentGroup.GET("/rental/:rentalID/overdue", api.GetOverduePayments)
+		paymentGroup.POST("", api.CreatePayment)
+		paymentGroup.PATCH(":id/pay", api.MarkAsPaid)
+		paymentGroup.PATCH("/mark-paid", api.MarkPaymentsPaid)
+		paymentGroup.GET(":id", api.GetPayment)
+		paymentGroup.GET("", api.ListPayments)
 	}
 }
 
-// CreatePayment создаёт новый платеж
+// CreatePayment godoc
 // @Summary Создать платеж
-// @Description Создает новый платеж для аренды
-// @Tags payment
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
+// @Tags payments
+// @Accept json
+// @Produce json
 // @Param payment body model.Payment true "Данные платежа"
-// @Success 201 "Payment created successfully"
-// @Failure 400 {object} sys.ErrorResponse
-// @Failure 401 {object} sys.ErrorResponse
-// @Failure 500 {object} sys.ErrorResponse
-// @Router /payment/ [post]
+// @Success 201 {object} map[string]int64
+// @Failure 400,500 {object} sys.ErrorResponse
+// @Router /payments [post]
 func (api *API) CreatePayment(c *gin.Context) {
-	var payment model.Payment
-
-	if err := c.ShouldBindJSON(&payment); err != nil {
-		sys.HandleError(c, sys.InvalidRequestError)
+	var p model.Payment
+	if err := c.ShouldBindJSON(&p); err != nil {
+		sys.HandleError(c, err)
 		return
 	}
 
-	err := api.paymentService.CreatePayment(c, payment)
+	id, err := api.paymentService.CreatePayment(c.Request.Context(), p)
 	if err != nil {
 		sys.HandleError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "Payment created successfully"})
+	c.JSON(http.StatusCreated, gin.H{"id": id})
 }
 
-// GetPaymentByID получает платеж по ID
-// @Summary Получить платеж
-// @Description Получает информацию о платеже по его ID
-// @Tags payment
-// @Produce  json
-// @Security BearerAuth
-// @Param paymentID path int true "ID платежа"
+// MarkAsPaid godoc
+// @Summary Отметить платеж как оплаченный
+// @Tags payments
+// @Param id path int true "ID платежа"
+// @Success 204 "Платеж отмечен как оплаченный"
+// @Failure 400,404,500 {object} sys.ErrorResponse
+// @Router /payments/{id}/pay [patch]
+func (api *API) MarkAsPaid(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		sys.HandleError(c, err)
+		return
+	}
+
+	if err := api.paymentService.MarkAsPaid(c.Request.Context(), id); err != nil {
+		sys.HandleError(c, err)
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
+
+// MarkPaymentsPaid помечает указанные платежи как оплаченные
+// @Summary Отметить платежи как оплаченные
+// @Description Обновляет статус is_paid и увеличивает paid_months у аренды
+// @Tags payments
+// @Accept json
+// @Produce json
+// @Param request body model.MarkPaymentsPaidRequest true "ID платежей"
+// @Success 204 "Успешно"
+// @Failure 400 {object} sys.ErrorResponse "Неверный запрос"
+// @Failure 500 {object} sys.ErrorResponse "Внутренняя ошибка сервера"
+// @Router /payments/mark-paid [patch]
+func (api *API) MarkPaymentsPaid(c *gin.Context) {
+	var req model.MarkPaymentsPaidRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		sys.HandleError(c, sys.InvalidRequestError)
+		return
+	}
+
+	if len(req.PaymentIDs) == 0 {
+		sys.HandleError(c, errors.New("no payment IDs provided"))
+		return
+	}
+
+	err := api.paymentService.MarkPaymentsAsPaid(c.Request.Context(), req.PaymentIDs)
+	if err != nil {
+		sys.HandleError(c, errors.New("failed to mark payments as paid"))
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
+
+// GetPayment godoc
+// @Summary Получить платеж по ID
+// @Tags payments
+// @Param id path int true "ID платежа"
+// @Produce json
 // @Success 200 {object} model.Payment
-// @Failure 400 {object} sys.ErrorResponse
-// @Failure 401 {object} sys.ErrorResponse
-// @Failure 404 {object} sys.ErrorResponse
-// @Failure 500 {object} sys.ErrorResponse
-// @Router /payment/{paymentID} [get]
-func (api *API) GetPaymentByID(c *gin.Context) {
-	idParam := c.Param("paymentID")
-
-	paymentID, err := strconv.ParseInt(idParam, 10, 64)
-	if err != nil {
-		sys.HandleError(c, sys.InvalidRequestError)
-		return
-	}
-
-	payment, err := api.paymentService.GetPaymentByID(c, paymentID)
+// @Failure 400,404,500 {object} sys.ErrorResponse
+// @Router /payments/{id} [get]
+func (api *API) GetPayment(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
 		sys.HandleError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, payment)
-}
-
-// GetLastPaymentByRentalID получает последний платеж по аренде
-// @Summary Получить последний платеж
-// @Description Получает последний платеж по rentalID
-// @Tags payment
-// @Produce  json
-// @Security BearerAuth
-// @Param rentalID path int true "ID аренды"
-// @Success 200 {object} model.Payment
-// @Failure 400 {object} sys.ErrorResponse
-// @Failure 401 {object} sys.ErrorResponse
-// @Failure 404 {object} sys.ErrorResponse
-// @Failure 500 {object} sys.ErrorResponse
-// @Router /payment/rental/{rentalID}/last [get]
-func (api *API) GetLastPaymentByRentalID(c *gin.Context) {
-	idParam := c.Param("rentalID")
-
-	rentalID, err := strconv.ParseInt(idParam, 10, 64)
-	if err != nil {
-		sys.HandleError(c, sys.InvalidRequestError)
-		return
-	}
-
-	lastPayment, err := api.paymentService.GetLastPaymentByRentalID(c, rentalID)
+	p, err := api.paymentService.GetByID(c.Request.Context(), id)
 	if err != nil {
 		sys.HandleError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, lastPayment)
+	c.JSON(http.StatusOK, p)
 }
 
-// GetOverduePayments получает просроченные платежи
-// @Summary Получить просроченные платежи
-// @Description Получает список просроченных платежей по rentalID
-// @Tags payment
-// @Produce  json
-// @Security BearerAuth
-// @Param rentalID path int true "ID аренды"
+// ListPayments godoc
+// @Summary Получить список платежей
+// @Tags payments
+// @Produce json
+// @Param is_paid query string false "Фильтрация по статусу оплаты" Enums(true, false)
+// @Param limit  query  int  false "Максимальное количество договоров" default(20)
+// @Param offset query  int  false "Смещение для пагинации" default(0)
 // @Success 200 {array} model.Payment
-// @Failure 400 {object} sys.ErrorResponse
-// @Failure 401 {object} sys.ErrorResponse
-// @Failure 404 {object} sys.ErrorResponse
-// @Failure 500 {object} sys.ErrorResponse
-// @Router /payment/rental/{rentalID}/overdue [get]
-func (api *API) GetOverduePayments(c *gin.Context) {
-	idParam := c.Param("rentalID")
+// @Failure 400,500 {object} sys.ErrorResponse
+// @Router /payments [get]
+func (api *API) ListPayments(c *gin.Context) {
+	var filter model.PaymentFilter
 
-	rentalID, err := strconv.ParseInt(idParam, 10, 64)
-	if err != nil {
-		sys.HandleError(c, sys.InvalidRequestError)
-		return
+	if isPaidStr := c.Query("is_paid"); isPaidStr != "" {
+		isPaid, err := strconv.ParseBool(isPaidStr)
+		if err != nil {
+			sys.HandleError(c, err)
+			return
+		}
+		filter.IsPaid = &isPaid
 	}
 
-	overduePayments, err := api.paymentService.GetOverduePayments(c, rentalID)
+	limitStr := c.DefaultQuery("limit", "20")
+	limit, err := strconv.ParseUint(limitStr, 10, 64)
 	if err != nil {
 		sys.HandleError(c, err)
 		return
 	}
+	filter.Limit = limit
 
-	c.JSON(http.StatusOK, overduePayments)
+	offsetStr := c.DefaultQuery("offset", "0")
+	offset, err := strconv.ParseUint(offsetStr, 10, 64)
+	if err != nil {
+		sys.HandleError(c, err)
+		return
+	}
+	filter.Offset = offset
+	fmt.Println(filter)
+	payments, err := api.paymentService.ListPayments(c.Request.Context(), filter)
+	if err != nil {
+		sys.HandleError(c, err)
+		return
+	}
+	fmt.Println(len(payments))
+	c.JSON(http.StatusOK, payments)
 }

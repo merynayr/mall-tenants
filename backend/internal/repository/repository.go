@@ -35,11 +35,15 @@ type RentalRepository interface {
 
 // PaymentRepository - интерфейс репо слоя для платежей
 type PaymentRepository interface {
-	CreatePayment(ctx context.Context, payment *model.Payment) error
-	GetPaymentByID(ctx context.Context, id int64) (*model.Payment, bool, error)
-	GetLastPayment(ctx context.Context, rentID int64) (*model.Payment, bool, error)
-	GetOverduePayments(ctx context.Context, rentID int64) ([]model.Payment, error)
-	GetPaymentByRentIDAndPeriod(ctx context.Context, rentID int64, startDate, endDate time.Time) (bool, error)
+	CreatePayment(ctx context.Context, p model.Payment) (int64, error)
+	MarkAsPaid(ctx context.Context, id int64, paidAt time.Time) error
+	MarkAsPaidMany(ctx context.Context, ids []int64, paymentDate time.Time) error
+	GetByID(ctx context.Context, id int64) (model.Payment, error)
+	List(ctx context.Context, f model.PaymentFilter) ([]model.Payment, error)
+	// GetPaymentByID(ctx context.Context, id int64) (*model.Payment, bool, error)
+	// GetLastPayment(ctx context.Context, rentID int64) (*model.Payment, bool, error)
+	// GetOverduePayments(ctx context.Context, rentID int64) ([]model.Payment, error)
+	// GetPaymentByRentIDAndPeriod(ctx context.Context, rentID int64, startDate, endDate time.Time) (bool, error)
 }
 
 // FloorPlanRepository - интерфейс репо слоя для плана здания

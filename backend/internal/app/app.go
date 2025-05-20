@@ -119,6 +119,9 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 	a.serviceProvider.AuthAPI(ctx)
 	a.serviceProvider.authAPI.RegisterRoutes(router)
 
+	a.serviceProvider.PaymentAPI(ctx)
+	a.serviceProvider.paymentAPI.RegisterRoutes(router)
+
 	mw := a.serviceProvider.Middleware(ctx)
 	router.Use(mw.TimeoutMiddleware(time.Second * 5))
 	router.Use(mw.Access().Check())
@@ -131,9 +134,6 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 
 	a.serviceProvider.RentalAPI(ctx)
 	a.serviceProvider.rentalAPI.RegisterRoutes(router)
-
-	a.serviceProvider.PaymentAPI(ctx)
-	a.serviceProvider.paymentAPI.RegisterRoutes(router)
 
 	a.serviceProvider.FloorPlanAPI(ctx)
 	a.serviceProvider.floorPlanAPI.RegisterRoutes(router)

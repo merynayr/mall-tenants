@@ -1,7 +1,6 @@
 package rental
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -30,7 +29,7 @@ func (a *API) CreateRental(c *gin.Context) {
 		sys.HandleError(c, sys.InvalidRequestError)
 		return
 	}
-	fmt.Println(rental)
+
 	err := a.rentalService.CreateRental(c.Request.Context(), rental)
 	if err != nil {
 		sys.HandleError(c, err)

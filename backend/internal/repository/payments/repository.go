@@ -10,15 +10,21 @@ import (
 	"github.com/merynayr/mall-tenants/internal/client/db"
 	"github.com/merynayr/mall-tenants/internal/model"
 	"github.com/merynayr/mall-tenants/internal/repository"
+	"github.com/merynayr/mall-tenants/internal/sys"
 )
 
 // Константы названий таблицы и столбцов
 const (
-	PaymentTable = "payments"
-	IDColumn     = "payment_id"
-	RentIDColumn = "rent_id"
-	DateColumn   = "payment_date"
-	AmountColumn = "amount"
+	PaymentTable    = "payments"
+	PaymentIDColumn = "payment_id"
+	RentalIDColumn  = "rental_id"
+	PeriodStartCol  = "period_start"
+	PeriodEndCol    = "period_end"
+	AmountColumn    = "amount"
+	IsPaidColumn    = "is_paid"
+	PaymentDateCol  = "payment_date"
+	CreatedAtColumn = "created_at"
+	UpdatedAtColumn = "updated_at"
 )
 
 // Структура репозитория с клиентом базы данных
@@ -32,23 +38,16 @@ func NewRepository(db db.Client) repository.PaymentRepository {
 }
 
 // CreatePayment создаёт новый платёж в базе данных
-func (r *repo) CreatePayment(ctx context.Context, payment *model.Payment) error {
+func (r *repo) CreatePayment(ctx context.Context, p model.Payment) (int64, error) {
 	query, args, err := sq.Insert(PaymentTable).
-		Columns(
-			RentIDColumn,
-			DateColumn,
-			AmountColumn,
-		).
-		Values(
-			payment.RentID,
-			payment.Date,
-			payment.Amount,
-		).
+		Columns(RentalIDColumn, PeriodStartCol, PeriodEndCol, AmountColumn, IsPaidColumn, PaymentDateCol).
+		Values(p.RentalID, p.PeriodStart, p.PeriodEnd, p.Amount, p.IsPaid, p.PaymentDate).
+		Suffix("RETURNING " + PaymentIDColumn).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	q := db.Query{
@@ -56,121 +55,115 @@ func (r *repo) CreatePayment(ctx context.Context, payment *model.Payment) error 
 		QueryRaw: query,
 	}
 
-	_, err = r.db.DB().ExecContext(ctx, q, args...)
+	var id int64
+	err = r.db.DB().ScanOneContext(ctx, &id, q, args...)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, err
+
+}
+
+func (r *repo) MarkAsPaid(ctx context.Context, id int64, paidAt time.Time) error {
+	query, args, err := sq.Update(PaymentTable).
+		Set(IsPaidColumn, true).
+		Set(PaymentDateCol, paidAt).
+		Set(UpdatedAtColumn, time.Now()).
+		Where(sq.Eq{PaymentIDColumn: id}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
 	if err != nil {
 		return err
 	}
 
+	q := db.Query{
+		Name:     "payment_repository.MarkAsPaid",
+		QueryRaw: query,
+	}
+
+	ct, err := r.db.DB().ExecContext(ctx, q, args...)
+	if err != nil {
+		return err
+	}
+
+	if ct.RowsAffected() == 0 {
+		return errors.New("no payment found to update")
+	}
 	return nil
 }
 
-// GetPaymentByID получает платёж по его PaymentID
-func (r *repo) GetPaymentByID(ctx context.Context, id int64) (*model.Payment, bool, error) {
-	query, args, err := sq.Select(
-		IDColumn,
-		RentIDColumn,
-		DateColumn,
-		AmountColumn,
-	).
-		From(PaymentTable).
-		Where(sq.Eq{IDColumn: id}).
+func (r *repo) MarkAsPaidMany(ctx context.Context, ids []int64, paymentDate time.Time) error {
+	query, args, err := sq.Update(PaymentTable).
+		Set(IsPaidColumn, true).
+		Set(PaymentDateCol, paymentDate).
+		Set(UpdatedAtColumn, time.Now()).
+		Where(sq.Eq{PaymentIDColumn: ids}).
 		PlaceholderFormat(sq.Dollar).
-		Limit(1).
 		ToSql()
-
 	if err != nil {
-		return nil, false, err
+		return err
 	}
 
 	q := db.Query{
-		Name:     "payment_repository.GetPaymentByID",
+		Name:     "payment_repository.MarkAsPaidMany",
 		QueryRaw: query,
 	}
 
-	var payment model.Payment
-	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(
-		&payment.PaymentID,
-		&payment.RentID,
-		&payment.Date,
-		&payment.Amount,
-	)
-
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, false, nil
-		}
-		return nil, false, err
-	}
-
-	return &payment, true, nil
+	_, err = r.db.DB().ExecContext(ctx, q, args...)
+	return err
 }
 
-// GetLastPayment получает последний платёж по аренде
-func (r *repo) GetLastPayment(ctx context.Context, rentID int64) (*model.Payment, bool, error) {
-	query, args, err := sq.Select(
-		IDColumn,
-		RentIDColumn,
-		DateColumn,
-		AmountColumn,
-	).
+func (r *repo) GetByID(ctx context.Context, id int64) (model.Payment, error) {
+	query, args, err := sq.Select("*").
 		From(PaymentTable).
-		Where(sq.Eq{RentIDColumn: rentID}).
-		OrderBy(DateColumn + " DESC").
-		Limit(1).
+		Where(sq.Eq{PaymentIDColumn: id}).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 
 	if err != nil {
-		return nil, false, err
+		return model.Payment{}, err
 	}
 
 	q := db.Query{
-		Name:     "payment_repository.GetLastPayment",
+		Name:     "payment_repository.GetByID",
 		QueryRaw: query,
 	}
 
-	var payment model.Payment
+	var p model.Payment
 	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(
-		&payment.PaymentID,
-		&payment.RentID,
-		&payment.Date,
-		&payment.Amount,
+		&p.ID, &p.RentalID, &p.PeriodStart, &p.PeriodEnd,
+		&p.Amount, &p.IsPaid, &p.PaymentDate, &p.CreatedAt, &p.UpdatedAt,
 	)
-
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, false, nil
+			return model.Payment{}, sys.NotFoundError
 		}
-		return nil, false, err
+		return model.Payment{}, err
 	}
-
-	return &payment, true, nil
+	return p, nil
 }
 
-// GetOverduePayments получает список просроченных платежей по аренде
-func (r *repo) GetOverduePayments(ctx context.Context, rentID int64) ([]model.Payment, error) {
-	now := time.Now().UTC()
-	query, args, err := sq.Select(
-		IDColumn,
-		RentIDColumn,
-		DateColumn,
-		AmountColumn,
-	).
+func (r *repo) List(ctx context.Context, f model.PaymentFilter) ([]model.Payment, error) {
+	qb := sq.Select("*").
 		From(PaymentTable).
-		Where(sq.And{
-			sq.Eq{RentIDColumn: rentID},
-			sq.Lt{DateColumn: now},
-		}).
-		OrderBy(DateColumn + " ASC").
-		PlaceholderFormat(sq.Dollar).
-		ToSql()
+		OrderBy(PeriodStartCol + " DESC").
+		Limit(f.Limit).
+		Offset(f.Offset).
+		PlaceholderFormat(sq.Dollar)
 
+	if f.IsPaid != nil {
+		qb = qb.Where(sq.Eq{IsPaidColumn: *f.IsPaid})
+	}
+
+	query, args, err := qb.ToSql()
 	if err != nil {
 		return nil, err
 	}
 
 	q := db.Query{
-		Name:     "payment_repository.GetOverduePayments",
+		Name:     "payment_repository.List",
 		QueryRaw: query,
 	}
 
@@ -180,58 +173,18 @@ func (r *repo) GetOverduePayments(ctx context.Context, rentID int64) ([]model.Pa
 	}
 	defer rows.Close()
 
-	var payments []model.Payment
+	var result []model.Payment
 	for rows.Next() {
-		var payment model.Payment
+		var p model.Payment
 		err := rows.Scan(
-			&payment.PaymentID,
-			&payment.RentID,
-			&payment.Date,
-			&payment.Amount,
+			&p.ID, &p.RentalID, &p.PeriodStart, &p.PeriodEnd,
+			&p.Amount, &p.IsPaid, &p.PaymentDate, &p.CreatedAt, &p.UpdatedAt,
 		)
 		if err != nil {
 			return nil, err
 		}
-		payments = append(payments, payment)
+		result = append(result, p)
 	}
 
-	if err = rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return payments, nil
-}
-
-// GetPaymentByRentIDAndPeriod проверяет, существует ли платёж для аренды на данный период
-func (r *repo) GetPaymentByRentIDAndPeriod(ctx context.Context, rentID int64, startDate, endDate time.Time) (bool, error) {
-	query, args, err := sq.Select(
-		"1",
-	).
-		PlaceholderFormat(sq.Dollar).
-		From(PaymentTable).
-		Where(sq.And{
-			sq.Eq{RentIDColumn: rentID},
-			sq.GtOrEq{DateColumn: startDate},
-			sq.LtOrEq{DateColumn: endDate},
-		}).ToSql()
-
-	if err != nil {
-		return true, err
-	}
-
-	q := db.Query{
-		Name:     "payment_repository.GetPaymentByRentIDAndPeriod",
-		QueryRaw: query,
-	}
-
-	var exists int32
-	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&exists)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return false, nil
-		}
-		return false, err
-	}
-
-	return exists == 1, nil
+	return result, rows.Err()
 }
