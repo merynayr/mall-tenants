@@ -12,11 +12,14 @@ export function PremiseList({ premises }: PremisesListProps) {
 		return acc;
 	}, {} as Record<number, Premises[]>);
 
+	const sortedFloors: number[] = Object.keys(groupedByFloor)
+		.map(Number)
+		.sort((a, b) => a - b);
+
 	return (
 		<div>
-			{Object.keys(groupedByFloor).map((floor) => {
-				const floorNumber = Number(floor);
-				const floorPremises = groupedByFloor[floorNumber];
+			{sortedFloors.map((floorNumber) => {
+				const floorPremises = groupedByFloor[floorNumber].sort((a, b) => a.code - b.code);
 
 				return (
 					<div key={floorNumber}>

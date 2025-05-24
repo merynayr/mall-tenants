@@ -106,7 +106,7 @@
 	font-style: normal;
 	font-weight: 400;
 	line-height: normal;
-	color: #9EA1B1;
+	color: var(--text-color);
 }
 
 .content {
@@ -138,4 +138,10 @@
 
 .settings-button:hover {
 	color: var(--primary-color);
+}
+
+.favicon {
+	width: 20px;  
+  height: 20px; 
+  margin-right: 8px;
 }

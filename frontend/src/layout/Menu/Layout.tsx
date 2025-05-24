@@ -1,20 +1,38 @@
 import cn from 'classnames';
 import { useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import styles from './Layout.module.css';
 import Button from '@/components/Button/Button';
+import { useHasRole } from '@/hooks/Role';
+import { AppDispath, RootState } from '@/store/store';
+import {  userActions } from '@/store/user.slice';
+
 
 export function Layout() {
 	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+	const navigate = useNavigate();
+	const dispatch = useDispatch<AppDispath>();
+	const { profile } = useSelector((state: RootState) => state.user);
 
 	const toggleSidebar = () => {
 		setIsSidebarOpen(prev => !prev);
 	};
 
+	const logout = () => {
+		document.cookie = 'access_token=; Max-Age=-1; path=/';
+		document.cookie = 'refresh_token=; Max-Age=-1; path=/';
+		dispatch(userActions.logout());
+		navigate('/auth/login');
+	};
+
 	return <>
 		<header className={styles['header']}>
 			<div className={styles['header-left']}>
-				<div className={styles['company-name']}>🏢 ООО "Твой Бизнес"</div>
+				<div className={styles['company-name']}>
+					<img src="/favicon.png" alt="Rentify" className={styles['favicon']} />
+  ООО "Rentify"
+				</div>
 
 			</div>
 			<div className={styles['header-right']}>
@@ -27,8 +45,7 @@ export function Layout() {
 					{isSidebarOpen && (
 						<>
 							<div>
-								<div className={styles['name']}>Dima</div>
-								<div className={styles['email']}>1@mail.ru</div>
+								<div className={styles['email']}>{profile?.email}</div>
 							</div>
 						</>
 					)}
@@ -47,22 +64,22 @@ export function Layout() {
 						{isSidebarOpen && 'Помещения'}
 					</NavLink>
 
-					<NavLink to="/clients" className={({ isActive }) => cn(styles['link'], { [styles.active]: isActive })}>
-						<img src="/client-icon.svg" alt="Иконка клиентов" className={styles['icon']} />
-						{isSidebarOpen && 'Клиенты'}
-					</NavLink>
-
-					<NavLink to="/payments" className={({ isActive }) => cn(styles['link'], { [styles.active]: isActive })}>
-						 <img src="/payment-icon.svg" alt="Иконка оплат" className={styles['icon']} />
-						{isSidebarOpen && 'Оплаты'}
-					</NavLink>
-
-					<NavLink to="/rents" className={({ isActive }) => cn(styles['link'], { [styles.active]: isActive })}>
-						<img src="/rent-icon.svg" alt="Иконка договоров" className={styles['icon']} />
-						{isSidebarOpen && 'Договора'}
-					</NavLink>
+					{useHasRole('moderator', 'director') && (
+						<>
+							<NavLink to="/clients" className={({ isActive }) => cn(styles['link'], { [styles.active]: isActive })}>
+								<img src="/client-icon.svg" alt="Иконка клиентов" className={styles['icon']} />
+								{isSidebarOpen && 'Клиенты'}
+							</NavLink><NavLink to="/payments" className={({ isActive }) => cn(styles['link'], { [styles.active]: isActive })}>
+								<img src="/payment-icon.svg" alt="Иконка оплат" className={styles['icon']} />
+								{isSidebarOpen && 'Оплаты'}
+							</NavLink><NavLink to="/rents" className={({ isActive }) => cn(styles['link'], { [styles.active]: isActive })}>
+								<img src="/rent-icon.svg" alt="Иконка договоров" className={styles['icon']} />
+								{isSidebarOpen && 'Договора'}
+							</NavLink>
+						</>
+					)}
 				</div>
-				<Button className={styles['exit']}>
+				<Button className={styles['exit']} onClick={logout}>
 					<img src="/exit-icon.svg" alt="Иконка выхода" className={styles['icon']} />
 					{isSidebarOpen && 'Выход'}
 				</Button>

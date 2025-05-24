@@ -18,14 +18,23 @@ function PremiseCard(props: PremisesProps) {
 	};
 
 	return (
-		<Link to={`/premise/${props.code}`} className={styles['link']}>
+		<Link to={`/premise/${props.code}`} className={styles.link}>
 			<div className={`${styles['premise-item']} ${getStatusClass()}`}>
-				<div className="code">
-					<strong>{props.floor} - {props.code}</strong>
-				</div>
-				<div className="area">
-					{props.area} м²
-				</div>
+				{props.floor !== undefined && props.code && (
+					<div className="code">
+						<strong>{props.floor} - {props.code}</strong>
+					</div>
+				)}
+				{props.floor === undefined && props.code && (
+					<div className="code">
+						<strong>{props.code}</strong>
+					</div>
+				)}
+				{props.area !== undefined && (
+					<div className="area">
+						{props.area} м²
+					</div>
+				)}
 			</div>
 		</Link>
 	);

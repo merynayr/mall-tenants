@@ -1,0 +1,39 @@
+.container {
+  text-align: center;
+  padding: 40px 20px;
+  font-family: Arial, sans-serif;
+  color: #333;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.code {
+  font-size: 6rem;
+  font-weight: bold;
+  color: #d32f2f;
+  margin: 0;
+}
+
+.heading {
+  font-size: 2rem;
+  margin: 10px 0;
+}
+
+.text {
+  font-size: 1rem;
+  margin: 10px 0;
+}
+
+.link {
+  color: #1976d2;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.image {
+  margin-top: 30px;
+  width: 100%;
+  max-width: 500px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}

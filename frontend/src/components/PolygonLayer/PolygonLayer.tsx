@@ -4,9 +4,15 @@ interface PolygonLayerProps {
   polygons: Polygon[];
 	selectedIndex: number | null;
   onSelect: (index: number) => void;
+	onDoubleClick: (premiseCode: number) => void;
 }
 
-export const PolygonLayer: React.FC<PolygonLayerProps> = ({ polygons, selectedIndex, onSelect }) => {
+export const PolygonLayer: React.FC<PolygonLayerProps> = ({
+	polygons, 
+	selectedIndex, 
+	onSelect, 
+	onDoubleClick 
+}) => {
 	const pointsString = (pts: Point[]) => pts.map((p) => `${p.x},${p.y}`).join(' ');
 
 	const textLabelPosition = (points: Point[]) => {
@@ -57,6 +63,7 @@ export const PolygonLayer: React.FC<PolygonLayerProps> = ({ polygons, selectedIn
 							e.stopPropagation();
 							onSelect(i);
 						}}
+						onDoubleClick={() => onDoubleClick(poly.premiseCode)} 
 						style={{ cursor: 'pointer' }}
 					/>
 					{textLabelPosition(poly.points) && (

@@ -1,20 +1,25 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
+import { Provider } from 'react-redux';
 import { RouterProvider, createBrowserRouter  } from 'react-router-dom';
+import { RequireAuth } from '@/helpers/RequireAuth';
+import { AuthLayout } from '@/layout/Auth/AuthLayout';
 import { Layout } from '@/layout/Menu/Layout';
-import Clients from '@/pages/Clients/Clients';
-import PremisesMapperPage from '@/pages/Menu/Menu';
+import Page404 from '@/pages/404/404';
+import PageClients from '@/pages/Clients/Clients';
+import { Login } from '@/pages/Login/Login';
 import Payments from '@/pages/Payments/Payments';
 import PagePremises from '@/pages/Premise/Premise';
 import PremiseInfo from '@/pages/PremiseInfo/PremiseInfo';
-
-// const Menu = lazy(() => import('@/pages/Menu/Menu'));
+import PremisesMapperPage from '@/pages/PremisesMapper/PremisesMapperPage';
+import PageRents from '@/pages/Rents/Rents';
+import { store } from '@/store/store';
 
 const router = createBrowserRouter([
 	{
 		path: '/',
-		element: <Layout />,
+		element: <RequireAuth><Layout /></RequireAuth>,
 		children: [
 			{
 				path: '/',
@@ -30,7 +35,7 @@ const router = createBrowserRouter([
 			},
 			{
 				path: '/clients',
-				element: <Clients />
+				element: <PageClients />
 			},
 			{
 				path: '/payments',
@@ -38,18 +43,30 @@ const router = createBrowserRouter([
 			},
 			{
 				path: '/rents',
-				element: <></>
+				element: <PageRents />
+			}
+		]
+	},
+	{
+		path: '/auth',
+		element: <AuthLayout />,
+		children: [
+			{
+				path: 'login',
+				element: <Login />
 			}
 		]
 	},
 	{
 		path: '*',
-		element: <Layout />
+		element:  <Page404 />
 	}
 ]);
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-	<React.StrictMode>		
-		<RouterProvider router={router} />
+	<React.StrictMode>
+		<Provider store={store}>
+			<RouterProvider router={router} />
+		</Provider>
 	</React.StrictMode>
 );

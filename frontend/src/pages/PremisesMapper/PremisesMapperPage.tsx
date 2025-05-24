@@ -1,12 +1,14 @@
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './Menu.module.css';
+import { FloorPlanCanvas } from '@/components/FloorPlan/FloorPlanCanvas';
+import { FloorPlanUploadModal } from '@/components/FloorPlan/FloorPlanUploadModal';
 import { ControlPanel } from '@/components/PolygonLayer/ControlPanel';
-import { DrawingOverlay } from '@/components/PolygonLayer/DrawingOverlay';
 import { PolygonInfoModal } from '@/components/PolygonLayer/PolygonInfoModal';
-import { PolygonLayer } from '@/components/PolygonLayer/PolygonLayer';
-import { PREFIX } from '@/helpers/API';
+import api from '@/helpers/API';
 import { Point, Polygon, PolygonFromAPI } from '@/interfaces/floorplan';
+import '@/store/storage';
 
 export function PremisesMapperPage() {
 	const [isDrawing, setIsDrawing] = useState(false);
@@ -16,6 +18,7 @@ export function PremisesMapperPage() {
 	const [floor, setFloor] = useState<number>(1);
 	const [showModal, setShowModal] = useState(false);
 	const [selectedPolygonIndex, setSelectedPolygonIndex] = useState<number | null>(null);
+	const [showAddFloorPlanModal, setShowAddFloorPlanModal] = useState(false);
 
 
 	useEffect(() => {
@@ -25,6 +28,24 @@ export function PremisesMapperPage() {
 		fetchFloorPlan(floor);
 		fetchPolygons(floor);
 	}, [floor]);
+
+	const navigate = useNavigate();
+
+	const handlePolygonDoubleClick = (premiseCode: number) => {
+		navigate(`/premise/${premiseCode}`);
+	};
+
+	const handleAddFloorPlan = () => {
+		setShowAddFloorPlanModal(true);
+	};
+
+	const handleCloseModal = () => {
+		setShowAddFloorPlanModal(false);
+	};
+
+	const handleUploaded = () => {
+		setShowAddFloorPlanModal(false);
+	};
 
 	const finishDrawing = async () => {
 		if (currentPoints.length >= 3) {
@@ -39,7 +60,7 @@ export function PremisesMapperPage() {
 
 	const fetchFloorPlan = async (floor: number) => {
 		try {
-			const { data } = await axios.get<string>(`${PREFIX}/floor-plan/${floor}`);
+			const { data } = await api.get<string>(`/floor-plan/${floor}`);
 			setSvgData(data);
 		} catch (e) {
 			if (e instanceof AxiosError) console.error(e.message);
@@ -48,7 +69,7 @@ export function PremisesMapperPage() {
 
 	const fetchPolygons = async (floor: number) => {
 		try {
-			const { data } = await axios.get<PolygonFromAPI[]>(`${PREFIX}/floor-plan/polygons/${floor}`);
+			const { data } = await api.get<PolygonFromAPI[]>(`/floor-plan/polygons/${floor}`);
 			const parsed = data.map((poly) => ({
 				points: poly.points.split(' ').map((pair) => {
 					const [x, y] = pair.split(',').map(Number);
@@ -67,7 +88,7 @@ export function PremisesMapperPage() {
 
 	const savePolygon = async (polygon: Polygon): Promise<boolean> => {
 		try {
-			await axios.post(`${PREFIX}/floor-plan/polygons/${polygon.premiseCode}`, {
+			await api.post(`/floor-plan/polygons/${polygon.premiseCode}`, {
 				floor: polygon.floor,
 				points: polygon.points.map(p => `${p.x},${p.y}`).join(' '),
 				label: polygon.label
@@ -76,6 +97,26 @@ export function PremisesMapperPage() {
 		} catch (e) {
 			if (e instanceof AxiosError) console.error(e.message);
 			return false;
+		}
+	};
+
+	const DeletePolygon = async () => {
+		if (selectedPolygonIndex === null) return;
+	
+		const polygonToDelete = polygons[selectedPolygonIndex];
+	
+		const confirmDelete = window.confirm(`Удалить полигон с кодом помещения ${polygonToDelete.premiseCode}?`);
+		if (!confirmDelete) return;
+	
+		try {
+			await api.delete(`/floor-plan/polygons/${polygonToDelete.premiseCode}`);
+			const newPolygons = [...polygons];
+			newPolygons.splice(selectedPolygonIndex, 1);
+			setPolygons(newPolygons);
+			setSelectedPolygonIndex(null);
+		} catch (error) {
+			alert('Ошибка при удалении полигона');
+			console.error(error);
 		}
 	};
 
@@ -119,29 +160,9 @@ export function PremisesMapperPage() {
 		}
 	};
 
-	const DeletePolygon = async () => {
-		if (selectedPolygonIndex === null) return;
-	
-		const polygonToDelete = polygons[selectedPolygonIndex];
-	
-		const confirmDelete = window.confirm(`Удалить полигон с кодом помещения ${polygonToDelete.premiseCode}?`);
-		if (!confirmDelete) return;
-	
-		try {
-			await axios.delete(`${PREFIX}/floor-plan/polygons/${polygonToDelete.premiseCode}`);
-			const newPolygons = [...polygons];
-			newPolygons.splice(selectedPolygonIndex, 1);
-			setPolygons(newPolygons);
-			setSelectedPolygonIndex(null);
-		} catch (error) {
-			alert('Ошибка при удалении полигона');
-			console.error(error);
-		}
-	};
-
 	return (
 		<div className={styles.wrapper}>
-			<h1 className={styles.title}>Редактирование плана этажа</h1>
+			<h1 className={styles.title}>Плана этажа</h1>
 
 			<ControlPanel
 				isDrawing={isDrawing}
@@ -152,43 +173,36 @@ export function PremisesMapperPage() {
 				onFloorChange={(val) => setFloor(val)}
 				DeletePolygon={DeletePolygon}
 				selectedPolygonIndex={selectedPolygonIndex}
+				onAddFloorPlan={handleAddFloorPlan}
 			/>
 
-			<svg
-				className={styles.canvas}
-				width={800}
-				height={500}
-				onContextMenu={handleSvgRightClick} 
-				onClick={(e) => {
+			<FloorPlanCanvas
+				svgData={svgData}
+				polygons={polygons}
+				currentPoints={currentPoints}
+				selectedPolygonIndex={selectedPolygonIndex}
+				onSvgClick={(e) => {
 					handleSvgClick(e);
-					setSelectedPolygonIndex(null); 
+					setSelectedPolygonIndex(null);
 				}}
-			>
-				{svgData && (
-					<image
-						key={`floor-${floor}`}
-						href={`data:image/svg+xml;utf8,${encodeURIComponent(svgData)}`}
-						x={0}
-						y={0}
-						width={800}
-						height={500}
-						preserveAspectRatio="xMidYMid meet"
-					/>
-				)}
-
-				<PolygonLayer
-					polygons={polygons}
-					selectedIndex={selectedPolygonIndex}
-					onSelect={setSelectedPolygonIndex}
-				/>
-				<DrawingOverlay currentPoints={currentPoints} />
-			</svg>
+				onSvgRightClick={handleSvgRightClick}
+				onPolygonSelect={setSelectedPolygonIndex}
+				onPolygonDoubleClick={handlePolygonDoubleClick}
+				floor={floor}
+			/>
 
 			<PolygonInfoModal
 				isOpen={showModal}
 				onClose={() => setShowModal(false)}
 				onSave={handleSavePolygonInfo}
 			/>
+
+			<FloorPlanUploadModal
+				isOpen={showAddFloorPlanModal}
+				onClose={handleCloseModal}
+				onUploaded={handleUploaded}
+			/>
+
 		</div>
 	);
 }

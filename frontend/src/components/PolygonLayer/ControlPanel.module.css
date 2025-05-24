@@ -1,3 +1,13 @@
+.wrapperRow {
+	display: flex;
+	justify-content: space-between;
+	flex-wrap: wrap;
+}
+
+.rightAligned {
+  padding: 12px;
+}
+
 .panel {
   padding: 12px;
   background: #f9f9f9;
@@ -8,7 +18,7 @@
 
 .topRow {
   display: flex;
-  align-items: center; /* выравнивание по вертикали */
+  align-items: center;
   justify-content: center;
   gap: 24px;
   flex-wrap: nowrap;
