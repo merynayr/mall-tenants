@@ -19,7 +19,7 @@ import { store } from '@/store/store';
 const router = createBrowserRouter([
 	{
 		path: '/',
-		element: <RequireAuth><Layout /></RequireAuth>,
+		element: <Layout />, 
 		children: [
 			{
 				path: '/',
@@ -31,8 +31,18 @@ const router = createBrowserRouter([
 			},
 			{
 				path: '/premise/:id',
-				element: <PremiseInfo /> 
-			},
+				element: <PremiseInfo />
+			}
+		]
+	},
+	{
+		path: '/',
+		element: (
+			<RequireAuth>
+				<Layout />
+			</RequireAuth>
+		),
+		children: [
 			{
 				path: '/clients',
 				element: <PageClients />
@@ -59,9 +69,10 @@ const router = createBrowserRouter([
 	},
 	{
 		path: '*',
-		element:  <Page404 />
+		element: <Page404 />
 	}
 ]);
+
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
 	<React.StrictMode>

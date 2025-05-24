@@ -5,6 +5,7 @@ import { ClientCreateModal } from '@/components/Clients/ClientCreateModal';
 import api from '@/helpers/API';
 import { Client } from '@/interfaces/client';
 import { ClientsTable } from '@/pages/Clients/ClientsTable/ClientsTable';
+import { useHasRole } from '@/hooks/Role';
 
 export function PageClients() {
 	const [clients, setClients] = useState<Client[]>([]);
@@ -50,7 +51,9 @@ export function PageClients() {
 	
 		<div className={styles.headRow}>
 			<h1>Клиенты</h1>
+			{useHasRole('moderator') && (
 			<Button className={styles.addButton} onClick={handleAddClient}>Создать клиента</Button>
+			)}
 		</div>
 
 		<div>

@@ -14,6 +14,7 @@ export function Layout() {
 	const navigate = useNavigate();
 	const dispatch = useDispatch<AppDispath>();
 	const { profile } = useSelector((state: RootState) => state.user);
+	const hasRole = useHasRole('client', 'moderator', 'director');
 
 	const toggleSidebar = () => {
 		setIsSidebarOpen(prev => !prev);
@@ -81,7 +82,7 @@ export function Layout() {
 				</div>
 				<Button className={styles['exit']} onClick={logout}>
 					<img src="/exit-icon.svg" alt="Иконка выхода" className={styles['icon']} />
-					{isSidebarOpen && 'Выход'}
+					{isSidebarOpen && (hasRole ? 'Выход' : 'Вход')}
 				</Button>
 			</div>
 			<div className={styles['content']}>

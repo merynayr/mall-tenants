@@ -37,7 +37,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
 						onChange={(e) => onFloorChange(Number(e.target.value))} />
 				</div>
 
-				{useHasRole('moderator', 'director') && (
+				{useHasRole('moderator') && (
 					<>
 						<div className={styles.verticalDivider} />
 						<div className={styles.buttonGroup}>
@@ -56,7 +56,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
 			</div>
 		</div>
 
-		{useHasRole('moderator', 'director') && (
+		{useHasRole('moderator') && (
 			<div className={cn(styles.rightAligned, styles.buttonGroup)}>
 				<button onClick={onAddFloorPlan}>Добавить новый план этажа</button>
 			</div>

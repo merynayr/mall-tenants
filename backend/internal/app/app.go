@@ -119,9 +119,6 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 	a.serviceProvider.AuthAPI(ctx)
 	a.serviceProvider.authAPI.RegisterRoutes(router)
 
-	a.serviceProvider.PaymentAPI(ctx)
-	a.serviceProvider.paymentAPI.RegisterRoutes(router)
-
 	mw := a.serviceProvider.Middleware(ctx)
 	router.Use(mw.TimeoutMiddleware(time.Second * 5))
 	router.Use(mw.Access().Check())
@@ -137,6 +134,12 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 
 	a.serviceProvider.FloorPlanAPI(ctx)
 	a.serviceProvider.floorPlanAPI.RegisterRoutes(router)
+
+	a.serviceProvider.PaymentAPI(ctx)
+	a.serviceProvider.paymentAPI.RegisterRoutes(router)
+
+	a.serviceProvider.ApplicationAPI(ctx)
+	a.serviceProvider.applicationAPI.RegisterRoutes(router)
 
 	corsMiddleware := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:5173", "http://localhost:8090"},

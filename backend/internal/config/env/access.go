@@ -43,7 +43,7 @@ func NewAccessConfig() (config.AccessConfig, error) {
 	for entry := range strings.SplitSeq(os.Getenv(directorEndpointsEnvName), ",") {
 		entry = strings.TrimSpace(entry)
 		if entry != "" {
-			userAccesses[model.RoleModerator][entry] = struct{}{}
+			userAccesses[model.RoleDirector][entry] = struct{}{}
 		}
 	}
 

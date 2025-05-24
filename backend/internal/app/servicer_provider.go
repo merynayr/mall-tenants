@@ -13,6 +13,7 @@ import (
 	"github.com/merynayr/mall-tenants/internal/repository"
 	"github.com/merynayr/mall-tenants/internal/service"
 
+	"github.com/merynayr/mall-tenants/internal/api/application"
 	"github.com/merynayr/mall-tenants/internal/api/auth"
 	"github.com/merynayr/mall-tenants/internal/api/payment"
 	"github.com/merynayr/mall-tenants/internal/api/premise"
@@ -37,6 +38,9 @@ import (
 
 	paymentRepository "github.com/merynayr/mall-tenants/internal/repository/payments"
 	paymentService "github.com/merynayr/mall-tenants/internal/service/payments"
+
+	applicationRepository "github.com/merynayr/mall-tenants/internal/repository/applications"
+	applicationService "github.com/merynayr/mall-tenants/internal/service/applications"
 
 	"github.com/merynayr/mall-tenants/internal/middleware"
 )
@@ -75,6 +79,10 @@ type serviceProvider struct {
 	paymentAPI        *payment.API
 	paymentService    service.PaymentService
 	paymentRepository repository.PaymentRepository
+
+	applicationAPI        *application.API
+	applicationService    service.ApplicationService
+	applicationRepository repository.ApplicationRepository
 
 	middleware    middleware.Middleware
 	accessService service.AccessService
@@ -376,4 +384,30 @@ func (s *serviceProvider) PaymentRepository(ctx context.Context) repository.Paym
 		s.paymentRepository = paymentRepository.NewRepository(s.DBClient(ctx))
 	}
 	return s.paymentRepository
+}
+
+// ApplicationAPI инициализирует API-слой для заявок
+func (s *serviceProvider) ApplicationAPI(ctx context.Context) *application.API {
+	if s.applicationAPI == nil {
+		s.applicationAPI = application.NewAPI(s.ApplicationService(ctx))
+	}
+	return s.applicationAPI
+}
+
+// ApplicationService инициализирует сервисный слой для заявок
+func (s *serviceProvider) ApplicationService(ctx context.Context) service.ApplicationService {
+	if s.applicationService == nil {
+		s.applicationService = applicationService.NewService(
+			s.ApplicationRepository(ctx),
+		)
+	}
+	return s.applicationService
+}
+
+// ApplicationRepository инициализирует репозиторий для заявок
+func (s *serviceProvider) ApplicationRepository(ctx context.Context) repository.ApplicationRepository {
+	if s.applicationRepository == nil {
+		s.applicationRepository = applicationRepository.NewRepository(s.DBClient(ctx))
+	}
+	return s.applicationRepository
 }

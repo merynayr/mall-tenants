@@ -9,15 +9,15 @@ import { Profile } from '@/interfaces/user.interface';
 export const JWT_PERSISTENT_STATE = 'userData';
 
 export interface UserPersistentState {
-  jwt: string | null;
+	jwt: string | null;
 	profile: Profile | null;
 }
 
 export interface UserState {
-  jwt: string | null;
-  loginErrorMessage?: string;
-  registerErrorMessage?: string;
-  profile?: Profile | null;
+	jwt: string | null;
+	loginErrorMessage?: string;
+	registerErrorMessage?: string;
+	profile?: Profile | null;
 }
 
 const initialState: UserState = {

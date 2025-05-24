@@ -18,6 +18,18 @@ const (
 
 // Check проверяет, имеет ли пользователь доступ к эндпоинту
 func (s *srv) Check(ctx *gin.Context, endpointAddress string) (string, error) {
+	isProtected := false
+	for _, accessMap := range s.userAccesses {
+		if _, ok := accessMap[endpointAddress]; ok {
+			isProtected = true
+			break
+		}
+	}
+	if !isProtected {
+		// Не защищённый путь — доступ разрешён без проверки токена
+		return "", nil
+	}
+
 	accessToken, err := ctx.Cookie(authCookieName)
 	if err != nil {
 		authHeader := ctx.GetHeader(authHeader)

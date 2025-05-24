@@ -46,10 +46,6 @@ type RentalService interface {
 
 // PaymentService - интерфейс репо слоя для платежей
 type PaymentService interface {
-	// CreatePayment(ctx context.Context, payment model.Payment) error
-	// GetPaymentByID(ctx context.Context, id int64) (*model.Payment, error)
-	// GetLastPaymentByRentalID(ctx context.Context, rentalID int64) (*model.Payment, error)
-	// GetOverduePayments(ctx context.Context, rentalID int64) ([]model.Payment, error)
 	CreatePayment(ctx context.Context, p model.Payment) (int64, error)
 	MarkAsPaid(ctx context.Context, id int64) error
 	MarkPaymentsAsPaid(ctx context.Context, paymentIDs []int64) error
@@ -57,11 +53,18 @@ type PaymentService interface {
 	ListPayments(ctx context.Context, filter model.PaymentFilter) ([]model.Payment, error)
 }
 
-// FloorPlanService интерфейс сервисного слоя access
+// FloorPlanService интерфейс сервисного слоя план этажей
 type FloorPlanService interface {
 	SaveFloorPlan(ctx context.Context, floor int64, reader io.Reader) error
 	GetFloorPlanContent(ctx context.Context, floor int64) ([]byte, error)
 	AddPolygon(ctx context.Context, poly *model.PremisePolygon) error
 	GetPolygons(ctx context.Context, floor int64) ([]*model.Polygons, error)
 	DeletPolygon(ctx context.Context, premiseCode int64) error
+}
+
+// ApplicationService интерфейс сервисного слоя заявок людей
+type ApplicationService interface {
+	CreateApplication(ctx context.Context, a *model.Application) error
+	GetApplications(ctx context.Context, isProcessed *bool) ([]*model.Application, error)
+	UpdateApplicationStatus(ctx context.Context, id int64, isProcessed bool) error
 }

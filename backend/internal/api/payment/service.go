@@ -89,6 +89,7 @@ func (api *API) MarkAsPaid(c *gin.Context) {
 // @Tags payments
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param request body model.MarkPaymentsPaidRequest true "ID платежей"
 // @Success 204 "Успешно"
 // @Failure 400 {object} sys.ErrorResponse "Неверный запрос"
@@ -120,6 +121,7 @@ func (api *API) MarkPaymentsPaid(c *gin.Context) {
 // @Tags payments
 // @Param id path int true "ID платежа"
 // @Produce json
+// @Security BearerAuth
 // @Success 200 {object} model.Payment
 // @Failure 400,404,500 {object} sys.ErrorResponse
 // @Router /payments/{id} [get]
@@ -143,6 +145,7 @@ func (api *API) GetPayment(c *gin.Context) {
 // @Summary Получить список платежей
 // @Tags payments
 // @Produce json
+// @Security BearerAuth
 // @Param is_paid query string false "Фильтрация по статусу оплаты" Enums(true, false)
 // @Param limit  query  int  false "Максимальное количество договоров" default(20)
 // @Param offset query  int  false "Смещение для пагинации" default(0)

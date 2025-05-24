@@ -21,6 +21,7 @@
 
 .logoImage {
 	object-fit: cover; 
-	height: auto;
-	max-height: 738px;
+	height: 100%;
+	max-height: 740px;
+	width: 100%;
 }

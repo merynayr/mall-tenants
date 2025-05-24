@@ -10,7 +10,8 @@ INSERT INTO users (email, password_hash, role) VALUES
 ('alice.brown@example.com', '$2a$10$sXEo6pqPra1UTAOEtxSV4uQqXKIJvrFJY.N2RmYRsj4CYafcnBvpa', 'client'),
 ('1@mail.ru', '$2a$10$0TFVc4ubbYMUYOo.OpDnk.dcVDc.CdEZm5JhL.z.RvzsA0N.UlbpK', 'moderator'),
 ('2@mail.ru', '$2a$10$0TFVc4ubbYMUYOo.OpDnk.dcVDc.CdEZm5JhL.z.RvzsA0N.UlbpK', 'client'),
-('3@mail.ru', '$2a$10$0TFVc4ubbYMUYOo.OpDnk.dcVDc.CdEZm5JhL.z.RvzsA0N.UlbpK', 'director');
+('director@mail.ru', '$2a$10$OOPYJr4wm6N2kewOz9r8s.b2M76rQVDxJmRm7OG8DjL4DSU..itLK', 'director'),
+('moderator@mail.ru', '$2a$10$UM52Ej3oGkWCiLLy.A45TOuHnG4Q95eKmO0DQvR0ZCw28oO7RXzvW', 'moderator');
 
 -- Вставка клиентов с использованием последних вставленных пользователей
 INSERT INTO clients (organization_name, contact_person, address, phone, requisites, client_id) VALUES

@@ -40,10 +40,6 @@ type PaymentRepository interface {
 	MarkAsPaidMany(ctx context.Context, ids []int64, paymentDate time.Time) error
 	GetByID(ctx context.Context, id int64) (model.Payment, error)
 	List(ctx context.Context, f model.PaymentFilter) ([]model.Payment, error)
-	// GetPaymentByID(ctx context.Context, id int64) (*model.Payment, bool, error)
-	// GetLastPayment(ctx context.Context, rentID int64) (*model.Payment, bool, error)
-	// GetOverduePayments(ctx context.Context, rentID int64) ([]model.Payment, error)
-	// GetPaymentByRentIDAndPeriod(ctx context.Context, rentID int64, startDate, endDate time.Time) (bool, error)
 }
 
 // FloorPlanRepository - интерфейс репо слоя для плана здания
@@ -54,4 +50,11 @@ type FloorPlanRepository interface {
 	GetAllPolygons(ctx context.Context, floor int64) ([]*model.Polygons, error)
 	CheckPremiseCode(ctx context.Context, code int64) (bool, error)
 	DeletPolygon(ctx context.Context, premiseCode int64) error
+}
+
+// ApplicationRepository - интерфейс репо слоя для заявок людей
+type ApplicationRepository interface {
+	Create(ctx context.Context, a *model.Application) error
+	GetAll(ctx context.Context, isProcessed *bool) ([]*model.Application, error)
+	SetProcessedStatus(ctx context.Context, id int64, isProcessed bool) error
 }

@@ -6,6 +6,10 @@ import Button from '@/components/Button/Button';
 import api from '@/helpers/API';
 import { Premises } from '@/interfaces/premises';
 import { RootState } from '@/store/store';
+import { PaymentModal } from '@/components/RentModals/PaymentModal';
+import { RentalModal } from '@/components/RentModals/RentalModal';
+import { useHasRole } from '@/hooks/Role';
+import LeaveRequestModal from '@/components/Applications/LeaveRequestModal';
 
 export function PremiseInfo() {
 	const { id } = useParams<{ id: string }>();
@@ -24,7 +28,9 @@ export function PremiseInfo() {
 	const [dateError, setDateError] = useState<string | null>(null);
 	const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 	const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
-
+	const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+	const hasRole = useHasRole('client', 'moderator', 'director');
+	
 	useEffect(() => {
 		if (startDate && endDate) {
 			const start = new Date(startDate);
@@ -180,110 +186,65 @@ export function PremiseInfo() {
 					<Button
 						disabled={premise?.status !== 'available'}
 						onClick={() => {
-							setIsModalOpen(true);
+							if (hasRole) {
+								setIsModalOpen(true);
+							} else {
+								setIsRequestModalOpen(true);
+							}
 						}}
 					>
-						Арендовать
+						{hasRole ? "Арендовать" : "Оставить заявку"}
 					</Button>
-
 				</div>
 			</div>
 
 			{isModalOpen && premise && (
-				<div className={styles['modal-overlay']}>
-					<div className={styles['modal']}>
-						<h2>Аренда помещения</h2>
-						<p><strong>Помещение:</strong> {premise.code}</p>
-
-						<label>
-				Дата начала:
-							<input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-						</label>
-
-						<label>
-				Дата окончания:
-							<input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-						</label>
-
-						{dateError && <p style={{ color: 'red' }}>{dateError}</p>}
-
-						{durationMonths !== null && (
-							<>
-								<p><strong>Срок аренды:</strong> {durationMonths} мес.</p>
-								<p><strong>Аренда/мес:</strong> {premise.rent_per_month} ₽</p>
-								<p><strong>К оплате сейчас (2 мес):</strong> {premise.rent_per_month * 2} ₽</p>
-							</>
-						)}
-
-						<div className={styles['modal-actions']}>
-							<button onClick={() => {
-								setIsModalOpen(false);
-								resetForm();
-							}}>Отмена</button>
-
-							<button
-								onClick={() => {
-									if (durationMonths) {
-										setIsModalOpen(false);
-										setIsPaymentModalOpen(true);
-									}
-								}}
-								disabled={!durationMonths}
-							>
-								Оплатить
-							</button>
-						</div>
-					</div>
-				</div>
+				<RentalModal
+					premiseCode={premise.code}
+					startDate={startDate}
+					endDate={endDate}
+					dateError={dateError}
+					durationMonths={durationMonths}
+					rentPerMonth={premise.rent_per_month ?? 0}
+					onStartDateChange={setStartDate}
+					onEndDateChange={setEndDate}
+					onCancel={() => {
+						setIsModalOpen(false);
+						resetForm();
+					}}
+					onNext={() => {
+						if (durationMonths) {
+							setIsModalOpen(false);
+							setIsPaymentModalOpen(true);
+						}
+					}}
+				/>
 			)}
 
-			{isPaymentModalOpen && (
-				<div className={styles['modal-overlay']}>
-					<div className={styles['modal']}>
-						<h2>Выберите способ оплаты</h2>
-						<div className={styles['payment-options']}>
-							{['card', 'sbp', 'yoomoney'].map((method) => (
-								<button
-									key={method}
-									className={`${styles['payment-button']} ${selectedPayment === method ? styles.selected : ''}`}
-									onClick={() => setSelectedPayment(method)}
-								>
-									{method === 'card' && '💳 Банковская карта'}
-									{method === 'sbp' && '📱 СБП'}
-									{method === 'yoomoney' && '💰 ЮMoney'}
-								</button>
-							))}
-						</div>
-
-						<p style={{ marginTop: '1rem' }}>
-				Сумма к оплате: <strong>{premise?.rent_per_month ? premise.rent_per_month * 2 : '—'} ₽</strong>
-						</p>
-
-						<div className={styles['modal-actions']}>
-							<button
-								onClick={() => {
-									setIsPaymentModalOpen(false);
-									setIsModalOpen(true);
-								}}
-							>
-					Отмена
-							</button>
-							<button
-								onClick={() => {
-									if (selectedPayment) {
-										handlePaymentSubmit();
-										closeAllModals();
-									}
-								}}
-								disabled={!selectedPayment}
-							>
-								Подтвердить
-							</button>
-						</div>
-					</div>
-				</div>
+			{isPaymentModalOpen && premise && (
+				<PaymentModal
+					amount={premise.rent_per_month * 2}
+					selectedPayment={selectedPayment}
+					onSelectPayment={setSelectedPayment}
+					onCancel={() => {
+						setIsPaymentModalOpen(false);
+						setIsModalOpen(true);
+					}}
+					onConfirm={() => {
+						if (selectedPayment) {
+							handlePaymentSubmit();
+							closeAllModals();
+						}
+					}}
+				/>
 			)}
 
+			{isRequestModalOpen && premise && (
+				<LeaveRequestModal
+					premiseNumber={String(premise.code)}
+					onClose={() => setIsRequestModalOpen(false)}
+				/>
+			)}
 
 		</>
 	);

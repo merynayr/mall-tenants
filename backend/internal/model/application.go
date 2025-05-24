@@ -1,0 +1,18 @@
+package model
+
+import "time"
+
+// Application - модель заявок пользователей
+type Application struct {
+	ID               int64     `json:"id,omitempty" db:"id"`
+	OrganizationName string    `json:"organizationName" db:"organization_name"`
+	ContactPerson    string    `json:"contactPerson" db:"contact_person"`
+	Address          string    `json:"address" db:"address"`
+	Phone            string    `json:"phone" db:"phone"`
+	Requisites       string    `json:"requisites" db:"requisites"`
+	Email            string    `json:"email" db:"email"`
+	PremiseNumber    string    `json:"premiseNumber" db:"premise_number"`
+	AdditionalInfo   *string   `json:"additionalInfo,omitempty" db:"additional_info"`
+	IsProcessed      bool      `json:"isProcessed" db:"is_processed"`
+	CreatedAt        time.Time `json:"createdAt" db:"created_at"`
+}

@@ -44,9 +44,9 @@ local-migration-reset:
 	go tool goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN} reset -v
 
 migrate_down:
-	go tool goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN} down 20250322151928_create_payments_table.sql
+	go tool goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN} down 20250524212026_applications_table.sql
 
 migrate_up:
-	go tool goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN} up 20250322151928_create_payments_table.sql
+	go tool goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN} up 20250524212026_applications_table.sql
 
 #  go tool goose -dir ./migrations create NAME sql

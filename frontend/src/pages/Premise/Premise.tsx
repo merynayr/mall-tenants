@@ -40,7 +40,7 @@ export function PagePremises() {
 	return <>
 		<div className={styles.headRow}>
 			<h1>Помещения</h1>
-			{useHasRole('moderator', 'director') && (
+			{useHasRole('moderator') && (
 				<Button className={styles.createButton} onClick={() => setModalOpen(true)}>Создать помещение</Button>
 			)}
 		</div>
