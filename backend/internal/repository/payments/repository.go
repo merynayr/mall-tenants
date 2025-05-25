@@ -138,7 +138,7 @@ func (r *repo) GetByID(ctx context.Context, id int64) (model.Payment, error) {
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return model.Payment{}, sys.NotFoundError
+			return model.Payment{}, sys.PaymentsNotFoundError
 		}
 		return model.Payment{}, err
 	}

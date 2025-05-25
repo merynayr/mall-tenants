@@ -7,14 +7,14 @@ import (
 	"github.com/merynayr/mall-tenants/internal/sys"
 )
 
-func (s *srv) GetRentalByID(ctx context.Context, code int64) (*model.Rental, error) {
-	rental, exist, err := s.rentalRepository.GetRentalByID(ctx, code)
+func (s *srv) GetRentalByID(ctx context.Context, code int64) ([]model.Rental, error) {
+	rentals, err := s.rentalRepository.GetRentalsByID(ctx, code)
 	if err != nil {
-		return &model.Rental{}, err
+		return nil, err
 	}
-	if !exist {
-		return &model.Rental{}, sys.RentalNotFoundError
+	if len(rentals) == 0 {
+		return nil, sys.RentalsNotFoundError
 	}
 
-	return rental, nil
+	return rentals, nil
 }

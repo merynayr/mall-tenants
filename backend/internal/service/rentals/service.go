@@ -39,7 +39,7 @@ func (s *srv) GetAgreements(ctx context.Context, limit, offset uint64) ([]model.
 		return nil, err
 	}
 	if len(rental) == 0 {
-		return nil, sys.RentalNotFoundError
+		return nil, sys.RentalsNotFoundError
 	}
 
 	return rental, nil

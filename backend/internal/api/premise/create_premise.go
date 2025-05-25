@@ -25,7 +25,7 @@ func (a *API) CreatePremise(c *gin.Context) {
 	var req model.Premises
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		sys.HandleError(c, sys.InvalidRequestError)
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
 		return
 	}
 

@@ -2,11 +2,9 @@ package rental
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx/v5"
 	"github.com/merynayr/mall-tenants/internal/client/db"
 	"github.com/merynayr/mall-tenants/internal/model"
 	"github.com/merynayr/mall-tenants/internal/repository"
@@ -76,7 +74,7 @@ func (r *repo) CreateRental(ctx context.Context, rental *model.Rental) error {
 }
 
 // GetRentalByID получает аренду по её RentalID
-func (r *repo) GetRentalByID(ctx context.Context, id int64) (*model.Rental, bool, error) {
+func (r *repo) GetRentalsByID(ctx context.Context, id int64) ([]model.Rental, error) {
 	query, args, err := sq.Select(
 		IDColumn,
 		SpaceIDColumn,
@@ -84,40 +82,31 @@ func (r *repo) GetRentalByID(ctx context.Context, id int64) (*model.Rental, bool
 		StartDateColumn,
 		EndDateColumn,
 		PaidMonthsColumn,
+		CreatedAtColumn,
 	).
 		From(RentalTable).
-		Where(sq.Eq{IDColumn: id}).
+		Where(sq.Eq{ClientIDColumn: id}).
+		OrderBy(CreatedAtColumn + " DESC").
 		PlaceholderFormat(sq.Dollar).
-		Limit(1).
 		ToSql()
 
 	if err != nil {
-		return nil, false, err
+		return nil, err
 	}
 
 	q := db.Query{
-		Name:     "rental_repository.GetRentalByID",
+		Name:     "rental_repository.GetRentalsByID",
 		QueryRaw: query,
 	}
 
-	var rental model.Rental
-	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(
-		&rental.RentalID,
-		&rental.SpaceID,
-		&rental.ClientID,
-		&rental.StartDate,
-		&rental.EndDate,
-		&rental.PaidMonths,
-	)
+	var rentals []model.Rental
+	err = r.db.DB().ScanAllContext(ctx, &rentals, q, args...)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, false, nil
-		}
-		return nil, false, err
+		return nil, err
 	}
 
-	return &rental, true, nil
+	return rentals, nil
 }
 
 // UpdateRental обновляет информацию о аренде
@@ -156,7 +145,7 @@ func (r *repo) UpdateRental(ctx context.Context, rental *model.Rental) error {
 
 	rowsAffected := result.RowsAffected()
 	if rowsAffected == 0 {
-		return sys.NotFoundError
+		return sys.RentalsNotFoundError
 	}
 
 	return nil

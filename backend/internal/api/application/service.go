@@ -75,7 +75,7 @@ func (api *API) GetAll(c *gin.Context) {
 	if value := c.Query("processed"); value != "" {
 		boolVal, err := strconv.ParseBool(value)
 		if err != nil {
-			sys.HandleError(c, sys.InvalidRequestError)
+			sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
 			return
 		}
 		processed = &boolVal
@@ -83,7 +83,7 @@ func (api *API) GetAll(c *gin.Context) {
 
 	apps, err := api.appService.GetApplications(c.Request.Context(), processed)
 	if err != nil {
-		sys.HandleError(c, errors.New("Failed to retrieve applications"))
+		sys.HandleError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, apps)

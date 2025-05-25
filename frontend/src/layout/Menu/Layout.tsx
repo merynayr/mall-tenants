@@ -70,12 +70,23 @@ export function Layout() {
 							<NavLink to="/clients" className={({ isActive }) => cn(styles['link'], { [styles.active]: isActive })}>
 								<img src="/client-icon.svg" alt="Иконка клиентов" className={styles['icon']} />
 								{isSidebarOpen && 'Клиенты'}
-							</NavLink><NavLink to="/payments" className={({ isActive }) => cn(styles['link'], { [styles.active]: isActive })}>
+							</NavLink>
+							<NavLink to="/payments" className={({ isActive }) => cn(styles['link'], { [styles.active]: isActive })}>
 								<img src="/payment-icon.svg" alt="Иконка оплат" className={styles['icon']} />
 								{isSidebarOpen && 'Оплаты'}
-							</NavLink><NavLink to="/rents" className={({ isActive }) => cn(styles['link'], { [styles.active]: isActive })}>
+							</NavLink>
+							<NavLink to="/rents" className={({ isActive }) => cn(styles['link'], { [styles.active]: isActive })}>
 								<img src="/rent-icon.svg" alt="Иконка договоров" className={styles['icon']} />
 								{isSidebarOpen && 'Договора'}
+							</NavLink>
+						</>
+					)}
+
+						{useHasRole('client') && (
+						<>
+							<NavLink to="/my-rents" className={({ isActive }) => cn(styles['link'], { [styles.active]: isActive })}>
+								<img src="/rent-icon.svg" alt="Иконка договоров" className={styles['icon']} />
+								{isSidebarOpen && 'Мои аренды'}
 							</NavLink>
 						</>
 					)}

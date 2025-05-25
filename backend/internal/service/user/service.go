@@ -34,7 +34,7 @@ func (s *userService) GetClients(ctx context.Context, limit, offset uint64) ([]m
 		return nil, err
 	}
 	if len(clients) == 0 {
-		return nil, sys.NotFoundError
+		return nil, sys.ClientsNotFoundError
 	}
 	return clients, nil
 }
@@ -61,7 +61,7 @@ func (s *userService) CreateClient(ctx context.Context, req model.RegisterReques
 		return err
 	}
 	if exist {
-		return sys.UserExistError
+		return sys.UserAlreadyExistsError
 	}
 
 	err = s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {

@@ -125,7 +125,7 @@ func (r *repo) UpdatePremise(ctx context.Context, premise *model.Premises) error
 
 	rowsAffected := result.RowsAffected()
 	if rowsAffected == 0 {
-		return sys.NotFoundError
+		return sys.PremiseNotFoundError
 	}
 
 	return nil

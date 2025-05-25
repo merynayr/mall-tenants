@@ -29,13 +29,13 @@ func (a *API) UpdateRental(c *gin.Context) {
 
 	id, err := strconv.ParseInt(codeParam, 10, 64)
 	if err != nil {
-		sys.HandleError(c, sys.InvalidRequestError)
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
 		return
 	}
 
 	var rental model.Rental
 	if err := c.ShouldBindJSON(&rental); err != nil {
-		sys.HandleError(c, sys.InvalidRequestError)
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
 		return
 	}
 

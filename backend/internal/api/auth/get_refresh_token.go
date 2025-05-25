@@ -11,7 +11,7 @@ import (
 func (a *API) GetRefreshToken(c *gin.Context) {
 	oldRefreshToken, err := c.Cookie("refresh_token")
 	if err != nil {
-		sys.HandleError(c, sys.InvalidRequestError)
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
 		return
 	}
 

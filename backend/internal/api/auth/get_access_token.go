@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/merynayr/mall-tenants/internal/logger"
 	"github.com/merynayr/mall-tenants/internal/sys"
 )
 
@@ -12,8 +11,7 @@ import (
 func (a *API) GetAccessToken(c *gin.Context) {
 	refreshToken, err := c.Cookie("refresh_token")
 	if err != nil {
-		logger.Debug(err.Error())
-		sys.HandleError(c, sys.InvalidRequestError)
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
 		return
 	}
 

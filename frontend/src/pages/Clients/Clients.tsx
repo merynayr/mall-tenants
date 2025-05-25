@@ -6,6 +6,7 @@ import api from '@/helpers/API';
 import { Client } from '@/interfaces/client';
 import { ClientsTable } from '@/pages/Clients/ClientsTable/ClientsTable';
 import { useHasRole } from '@/hooks/Role';
+import { AxiosError } from 'axios';
 
 export function PageClients() {
 	const [clients, setClients] = useState<Client[]>([]);
@@ -28,9 +29,11 @@ export function PageClients() {
 			});
 			setClients(data);
 		} catch (e) {
-			console.error(e);
-			setError('Ошибка при загрузке клиентов');
-		} finally {
+				console.error(e);
+				if (e instanceof AxiosError) {
+					setError(e.response?.data.error);
+				}	
+			} finally {
 			setIsLoading(false);
 		}
 	};

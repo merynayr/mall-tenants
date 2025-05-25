@@ -1,8 +1,6 @@
 package payment
 
 import (
-	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -98,18 +96,18 @@ func (api *API) MarkAsPaid(c *gin.Context) {
 func (api *API) MarkPaymentsPaid(c *gin.Context) {
 	var req model.MarkPaymentsPaidRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		sys.HandleError(c, sys.InvalidRequestError)
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
 		return
 	}
 
 	if len(req.PaymentIDs) == 0 {
-		sys.HandleError(c, errors.New("no payment IDs provided"))
+		sys.HandleError(c, sys.NoPaymentIDsError)
 		return
 	}
 
 	err := api.paymentService.MarkPaymentsAsPaid(c.Request.Context(), req.PaymentIDs)
 	if err != nil {
-		sys.HandleError(c, errors.New("failed to mark payments as paid"))
+		sys.HandleError(c, sys.MarkPaymentsFailedError)
 		return
 	}
 
@@ -128,7 +126,7 @@ func (api *API) MarkPaymentsPaid(c *gin.Context) {
 func (api *API) GetPayment(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		sys.HandleError(c, err)
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
 		return
 	}
 
@@ -158,7 +156,7 @@ func (api *API) ListPayments(c *gin.Context) {
 	if isPaidStr := c.Query("is_paid"); isPaidStr != "" {
 		isPaid, err := strconv.ParseBool(isPaidStr)
 		if err != nil {
-			sys.HandleError(c, err)
+			sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
 			return
 		}
 		filter.IsPaid = &isPaid
@@ -167,7 +165,7 @@ func (api *API) ListPayments(c *gin.Context) {
 	limitStr := c.DefaultQuery("limit", "20")
 	limit, err := strconv.ParseUint(limitStr, 10, 64)
 	if err != nil {
-		sys.HandleError(c, err)
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
 		return
 	}
 	filter.Limit = limit
@@ -175,16 +173,15 @@ func (api *API) ListPayments(c *gin.Context) {
 	offsetStr := c.DefaultQuery("offset", "0")
 	offset, err := strconv.ParseUint(offsetStr, 10, 64)
 	if err != nil {
-		sys.HandleError(c, err)
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
 		return
 	}
 	filter.Offset = offset
-	fmt.Println(filter)
+
 	payments, err := api.paymentService.ListPayments(c.Request.Context(), filter)
 	if err != nil {
 		sys.HandleError(c, err)
 		return
 	}
-	fmt.Println(len(payments))
 	c.JSON(http.StatusOK, payments)
 }

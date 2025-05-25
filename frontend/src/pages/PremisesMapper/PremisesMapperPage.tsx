@@ -63,7 +63,7 @@ export function PremisesMapperPage() {
 			const { data } = await api.get<string>(`/floor-plan/${floor}`);
 			setSvgData(data);
 		} catch (e) {
-			if (e instanceof AxiosError) console.error(e.message);
+			if (e instanceof AxiosError) console.error(e.response?.data.error);
 		}
 	};
 
@@ -82,7 +82,7 @@ export function PremisesMapperPage() {
 			}));
 			setPolygons(parsed);
 		} catch (e) {
-			if (e instanceof AxiosError) console.error(e.message);
+			if (e instanceof AxiosError) console.error(e.response?.data.error);
 		}
 	};
 
@@ -95,7 +95,7 @@ export function PremisesMapperPage() {
 			});
 			return true;
 		} catch (e) {
-			if (e instanceof AxiosError) console.error(e.message);
+			if (e instanceof AxiosError) console.error(e.response?.data.error);
 			return false;
 		}
 	};

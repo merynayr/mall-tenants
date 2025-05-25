@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/merynayr/mall-tenants/internal/logger"
 	"github.com/merynayr/mall-tenants/internal/model"
 	"github.com/merynayr/mall-tenants/internal/sys"
 )
@@ -25,8 +24,7 @@ import (
 func (a *API) CreateRental(c *gin.Context) {
 	var rental model.Rental
 	if err := c.ShouldBindJSON(&rental); err != nil {
-		logger.Error(err.Error())
-		sys.HandleError(c, sys.InvalidRequestError)
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
 		return
 	}
 

@@ -27,7 +27,7 @@ func (a *API) GetPremisesByCode(c *gin.Context) {
 
 	code, err := strconv.ParseInt(codeParam, 10, 64)
 	if err != nil {
-		sys.HandleError(c, sys.InvalidRequestError)
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
 		return
 	}
 	premise, err := a.premiseService.GetPremisesByCode(c.Request.Context(), code)

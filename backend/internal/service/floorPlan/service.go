@@ -11,7 +11,6 @@ import (
 	"github.com/merynayr/mall-tenants/internal/repository"
 	"github.com/merynayr/mall-tenants/internal/service"
 	"github.com/merynayr/mall-tenants/internal/sys"
-	"github.com/merynayr/mall-tenants/internal/sys/codes"
 )
 
 const svgBasePath = "./assets/floor_plans"
@@ -30,7 +29,7 @@ func NewService(premiseRepo repository.FloorPlanRepository) service.FloorPlanSer
 // SaveFloorPlan сохраняет SVG-файл и создаёт запись в БД
 func (s *srv) SaveFloorPlan(ctx context.Context, floor int64, reader io.Reader) error {
 	if floor < 0 {
-		return fmt.Errorf("invalid floor number: %d", floor)
+		return sys.FloorNumberInvalidError
 	}
 
 	filename := fmt.Sprintf("floor_%d.svg", floor)
@@ -70,14 +69,14 @@ func (s *srv) SaveFloorPlan(ctx context.Context, floor int64, reader io.Reader) 
 // GetFloorPlanContent возвращает SVG по этажу
 func (s *srv) GetFloorPlanContent(ctx context.Context, floor int64) ([]byte, error) {
 	if floor < 1 {
-		return nil, fmt.Errorf("%s", "номер этажа' должен быть положительным")
+		return nil, sys.FloorNumberInvalidError
 	}
 	plan, err := s.floorPlanRepository.GetFloorPlanByFloor(ctx, floor)
 	if err != nil {
-		return nil, fmt.Errorf("floor plan not found: %w", err)
+		return nil, err
 	}
 	if plan == nil {
-		return nil, sys.NotFoundError
+		return nil, sys.FloorPlanNotFoundError
 	}
 	fullPath := filepath.Join(svgBasePath, plan.Filename)
 	content, err := os.ReadFile(fullPath) // #nosec G304
@@ -91,14 +90,14 @@ func (s *srv) GetFloorPlanContent(ctx context.Context, floor int64) ([]byte, err
 // AddPolygon делегирует сохранение в репозиторий
 func (s *srv) AddPolygon(ctx context.Context, poly *model.PremisePolygon) error {
 	if poly.PremiseCode < 1 {
-		return fmt.Errorf("%s", "номер помещения должен быть положительным")
+		return sys.InvalidIDFormatError
 	}
 	nounique, err := s.floorPlanRepository.CheckPremiseCode(ctx, poly.PremiseCode)
 	if err != nil {
 		return err
 	}
 	if nounique {
-		return sys.NewCommonError("Premise code already exists", codes.Forbidden)
+		return sys.PremiseAlreadyExistsError
 	}
 	return s.floorPlanRepository.AddPolygon(ctx, poly)
 }
@@ -106,7 +105,7 @@ func (s *srv) AddPolygon(ctx context.Context, poly *model.PremisePolygon) error 
 // GetPolygons получает из репозитория все полигоны по коду помещения
 func (s *srv) GetPolygons(ctx context.Context, floor int64) ([]*model.Polygons, error) {
 	if floor < 1 {
-		return nil, fmt.Errorf("%s", "номер этажа' должен быть положительным")
+		return nil, sys.FloorNumberInvalidError
 	}
 	return s.floorPlanRepository.GetAllPolygons(ctx, floor)
 }
@@ -114,7 +113,7 @@ func (s *srv) GetPolygons(ctx context.Context, floor int64) ([]*model.Polygons, 
 // DeletPolygon удаляет из репозитория полигон по коду помещения
 func (s *srv) DeletPolygon(ctx context.Context, premiseCode int64) error {
 	if premiseCode < 1 {
-		return fmt.Errorf("%s", "номер помещения' должен быть положительным")
+		return sys.FloorNumberInvalidError
 	}
 	return s.floorPlanRepository.DeletPolygon(ctx, premiseCode)
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/merynayr/mall-tenants/internal/model"
 	"github.com/merynayr/mall-tenants/internal/repository"
 	"github.com/merynayr/mall-tenants/internal/service"
+	"github.com/merynayr/mall-tenants/internal/sys"
 )
 
 type srv struct {
@@ -34,7 +35,6 @@ func NewService(
 }
 
 func (s *srv) CreatePayment(ctx context.Context, p model.Payment) (int64, error) {
-	// можно добавить валидацию, например:
 	if p.Amount <= 0 {
 		return 0, errors.New("amount must be greater than 0")
 	}
@@ -106,5 +106,12 @@ func (s *srv) GetByID(ctx context.Context, id int64) (model.Payment, error) {
 }
 
 func (s *srv) ListPayments(ctx context.Context, filter model.PaymentFilter) ([]model.Payment, error) {
-	return s.paymentRepository.List(ctx, filter)
+	payments, err := s.paymentRepository.List(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	if len(payments) == 0 {
+		return nil, sys.PaymentsNotFoundError
+	}
+	return payments, nil
 }

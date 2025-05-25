@@ -15,6 +15,7 @@ import PremiseInfo from '@/pages/PremiseInfo/PremiseInfo';
 import PremisesMapperPage from '@/pages/PremisesMapper/PremisesMapperPage';
 import PageRents from '@/pages/Rents/Rents';
 import { store } from '@/store/store';
+import PageMyRents from './pages/MyRents/MyRents';
 
 const router = createBrowserRouter([
 	{
@@ -54,6 +55,10 @@ const router = createBrowserRouter([
 			{
 				path: '/rents',
 				element: <PageRents />
+			},
+			{
+				path: '/my-rents',
+				element: <PageMyRents />
 			}
 		]
 	},

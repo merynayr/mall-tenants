@@ -19,7 +19,7 @@ func (s *srv) Register(ctx context.Context, req model.RegisterRequest) (*model.A
 		return nil, err
 	}
 	if exist {
-		return nil, sys.UserExistError
+		return nil, sys.UserAlreadyExistsError
 	}
 
 	_, err = s.userRepository.CreateUser(ctx, &req)

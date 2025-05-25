@@ -10,6 +10,7 @@ import { PaymentModal } from '@/components/RentModals/PaymentModal';
 import { RentalModal } from '@/components/RentModals/RentalModal';
 import { useHasRole } from '@/hooks/Role';
 import LeaveRequestModal from '@/components/Applications/LeaveRequestModal';
+import { AxiosError } from 'axios';
 
 export function PremiseInfo() {
 	const { id } = useParams<{ id: string }>();
@@ -76,11 +77,13 @@ export function PremiseInfo() {
 			setIsLoading(true);
 			api.get<Premises>(`/premise/${id}`)
 				.then(({ data }) => setPremise(data))
-				.catch((err) => {
-					console.error(err);
-					setError('Не удалось загрузить данные о помещении');
+				.catch((e) => {
+					console.error(e);
+					if (e instanceof AxiosError) {
+						setError(e.response?.data.error);
+					}					
 				})
-				.finally(() => setIsLoading(false));
+			.finally(() => setIsLoading(false));
 		}
 	}, [id, premise]);
 

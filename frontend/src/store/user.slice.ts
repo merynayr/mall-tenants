@@ -37,7 +37,7 @@ export const login = createAsyncThunk<LoginResponse, { email: string, password: 
 			return data;
 		} catch (e) {
 			if (e instanceof AxiosError) {
-				return rejectWithValue(e.response?.data.message);
+				return rejectWithValue(e.response?.data.error);
 			}
 			return rejectWithValue('An unexpected error occurred.');
 		}

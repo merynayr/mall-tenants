@@ -25,7 +25,7 @@ func NewAPI(rentalService service.RentalService) *API {
 func (api *API) RegisterRoutes(router *gin.Engine) {
 	rentalGroup := router.Group("/rental")
 	{
-		rentalGroup.GET("/:id", api.GetRentalByID)
+		rentalGroup.GET("/:id", api.GetRentalsByID)
 		rentalGroup.PATCH("/:id", api.UpdateRental)
 		rentalGroup.POST("/", api.CreateRental)
 		rentalGroup.GET("/", api.GetAgreements)
@@ -51,13 +51,13 @@ func (api *API) GetAgreements(c *gin.Context) {
 
 	limit, err := strconv.ParseUint(limitStr, 10, 64)
 	if err != nil {
-		sys.HandleError(c, sys.InvalidRequestError)
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
 		return
 	}
 
 	offset, err := strconv.ParseUint(offsetStr, 10, 64)
 	if err != nil {
-		sys.HandleError(c, sys.InvalidRequestError)
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
 		return
 	}
 

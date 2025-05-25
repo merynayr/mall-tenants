@@ -1,0 +1,130 @@
+.rent-card {
+	background-color: #fff;
+	border-radius: 16px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+	padding: 20px;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.rent-card:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.rent-title {
+	font-size: 1.25rem;
+	font-weight: 600;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	color: #2b2b2b;
+}
+
+.badge {
+	display: inline-block;
+	background-color: #eef2ff;
+	color: #3b82f6;
+	font-size: 0.89rem;
+	padding: 4px 8px;
+	border-radius: 12px;
+	margin-right: 8px;
+}
+
+.rent-footer {
+	margin-top: auto;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.period {
+	background-color: #e8e8e8;
+	padding: 8px 12px;
+	border-left: 4px solid #3b82f6;
+	border-right: 4px solid #3b82f6;
+	border-radius: 6px;
+	font-size: 0.95rem;
+	font-weight: 500;
+	color: #1f2937;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.date {
+	font-weight: 600;
+	color: #111827;
+}
+
+.rent-actions {
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	background-color: #f9fafb;
+	border-top: 1px solid #e5e7eb;
+	padding: 10px 0;
+	border-radius: 0 0 16px 16px;
+}
+
+.action-btn {
+	flex: 1;
+	text-align: center;
+	background: none;
+	border: none;
+	cursor: pointer;
+	font-size: 0.85rem;
+	color: #374151;
+	transition: transform 0.2s ease, color 0.2s ease;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+}
+
+.action-btn:hover {
+	transform: translateY(-2px);
+	color: #2563eb;
+}
+
+.action-icon {
+	font-size: 1.2rem;
+}
+
+button {
+	padding: 0.4rem 0.9rem;
+	border: none;
+	border-radius: 8px;
+	font-size: 0.9rem;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+}
+
+.btn-primary {
+	background-color: #4CAF50;
+	color: white;
+}
+
+.btn-primary:hover {
+	background-color: #45a049;
+}
+
+.btn-secondary {
+	background-color: #2196F3;
+	color: white;
+}
+
+.btn-secondary:hover {
+	background-color: #1976D2;
+}
+
+.btn-danger {
+	background-color: #f44336;
+	color: white;
+}
+
+.btn-danger:hover {
+	background-color: #d32f2f;
+}

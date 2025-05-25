@@ -3,7 +3,6 @@ package access
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/merynayr/mall-tenants/internal/config"
-	"github.com/merynayr/mall-tenants/internal/logger"
 	"github.com/merynayr/mall-tenants/internal/service"
 	"github.com/merynayr/mall-tenants/internal/sys"
 )
@@ -31,7 +30,6 @@ func (m *Middleware) Check() gin.HandlerFunc {
 
 		email, err := m.accessService.Check(c, endpoint)
 		if err != nil {
-			logger.Debug(err.Error())
 			sys.HandleError(c, err)
 			c.Abort()
 			return

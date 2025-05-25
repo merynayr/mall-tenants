@@ -4,6 +4,7 @@ import Button from '@/components/Button/Button';
 import api from '@/helpers/API';
 import { Rent } from '@/interfaces/rent';
 import { RentsTable } from '@/pages/Rents/RentsTable/RentsTable';
+import { AxiosError } from 'axios';
 
 export function PageRents() {
 	const [rents, setRents] = useState<Rent[]>([]);
@@ -26,7 +27,9 @@ export function PageRents() {
 			setRents(data);
 		} catch (e) {
 			console.error(e);
-			setError('Ошибка при загрузке договоров');
+			if (e instanceof AxiosError) {
+					setError(e.response?.data.error);
+				}	
 		} finally {
 			setIsLoading(false);
 		}

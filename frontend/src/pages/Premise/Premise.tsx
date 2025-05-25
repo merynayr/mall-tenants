@@ -30,8 +30,8 @@ export function PagePremises() {
 		} catch (e) {
 			console.error(e);
 			if (e instanceof AxiosError) {
-				setError(e.message);
-			}
+				setError(e.response?.data.error);
+			}	
 			setIsLoading(false);
 			return;
 		}

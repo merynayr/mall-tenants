@@ -16,26 +16,26 @@ import (
 // @Produce  json
 // @Security BearerAuth
 // @Param id path int64 true "Код аренды"
-// @Success 200 {object} model.Rental
+// @Success 200 {array} model.Rental
 // @Failure 400 {object} sys.ErrorResponse
 // @Failure 401 {object} sys.ErrorResponse
 // @Failure 404 {object} sys.ErrorResponse "Аренда не найдена"
 // @Failure 500 {object} sys.ErrorResponse
 // @Router /rental/{id} [get]
-func (a *API) GetRentalByID(c *gin.Context) {
+func (a *API) GetRentalsByID(c *gin.Context) {
 	codeParam := c.Param("id")
 
 	id, err := strconv.ParseInt(codeParam, 10, 64)
 	if err != nil {
-		sys.HandleError(c, sys.InvalidRequestError)
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
 		return
 	}
 
-	rental, err := a.rentalService.GetRentalByID(c.Request.Context(), id)
+	rentals, err := a.rentalService.GetRentalByID(c.Request.Context(), id)
 	if err != nil {
 		sys.HandleError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, rental)
+	c.JSON(http.StatusOK, rentals)
 }

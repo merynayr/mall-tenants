@@ -51,7 +51,7 @@ func (api *API) UploadFloorPlan(c *gin.Context) {
 	floorParam := c.Param("floor")
 	n, err := strconv.ParseInt(floorParam, 10, 64)
 	if err != nil {
-		sys.HandleError(c, err)
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
 		return
 	}
 
@@ -97,13 +97,13 @@ func (api *API) GetFloorPlan(c *gin.Context) {
 	floorParam := c.Param("floor")
 	floor, err := strconv.ParseInt(floorParam, 10, 64)
 	if err != nil {
-		sys.HandleError(c, err)
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
 		return
 	}
 
 	content, err := api.floorplanService.GetFloorPlanContent(c.Request.Context(), floor)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		sys.HandleError(c, err)
 		return
 	}
 
@@ -127,13 +127,13 @@ func (api *API) AddPolygon(c *gin.Context) {
 	codeParam := c.Param("code")
 	code, err := strconv.ParseInt(codeParam, 10, 64)
 	if err != nil {
-		sys.HandleError(c, err)
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
 		return
 	}
 
 	var poly model.PremisePolygon
 	if err := c.ShouldBindJSON(&poly); err != nil {
-		sys.HandleError(c, err)
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
 		return
 	}
 	poly.PremiseCode = code
@@ -162,7 +162,7 @@ func (api *API) GetPolygons(c *gin.Context) {
 	floorParam := c.Param("floor")
 	floor, err := strconv.ParseInt(floorParam, 10, 64)
 	if err != nil {
-		sys.HandleError(c, err)
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
 		return
 	}
 
@@ -191,7 +191,7 @@ func (api *API) DeletePolygon(c *gin.Context) {
 	codeParam := c.Param("code")
 	code, err := strconv.ParseInt(codeParam, 10, 64)
 	if err != nil {
-		sys.HandleError(c, err)
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
 		return
 	}
 

@@ -23,7 +23,7 @@ import (
 func (a *API) GetAllPremises(c *gin.Context) {
 	premises, err := a.premiseService.GetAllPremises(c.Request.Context())
 	if err != nil {
-		sys.HandleError(c, err)
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
 		return
 	}
 

@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/merynayr/mall-tenants/internal/logger"
 	"github.com/merynayr/mall-tenants/internal/model"
 	"github.com/merynayr/mall-tenants/internal/sys"
 	"github.com/merynayr/mall-tenants/internal/utils/jwt"
@@ -34,22 +33,21 @@ func (s *srv) Check(ctx *gin.Context, endpointAddress string) (string, error) {
 	if err != nil {
 		authHeader := ctx.GetHeader(authHeader)
 		if authHeader == "" {
-			return "", sys.AuthHeaderNotProvidedError
+			return "", sys.AuthHeaderMissingError
 		}
 
 		if !strings.HasPrefix(authHeader, authPrefix) {
-			return "", sys.InvalidAuthHeaderFormatError
+			return "", sys.AuthHeaderInvalidFormatError
 		}
 
 		accessToken = strings.TrimPrefix(authHeader, authPrefix)
 		if len(accessToken) == 0 {
-			return "", sys.AuthHeaderNotProvidedError
+			return "", sys.AuthHeaderInvalidFormatError
 		}
 	}
 
 	claims, err := jwt.VerifyToken(accessToken, s.authConfig.AccessTokenSecretKey())
 	if err != nil {
-		logger.Debug(err.Error())
 		return "", err
 	}
 

@@ -38,7 +38,7 @@ type PremiseService interface {
 
 // RentalService - интерфейс репо слоя для аренд
 type RentalService interface {
-	GetRentalByID(ctx context.Context, code int64) (*model.Rental, error)
+	GetRentalByID(ctx context.Context, code int64) ([]model.Rental, error)
 	CreateRental(ctx context.Context, rental model.Rental) error
 	UpdateRental(ctx context.Context, rental model.Rental) error
 	GetAgreements(ctx context.Context, limit, offset uint64) ([]model.Agreements, error)

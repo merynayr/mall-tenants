@@ -13,7 +13,6 @@ const Page404: React.FC = () => {
 			</p>
 			<img
 				src="/public/404.png"
-				srcSet="/images/static/404@2x.jpg 2x"
 				alt="404"
 				className={styles.image}
 			/>
