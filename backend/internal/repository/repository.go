@@ -55,6 +55,6 @@ type FloorPlanRepository interface {
 // ApplicationRepository - интерфейс репо слоя для заявок людей
 type ApplicationRepository interface {
 	Create(ctx context.Context, a *model.Application) error
-	GetAll(ctx context.Context, isProcessed *bool) ([]*model.Application, error)
+	GetAll(ctx context.Context, filter model.ApplicationFilter) ([]*model.Application, error)
 	SetProcessedStatus(ctx context.Context, id int64, isProcessed bool) error
 }

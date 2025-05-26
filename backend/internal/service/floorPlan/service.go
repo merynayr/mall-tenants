@@ -26,13 +26,23 @@ func NewService(premiseRepo repository.FloorPlanRepository) service.FloorPlanSer
 	}
 }
 
-// SaveFloorPlan сохраняет SVG-файл и создаёт запись в БД
-func (s *srv) SaveFloorPlan(ctx context.Context, floor int64, reader io.Reader) error {
+// SaveFloorPlan сохраняет SVG или PNG-файл и создаёт запись в БД
+func (s *srv) SaveFloorPlan(ctx context.Context, floor int64, reader io.Reader, mimeType string) error {
 	if floor < 0 {
 		return sys.FloorNumberInvalidError
 	}
 
-	filename := fmt.Sprintf("floor_%d.svg", floor)
+	var extension string
+	switch mimeType {
+	case "image/svg+xml":
+		extension = ".svg"
+	case "image/png":
+		extension = ".png"
+	default:
+		return fmt.Errorf("unsupported file type: %s", mimeType)
+	}
+
+	filename := fmt.Sprintf("floor_%d%s", floor, extension)
 	fullPath := filepath.Join(svgBasePath, filename)
 
 	if err := os.MkdirAll(svgBasePath, 0750); err != nil {
@@ -41,17 +51,12 @@ func (s *srv) SaveFloorPlan(ctx context.Context, floor int64, reader io.Reader) 
 
 	f, err := os.Create(fullPath) // #nosec G304
 	if err != nil {
-		return fmt.Errorf("failed to create svg file: %w", err)
+		return fmt.Errorf("failed to create file: %w", err)
 	}
-	defer func() {
-		err := f.Close()
-		if err != nil {
-			return
-		}
-	}()
+	defer f.Close()
 
 	if _, err := io.Copy(f, reader); err != nil {
-		return fmt.Errorf("failed to write svg data: %w", err)
+		return fmt.Errorf("failed to write file data: %w", err)
 	}
 
 	plan := &model.FloorPlan{

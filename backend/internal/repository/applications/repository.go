@@ -57,7 +57,7 @@ func (r *repo) Create(ctx context.Context, a *model.Application) error {
 	return err
 }
 
-func (r *repo) GetAll(ctx context.Context, isProcessed *bool) ([]*model.Application, error) {
+func (r *repo) GetAll(ctx context.Context, filter model.ApplicationFilter) ([]*model.Application, error) {
 	sb := squirrel.
 		Select(
 			idColumn,
@@ -74,10 +74,12 @@ func (r *repo) GetAll(ctx context.Context, isProcessed *bool) ([]*model.Applicat
 		).
 		From(applicationsTable).
 		OrderBy("created_at DESC").
+		Limit(filter.Limit).
+		Offset(filter.Offset).
 		PlaceholderFormat(squirrel.Dollar)
 
-	if isProcessed != nil {
-		sb = sb.Where(squirrel.Eq{IsProcessedColumn: *isProcessed})
+	if filter.IsProcessed != nil {
+		sb = sb.Where(squirrel.Eq{IsProcessedColumn: *filter.IsProcessed})
 	}
 
 	query, args, err := sb.ToSql()

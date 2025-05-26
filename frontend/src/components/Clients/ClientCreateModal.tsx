@@ -1,19 +1,21 @@
 import { useState } from 'react';
 import styles from './ClientCreateModal.module.css';
 import api from '@/helpers/API';
+import { Application } from '@/interfaces/applications';
 
 interface Props {
 	onClose: () => void;
 	onCreated: () => void;
+	initialData?: Partial<Application>;
 }
 
-export const ClientCreateModal: React.FC<Props> = ({ onClose, onCreated }) => {
-	const [organizationName, setOrganizationName] = useState('');
-	const [contactPerson, setContactPerson] = useState('');
-	const [address, setAddress] = useState('');
-	const [phone, setPhone] = useState('');
-	const [requisites, setRequisites] = useState('');
-	const [email, setEmail] = useState('');
+export const ClientCreateModal: React.FC<Props> = ({ onClose, onCreated, initialData = {} }) => {
+	const [organizationName, setOrganizationName] = useState(initialData.organizationName || '');
+	const [contactPerson, setContactPerson] = useState(initialData.contactPerson || '');
+	const [address, setAddress] = useState(initialData.address || '');
+	const [phone, setPhone] = useState(initialData.phone || '');
+	const [requisites, setRequisites] = useState(initialData.requisites || '');
+	const [email, setEmail] = useState(initialData.email || '');
 	const [password, setPassword] = useState('');
 	const [confirmPassword, setConfirmPassword] = useState('');
 	const [role, setRole] = useState('client');
@@ -32,6 +34,7 @@ export const ClientCreateModal: React.FC<Props> = ({ onClose, onCreated }) => {
 				confirm_password: confirmPassword,
 				role: role
 			});
+			setError(null);
 			onCreated();
 			onClose(); 
 		} catch (e) {

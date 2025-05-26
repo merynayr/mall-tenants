@@ -55,7 +55,7 @@ type PaymentService interface {
 
 // FloorPlanService интерфейс сервисного слоя план этажей
 type FloorPlanService interface {
-	SaveFloorPlan(ctx context.Context, floor int64, reader io.Reader) error
+	SaveFloorPlan(ctx context.Context, floor int64, reader io.Reader, mimeType string) error
 	GetFloorPlanContent(ctx context.Context, floor int64) ([]byte, error)
 	AddPolygon(ctx context.Context, poly *model.PremisePolygon) error
 	GetPolygons(ctx context.Context, floor int64) ([]*model.Polygons, error)
@@ -65,6 +65,6 @@ type FloorPlanService interface {
 // ApplicationService интерфейс сервисного слоя заявок людей
 type ApplicationService interface {
 	CreateApplication(ctx context.Context, a *model.Application) error
-	GetApplications(ctx context.Context, isProcessed *bool) ([]*model.Application, error)
+	GetApplications(ctx context.Context, filter model.ApplicationFilter) ([]*model.Application, error)
 	UpdateApplicationStatus(ctx context.Context, id int64, isProcessed bool) error
 }

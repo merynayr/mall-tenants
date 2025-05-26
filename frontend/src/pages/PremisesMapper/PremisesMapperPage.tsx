@@ -1,7 +1,7 @@
 import { AxiosError } from 'axios';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styles from './Menu.module.css';
+import  './Menu.module.css';
 import { FloorPlanCanvas } from '@/components/FloorPlan/FloorPlanCanvas';
 import { FloorPlanUploadModal } from '@/components/FloorPlan/FloorPlanUploadModal';
 import { ControlPanel } from '@/components/PolygonLayer/ControlPanel';
@@ -14,7 +14,7 @@ export function PremisesMapperPage() {
 	const [isDrawing, setIsDrawing] = useState(false);
 	const [currentPoints, setCurrentPoints] = useState<Point[]>([]);
 	const [polygons, setPolygons] = useState<Polygon[]>([]);
-	const [svgData, setSvgData] = useState<string | null>(null);
+	const [imageData, setImageData] = useState<string | null>(null);
 	const [floor, setFloor] = useState<number>(1);
 	const [showModal, setShowModal] = useState(false);
 	const [selectedPolygonIndex, setSelectedPolygonIndex] = useState<number | null>(null);
@@ -22,7 +22,7 @@ export function PremisesMapperPage() {
 
 
 	useEffect(() => {
-		setSvgData('');
+		setImageData('');
 		setPolygons([]);
 		
 		fetchFloorPlan(floor);
@@ -60,15 +60,29 @@ export function PremisesMapperPage() {
 
 	const fetchFloorPlan = async (floor: number) => {
 		try {
-			const { data } = await api.get<string>(`/floor-plan/${floor}`);
-			setSvgData(data);
+			const response = await api.get(`/floor-plan/${floor}`, {
+				responseType: 'blob',
+			});
+
+			const blob = response.data as Blob;
+			const reader = new FileReader();
+			reader.onloadend = () => {
+				const base64 = reader.result as string;
+				setImageData(base64);
+			};
+			reader.readAsDataURL(blob);
 		} catch (e) {
-			if (e instanceof AxiosError) console.error(e.response?.data.error);
+			if (e instanceof AxiosError) {
+				console.error(e.response?.data.error);
+			}
 		}
 	};
 
+
+
 	const fetchPolygons = async (floor: number) => {
 		try {
+			console.log(floor)
 			const { data } = await api.get<PolygonFromAPI[]>(`/floor-plan/polygons/${floor}`);
 			const parsed = data.map((poly) => ({
 				points: poly.points.split(' ').map((pair) => {
@@ -160,36 +174,39 @@ export function PremisesMapperPage() {
 		}
 	};
 
+
 	return (
-		<div className={styles.wrapper}>
-			<h1 className={styles.title}>Плана этажа</h1>
+		<div className="mapper-page">
+			<h1>План этажа</h1>
 
-			<ControlPanel
-				isDrawing={isDrawing}
-				onStart={() => setIsDrawing(true)}
-				onFinish={finishDrawing}
-				onReset={resetCurrent}
-				floor={floor}
-				onFloorChange={(val) => setFloor(val)}
-				DeletePolygon={DeletePolygon}
-				selectedPolygonIndex={selectedPolygonIndex}
-				onAddFloorPlan={handleAddFloorPlan}
-			/>
+			<div className="mapper-layout">
+				<ControlPanel
+					isDrawing={isDrawing}
+					onStart={() => setIsDrawing(true)}
+					onFinish={finishDrawing}
+					onReset={resetCurrent}
+					floor={floor}
+					onFloorChange={(val) => setFloor(val)}
+					DeletePolygon={DeletePolygon}
+					selectedPolygonIndex={selectedPolygonIndex}
+					onAddFloorPlan={handleAddFloorPlan}
+				/>
 
-			<FloorPlanCanvas
-				svgData={svgData}
-				polygons={polygons}
-				currentPoints={currentPoints}
-				selectedPolygonIndex={selectedPolygonIndex}
-				onSvgClick={(e) => {
-					handleSvgClick(e);
-					setSelectedPolygonIndex(null);
-				}}
-				onSvgRightClick={handleSvgRightClick}
-				onPolygonSelect={setSelectedPolygonIndex}
-				onPolygonDoubleClick={handlePolygonDoubleClick}
-				floor={floor}
-			/>
+				<FloorPlanCanvas
+					imageData={imageData}
+					polygons={polygons}
+					currentPoints={currentPoints}
+					selectedPolygonIndex={selectedPolygonIndex}
+					onSvgClick={(e) => {
+						handleSvgClick(e);
+						setSelectedPolygonIndex(null);
+					}}
+					onSvgRightClick={handleSvgRightClick}
+					onPolygonSelect={setSelectedPolygonIndex}
+					onPolygonDoubleClick={handlePolygonDoubleClick}
+					floor={floor}
+				/>
+			</div>
 
 			<PolygonInfoModal
 				isOpen={showModal}
@@ -202,7 +219,6 @@ export function PremisesMapperPage() {
 				onClose={handleCloseModal}
 				onUploaded={handleUploaded}
 			/>
-
 		</div>
 	);
 }

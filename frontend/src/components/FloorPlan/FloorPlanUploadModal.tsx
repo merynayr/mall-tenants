@@ -16,11 +16,16 @@ export const FloorPlanUploadModal: React.FC<Props> = ({ isOpen, onClose, onUploa
 	const handleSubmit = async () => {
 		const numericCode = Number(floor);
 		if (!floor || isNaN(numericCode) || numericCode <= 0) {
-			setError('Пожалуйста, введите корректный код помещения.');
+			setError('Пожалуйста, введите корректный номер этажа.');
 			return;
 		}
 		if (!file) {
-			setError('Выберите SVG файл');
+			setError('Выберите файл формата PNG');
+			return;
+		}
+		const validTypes = ['image/png'];
+		if (!validTypes.includes(file.type)) {
+			setError('Допустимы только файлы формата PNG');
 			return;
 		}
 
@@ -71,7 +76,7 @@ export const FloorPlanUploadModal: React.FC<Props> = ({ isOpen, onClose, onUploa
 				<label>SVG файл:</label>
 				<input
 					type="file"
-					accept=".svg"
+					accept=".png,image/png"
 					onChange={(e) => {
 						const f = e.target.files?.[0] || null;
 						setFile(f);

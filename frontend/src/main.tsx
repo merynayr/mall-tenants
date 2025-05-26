@@ -16,6 +16,7 @@ import PremisesMapperPage from '@/pages/PremisesMapper/PremisesMapperPage';
 import PageRents from '@/pages/Rents/Rents';
 import { store } from '@/store/store';
 import PageMyRents from './pages/MyRents/MyRents';
+import { PageApplications } from './pages/Applications/Applications';
 
 const router = createBrowserRouter([
 	{
@@ -59,6 +60,10 @@ const router = createBrowserRouter([
 			{
 				path: '/my-rents',
 				element: <PageMyRents />
+			},
+			{
+				path: '/applications',
+				element: <PageApplications />
 			}
 		]
 	},

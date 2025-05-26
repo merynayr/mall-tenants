@@ -16,3 +16,10 @@ type Application struct {
 	IsProcessed      bool      `json:"isProcessed" db:"is_processed"`
 	CreatedAt        time.Time `json:"createdAt" db:"created_at"`
 }
+
+// ApplicationFilter - структура фильтрации для заявок
+type ApplicationFilter struct {
+	IsProcessed *bool
+	Limit       uint64
+	Offset      uint64
+}

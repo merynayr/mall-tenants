@@ -60,12 +60,21 @@ export function Layout() {
 						{isSidebarOpen && 'Основной экран'}
 					</NavLink>
 
-					<NavLink to="/premises" className={({ isActive }) => cn(styles['link'], { [styles.active]: isActive })}>
-						 <img src="/premise-icon.svg" alt="Иконка помещений" className={styles['icon']} />
-						{isSidebarOpen && 'Помещения'}
-					</NavLink>
+						{useHasRole('moderator') && (
+						<>
+							<NavLink to="/applications" className={({ isActive }) => cn(styles['link'], { [styles.active]: isActive })}>
+								<img src="/application-icon.svg" alt="Иконка договоров" className={styles['icon']} />
+								{isSidebarOpen && 'Заявки'}
+							</NavLink>
+						</>
+						)}
+						
+						<NavLink to="/premises" className={({ isActive }) => cn(styles['link'], { [styles.active]: isActive })}>
+								<img src="/premise-icon.svg" alt="Иконка помещений" className={styles['icon']} />
+								{isSidebarOpen && 'Помещения'}
+							</NavLink>
 
-					{useHasRole('moderator', 'director') && (
+						{useHasRole('moderator', 'director') && (
 						<>
 							<NavLink to="/clients" className={({ isActive }) => cn(styles['link'], { [styles.active]: isActive })}>
 								<img src="/client-icon.svg" alt="Иконка клиентов" className={styles['icon']} />

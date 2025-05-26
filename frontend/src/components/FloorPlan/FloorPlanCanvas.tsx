@@ -2,9 +2,9 @@ import React from 'react';
 import { DrawingOverlay } from '@/components/PolygonLayer/DrawingOverlay';
 import { PolygonLayer } from '@/components/PolygonLayer/PolygonLayer';
 import { Point, Polygon } from '@/interfaces/floorplan';
-
+import './FloorPlanCanvas.css';
 interface FloorPlanCanvasProps {
-  svgData: string | null;
+  imageData: string | null;
   polygons: Polygon[];
   currentPoints: Point[];
   selectedPolygonIndex: number | null;
@@ -16,43 +16,52 @@ interface FloorPlanCanvasProps {
 }
 
 export const FloorPlanCanvas: React.FC<FloorPlanCanvasProps> = ({
-	svgData,
-	polygons,
-	currentPoints,
-	selectedPolygonIndex,
-	onSvgClick,
-	onSvgRightClick,
-	onPolygonSelect,
-	onPolygonDoubleClick,
-	floor
+  imageData,
+  polygons,
+  currentPoints,
+  selectedPolygonIndex,
+  onSvgClick,
+  onSvgRightClick,
+  onPolygonSelect,
+  onPolygonDoubleClick,
+  floor
 }) => {
-	return (
-		<svg
-			width={800}
-			height={500}
-			onContextMenu={onSvgRightClick}
-			onClick={onSvgClick}
-		>
-			{svgData && (
-				<image
-					key={`floor-${floor}`}
-					href={`data:image/svg+xml;utf8,${encodeURIComponent(svgData)}`}
-					x={0}
-					y={0}
-					width={800}
-					height={500}
-					preserveAspectRatio="xMidYMid meet"
-				/>
-			)}
+  const getPngHref = () => {
+    if (!imageData) return null;
+    return imageData.startsWith('data:image/') ? imageData : `data:image/png;base64,${imageData}`;
+  };
 
-			<PolygonLayer
-				polygons={polygons}
-				selectedIndex={selectedPolygonIndex}
-				onSelect={onPolygonSelect}
-				onDoubleClick={onPolygonDoubleClick}
-			/>
-      
-			<DrawingOverlay currentPoints={currentPoints} />
-		</svg>
-	);
+  const href = getPngHref();
+
+  return (
+    <div className="floor-plan-container">
+      <svg
+        width={738}
+        height={393}
+        onContextMenu={onSvgRightClick}
+        onClick={onSvgClick}
+        className="floor-plan-svg size"
+      >
+        {href && (
+          <image
+            key={`floor-${floor}`}
+            href={href}
+            x={0}
+            y={0}
+            className='size'
+            preserveAspectRatio="xMidYMid meet"
+          />
+        )}
+
+        <PolygonLayer
+          polygons={polygons}
+          selectedIndex={selectedPolygonIndex}
+          onSelect={onPolygonSelect}
+          onDoubleClick={onPolygonDoubleClick}
+        />
+
+        <DrawingOverlay currentPoints={currentPoints} />
+      </svg>
+    </div>
+  );
 };

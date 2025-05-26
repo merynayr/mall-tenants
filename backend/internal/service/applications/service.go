@@ -28,8 +28,8 @@ func (s *srv) CreateApplication(ctx context.Context, a *model.Application) error
 	return err
 }
 
-func (s *srv) GetApplications(ctx context.Context, isProcessed *bool) ([]*model.Application, error) {
-	apps, err := s.applicationRepository.GetAll(ctx, isProcessed)
+func (s *srv) GetApplications(ctx context.Context, filter model.ApplicationFilter) ([]*model.Application, error) {
+	apps, err := s.applicationRepository.GetAll(ctx, filter)
 	if err != nil {
 		return nil, err
 	}

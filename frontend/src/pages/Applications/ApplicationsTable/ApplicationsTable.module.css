@@ -1,0 +1,49 @@
+.cardList {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	margin-top: 16px;
+}
+
+.card {
+	background-color: #fff;
+	border: 1px solid #ddd;
+	border-radius: 12px;
+	padding: 16px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+	transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.row {
+	margin-bottom: 8px;
+	font-size: 14px;
+}
+
+.row strong {
+	display: inline-block;
+	min-width: 140px;
+	color: #333;
+}
+
+.actions {
+	text-align: right;
+	margin-top: 12px;
+}
+
+.actions button {
+	padding: 6px 12px;
+	background-color: #007bff;
+	color: #fff;
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+}
+
+.actions button:hover {
+	background-color: #0056b3;
+}

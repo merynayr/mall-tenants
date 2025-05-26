@@ -6,6 +6,9 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	position: fixed;
+	width: 100%;
+
 }
 
 .header-left {
@@ -27,6 +30,8 @@
   flex-direction: column;
   overflow: hidden;
   transition: width 0.3s ease;  
+	position: fixed;
+	margin-top: 64px;
 }
 
 .sidebar-closed {
@@ -47,10 +52,8 @@
   transition: opacity 0.3s ease;  
 }
 
-
-
 .exit {
-	margin-top: auto;
+	margin-top: 110%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -112,6 +115,9 @@
 .content {
 	padding: 10px 60px;
 	width: 100%;
+	margin-left: 300px;
+	margin-top: 64px;
+
 }
 
 

@@ -71,17 +71,34 @@ func (api *API) Create(c *gin.Context) {
 // @Failure      500  {object}  sys.ErrorResponse
 // @Router       /applications/ [get]
 func (api *API) GetAll(c *gin.Context) {
-	var processed *bool
-	if value := c.Query("processed"); value != "" {
-		boolVal, err := strconv.ParseBool(value)
+	var filter model.ApplicationFilter
+
+	if isProcessedStr := c.Query("processed"); isProcessedStr != "" {
+		isProcessed, err := strconv.ParseBool(isProcessedStr)
 		if err != nil {
 			sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
 			return
 		}
-		processed = &boolVal
+		filter.IsProcessed = &isProcessed
 	}
 
-	apps, err := api.appService.GetApplications(c.Request.Context(), processed)
+	limitStr := c.DefaultQuery("limit", "20")
+	limit, err := strconv.ParseUint(limitStr, 10, 64)
+	if err != nil {
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
+		return
+	}
+	filter.Limit = limit
+
+	offsetStr := c.DefaultQuery("offset", "0")
+	offset, err := strconv.ParseUint(offsetStr, 10, 64)
+	if err != nil {
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
+		return
+	}
+	filter.Offset = offset
+
+	apps, err := api.appService.GetApplications(c.Request.Context(), filter)
 	if err != nil {
 		sys.HandleError(c, err)
 		return

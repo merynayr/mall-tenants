@@ -1,0 +1,84 @@
+.overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.4);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 1000;
+	backdrop-filter: blur(4px);
+}
+
+.modal {
+	background-color: #fff;
+	border-radius: 16px;
+	padding: 32px;
+	width: 100%;
+	max-width: 420px;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+	text-align: center;
+	animation: fadeIn 0.2s ease-in-out;
+}
+
+h2 {
+	font-size: 20px;
+	margin-bottom: 24px;
+	color: #333;
+}
+
+.buttons {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+button {
+	padding: 12px 20px;
+	font-size: 16px;
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+button:hover {
+	transform: translateY(-1px);
+}
+
+.primary {
+	background-color: #4f46e5;
+	color: white;
+}
+
+.primary:hover {
+	background-color: #4338ca;
+}
+
+.danger {
+	background-color: #ef4444;
+	color: white;
+}
+
+.danger:hover {
+	background-color: #dc2626;
+}
+
+.secondary {
+	background-color: #f3f4f6;
+	color: #111827;
+}
+
+.secondary:hover {
+	background-color: #e5e7eb;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}

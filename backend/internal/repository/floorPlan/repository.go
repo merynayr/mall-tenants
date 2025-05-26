@@ -129,7 +129,11 @@ func (r *repo) GetAllPolygons(ctx context.Context, floor int64) ([]*model.Polygo
 		).
 		From(PolygonsTable + " AS p").
 		Join("premises AS pr ON p.premise_code = pr.code").
-		Where(sq.Eq{"pr.floor": floor}).
+		Where(
+			sq.And{
+				sq.Eq{"p.floor": floor},
+				sq.Eq{"pr.floor": floor},
+			}).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {

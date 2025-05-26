@@ -1,6 +1,7 @@
 package floorplan
 
 import (
+	"io"
 	"net/http"
 	"strconv"
 
@@ -8,6 +9,7 @@ import (
 	"github.com/merynayr/mall-tenants/internal/model"
 	"github.com/merynayr/mall-tenants/internal/service"
 	"github.com/merynayr/mall-tenants/internal/sys"
+	"github.com/merynayr/mall-tenants/internal/sys/codes"
 )
 
 // API premise структура
@@ -34,15 +36,15 @@ func (api *API) RegisterRoutes(router *gin.Engine) {
 	}
 }
 
-// UploadFloorPlan загружает SVG‑план этажа
-// @Summary      Загрузить SVG‑план этажа
-// @Description  Принимает multipart/form-data с полем file и сохраняет SVG на диск + в БД
+// UploadFloorPlan загружает план этажа (SVG или PNG)
+// @Summary      Загрузить план этажа
+// @Description  Принимает multipart/form-data с полем file и сохраняет файл на диск + в БД
 // @Tags         floor-plans
 // @Accept       multipart/form-data
 // @Produce      json
-// @Security BearerAuth
+// @Security     BearerAuth
 // @Param        floor path     int  true  "Номер этажа"
-// @Param        file  formData file true  "SVG‑файл плана этажа"
+// @Param        file  formData file true  "Файл плана этажа (.svg или .png)"
 // @Success      201 {object}   map[string]string  "{"message":"floor plan uploaded"}"
 // @Failure      400 {object}   sys.ErrorResponse  "Неверный запрос"
 // @Failure      500 {object}   sys.ErrorResponse  "Ошибка сервера при сохранении"
@@ -60,20 +62,35 @@ func (api *API) UploadFloorPlan(c *gin.Context) {
 		sys.HandleError(c, err)
 		return
 	}
+
 	file, err := fileHeader.Open()
 	if err != nil {
 		sys.HandleError(c, err)
 		return
 	}
-	defer func() {
-		err := file.Close()
-		if err != nil {
-			sys.HandleError(c, err)
-			return
-		}
-	}()
+	defer file.Close()
 
-	if err := api.floorplanService.SaveFloorPlan(c.Request.Context(), n, file); err != nil {
+	// Определим тип файла
+	buffer := make([]byte, 512)
+	if _, err := file.Read(buffer); err != nil {
+		sys.HandleError(c, err)
+		return
+	}
+	filetype := http.DetectContentType(buffer)
+
+	// Поддерживаемые типы
+	if filetype != "image/svg+xml" && filetype != "image/png" {
+		sys.HandleError(c, sys.NewCommonError("допустимы только SVG или PNG", codes.BadRequest))
+		return
+	}
+
+	// Вернуть начало файла
+	if _, err := file.Seek(0, io.SeekStart); err != nil {
+		sys.HandleError(c, err)
+		return
+	}
+
+	if err := api.floorplanService.SaveFloorPlan(c.Request.Context(), n, file, filetype); err != nil {
 		sys.HandleError(c, err)
 		return
 	}
@@ -81,15 +98,15 @@ func (api *API) UploadFloorPlan(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "floor plan uploaded"})
 }
 
-// GetFloorPlan отдает SVG‑план этажа
-// @Summary      Получить SVG‑план этажа
-// @Description  Возвращает raw SVG‑контент для указанного этажа
+// GetFloorPlan отдает PNG-план этажа
+// @Summary      Получить PNG‑план этажа
+// @Description  Возвращает raw PNG‑контент для указанного этажа
 // @Tags         floor-plans
 // @Accept       json
-// @Produce      image/svg+xml
+// @Produce      image/png
 // @Security BearerAuth
 // @Param        floor path int64 true "Номер этажа"
-// @Success      200 {file}    string              "SVG‑план этажа"
+// @Success      200 {file}    string              "PNG‑план этажа"
 // @Failure      400 {object}  sys.ErrorResponse   "Неверный номер этажа"
 // @Failure      404 {object}  sys.ErrorResponse   "План не найден"
 // @Router       /floor-plan/{floor} [get]
@@ -107,7 +124,7 @@ func (api *API) GetFloorPlan(c *gin.Context) {
 		return
 	}
 
-	c.Data(http.StatusOK, "image/svg+xml", content)
+	c.Data(http.StatusOK, "image/png", content)
 }
 
 // AddPolygon сохраняет полигон
@@ -171,7 +188,6 @@ func (api *API) GetPolygons(c *gin.Context) {
 		sys.HandleError(c, err)
 		return
 	}
-
 	c.JSON(http.StatusOK, polys)
 }
 
