@@ -1,27 +1,31 @@
 import { useEffect, useState } from 'react';
-import styles from './Payments.module.css';
+import styles from './MyPayments.module.css';
 import Button from '@/components/Button/Button';
 import api from '@/helpers/API';
 import { Payment } from '@/interfaces/payment';
 import { PaymentsTable } from '@/pages/Payments/PaymetnsTable/PaymetnsTable';
 import { AxiosError } from 'axios';
+import { RootState } from '@/store/store';
+import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 
-export function PagePayments() {
+export function PageMyPayments() {
 	const [payments, setPayments] = useState<Payment[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [limit] = useState(20);
 	const [offset, setOffset] = useState(0);
 	const [status, setStatus] = useState<'all' | 'paid' | 'unpaid'>('all');
-	const [searchQuery, setSearchQuery] = useState('');
 	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+	const { profile } = useSelector((state: RootState) => state.user);
 
 	useEffect(() => {
-		fetchPayments();
+		if (profile?.user_id) {
+			fetchPayments(profile.user_id);
+		}
 		setError("");
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [offset, status, searchQuery, sortOrder]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [offset, status, sortOrder, profile?.user_id]);
 
 	useEffect(() => {
 		if (error) {
@@ -29,17 +33,16 @@ export function PagePayments() {
 		}
 	}, [error]);
 	
-	const fetchPayments = async () => {
+	const fetchPayments = async (id: number | undefined) => {
 		try {
 			setIsLoading(true);
 			const isPaidParam = status === 'all' ? undefined : status === 'paid';
 
-			const { data } = await api.get<Payment[]>('/payments', {
+			const { data } = await api.get<Payment[]>(`/payments/client/${id}`, {
 				params: {
 					limit,
 					offset,
 					is_paid: isPaidParam,
-					client: searchQuery.trim() || undefined,
 					sort_by: 'period_start',
 					sort_order: sortOrder,
 				}
@@ -65,13 +68,6 @@ export function PagePayments() {
 		</div>
 
 		<div className={styles.filters}>
-			<input
-				type="text"
-				placeholder="Поиск по имени клиента..."
-				value={searchQuery}
-				onChange={(e) => setSearchQuery(e.target.value)}
-			/>
-
 			<select value={status} onChange={(e) => setStatus(e.target.value as any)}>
 				<option value="all">Все</option>
 				<option value="paid">Оплаченные</option>
@@ -103,4 +99,4 @@ export function PagePayments() {
 	</>;
 }
 
-export default PagePayments;
+export default PageMyPayments;

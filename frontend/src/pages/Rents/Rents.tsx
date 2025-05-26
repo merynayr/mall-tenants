@@ -5,6 +5,7 @@ import api from '@/helpers/API';
 import { Rent } from '@/interfaces/rent';
 import { RentsTable } from '@/pages/Rents/RentsTable/RentsTable';
 import { AxiosError } from 'axios';
+import { toast } from 'react-toastify';
 
 export function PageRents() {
 	const [rents, setRents] = useState<Rent[]>([]);
@@ -18,6 +19,12 @@ export function PageRents() {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [offset]);
 
+	useEffect(() => {
+		if (error) {
+			toast.error(error);
+		}
+	}, [error]);
+	
 	const fetchRents = async () => {
 		try {
 			setIsLoading(true);
@@ -46,7 +53,6 @@ export function PageRents() {
 		</div>
 
 		<div>
-			{error && <div className={styles.error}>{error}</div>}
 			{isLoading ? (
 				<div>Загрузка...</div>
 			) : (

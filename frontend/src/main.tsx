@@ -17,6 +17,8 @@ import PageRents from '@/pages/Rents/Rents';
 import { store } from '@/store/store';
 import PageMyRents from './pages/MyRents/MyRents';
 import { PageApplications } from './pages/Applications/Applications';
+import PageMyPayments from './pages/MyPayments/MyPayments';
+import { ToastContainer } from 'react-toastify';
 
 const router = createBrowserRouter([
 	{
@@ -62,6 +64,10 @@ const router = createBrowserRouter([
 				element: <PageMyRents />
 			},
 			{
+				path: '/my-payments',
+				element: <PageMyPayments />
+			},
+			{
 				path: '/applications',
 				element: <PageApplications />
 			}
@@ -88,6 +94,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 	<React.StrictMode>
 		<Provider store={store}>
 			<RouterProvider router={router} />
+			<ToastContainer position="top-right" autoClose={3000} />
 		</Provider>
 	</React.StrictMode>
 );

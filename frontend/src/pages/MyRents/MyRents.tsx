@@ -5,19 +5,32 @@ import { RootState } from '@/store/store';
 import { useSelector } from 'react-redux';
 import RentCard from './MyRentsCard/RentCard';
 import styles from './MyRents.module.css'; 
+import { AxiosError } from 'axios';
+import { toast } from 'react-toastify';
 
 const PageMyRents: React.FC = () => {
 	const [rents, setRents] = useState<Rent[]>([]);
 	const [loading, setLoading] = useState(true);
 	const { profile } = useSelector((state: RootState) => state.user);
+	const [error, setError] = useState<string | null>(null);
 
+
+	useEffect(() => {
+		if (error) {
+			toast.error(error);
+		}
+	}, [error]);
+	
 	useEffect(() => {
 		const fetchRents = async (id: number | undefined) => {
 			try {
 				const response = await api.get<Rent[]>(`/rental/${id}`);
 				setRents(response.data);
-			} catch (error) {
-				console.error('Ошибка при загрузке аренд:', error);
+			} catch (e) {
+				console.error(e);
+				if (e instanceof AxiosError) {
+					setError(e.response?.data.error);
+				}
 			} finally {
 				setLoading(false);
 			}

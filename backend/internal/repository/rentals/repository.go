@@ -35,7 +35,7 @@ func NewRepository(db db.Client) repository.RentalRepository {
 }
 
 // CreateRental создаёт новую аренду в базе данных
-func (r *repo) CreateRental(ctx context.Context, rental *model.Rental) error {
+func (r *repo) CreateRental(ctx context.Context, rental *model.Rental) (int64, error) {
 	query, args, err := sq.Insert(RentalTable).
 		Columns(
 			SpaceIDColumn,
@@ -54,10 +54,11 @@ func (r *repo) CreateRental(ctx context.Context, rental *model.Rental) error {
 			time.Now().UTC(),
 		).
 		PlaceholderFormat(sq.Dollar).
+		Suffix("RETURNING " + IDColumn).
 		ToSql()
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	q := db.Query{
@@ -65,12 +66,13 @@ func (r *repo) CreateRental(ctx context.Context, rental *model.Rental) error {
 		QueryRaw: query,
 	}
 
-	_, err = r.db.DB().ExecContext(ctx, q, args...)
+	var ID int64
+	err = r.db.DB().ScanOneContext(ctx, &ID, q, args...)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return ID, nil
 }
 
 // GetRentalByID получает аренду по её RentalID

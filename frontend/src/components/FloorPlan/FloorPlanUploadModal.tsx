@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './FloorPlanUploadModal.module.css';
 import api from '@/helpers/API';
+import { toast } from 'react-toastify';
 
 interface Props {
 	isOpen: boolean;
@@ -13,6 +14,12 @@ export const FloorPlanUploadModal: React.FC<Props> = ({ isOpen, onClose, onUploa
 	const [file, setFile] = useState<File | null>(null);
 	const [error, setError] = useState<string | null>(null);
 
+	useEffect(() => {
+		if (error) {
+			toast.error(error);
+		}
+	}, [error]);
+	
 	const handleSubmit = async () => {
 		const numericCode = Number(floor);
 		if (!floor || isNaN(numericCode) || numericCode <= 0) {
@@ -82,8 +89,6 @@ export const FloorPlanUploadModal: React.FC<Props> = ({ isOpen, onClose, onUploa
 						setFile(f);
 					}}
 				/>
-
-				{error && <p className={styles.error}>{error}</p>}
 
 				<div className={styles.buttons}>
 					<button onClick={handleSubmit}>Загрузить</button>

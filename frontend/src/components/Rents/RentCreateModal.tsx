@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './RentCreateModal.module.css';
 import api from '@/helpers/API';
+import { toast } from 'react-toastify';
 
 interface Props {
 	onClose: () => void;
@@ -19,6 +20,12 @@ export const RentCreateModal: React.FC<Props> = ({ onClose, onCreated }) => {
 	const [role, setRole] = useState('rent');
 	const [error, setError] = useState<string | null>(null);
 
+	useEffect(() => {
+		if (error) {
+			toast.error(error);
+		}
+	}, [error]);
+	
 	const handleSubmit = async () => {
 		try {
 			await api.post('/rents', {
@@ -97,8 +104,6 @@ export const RentCreateModal: React.FC<Props> = ({ onClose, onCreated }) => {
 					<option value="rent">Клиент</option>
 					<option value="admin">Администратор</option>
 				</select>
-
-				{error && <p className={styles.error}>{error}</p>}
 
 				<div className={styles.buttons}>
 					<button onClick={handleSubmit}>Создать</button>

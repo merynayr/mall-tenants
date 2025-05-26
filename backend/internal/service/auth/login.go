@@ -21,7 +21,7 @@ func (s *srv) Login(ctx context.Context, email string, password string) (*model.
 
 	err = hash.CompareHashAndPass(password, user.Password)
 	if err != nil {
-		return nil, sys.InvalidPasswordError
+		return nil, sys.InvalidCredentialsError
 	}
 
 	userInfo := &model.UserClaims{

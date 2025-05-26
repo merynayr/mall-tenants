@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './ClientCreateModal.module.css';
 import api from '@/helpers/API';
 import { Application } from '@/interfaces/applications';
+import { toast } from 'react-toastify';
 
 interface Props {
 	onClose: () => void;
@@ -21,6 +22,12 @@ export const ClientCreateModal: React.FC<Props> = ({ onClose, onCreated, initial
 	const [role, setRole] = useState('client');
 	const [error, setError] = useState<string | null>(null);
 
+	useEffect(() => {
+		if (error) {
+			toast.error(error);
+		}
+	}, [error]);
+	
 	const handleSubmit = async () => {
 		try {
 			await api.post('/clients', {
@@ -100,8 +107,6 @@ export const ClientCreateModal: React.FC<Props> = ({ onClose, onCreated, initial
 					<option value="client">Клиент</option>
 					<option value="admin">Администратор</option>
 				</select>
-
-				{error && <p className={styles.error}>{error}</p>}
 
 				<div className={styles.buttons}>
 					<button onClick={handleSubmit}>Создать</button>

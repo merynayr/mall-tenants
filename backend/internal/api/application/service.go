@@ -67,6 +67,8 @@ func (api *API) Create(c *gin.Context) {
 // @Produce      json
 // @Security     BearerAuth
 // @Param        processed  query  bool  false  "Фильтрация по статусу обработки"
+// @Param limit  query  int  false "Максимальное количество договоров" default(20)
+// @Param offset query  int  false "Смещение для пагинации" default(0)
 // @Success      200  {array}   model.Application
 // @Failure      500  {object}  sys.ErrorResponse
 // @Router       /applications/ [get]
@@ -115,7 +117,7 @@ func (api *API) GetAll(c *gin.Context) {
 // @Security     BearerAuth
 // @Param        id    path     int               true  "ID заявки"
 // @Param        body  body     updateStatusInput true  "Статус заявки"
-// @Success      200   {object} gin.H
+// @Success      200   {object} map[string]interface{}
 // @Failure      400   {object} sys.ErrorResponse
 // @Failure      500   {object} sys.ErrorResponse
 // @Router       /applications/{id}/status [patch]

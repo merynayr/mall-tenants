@@ -13,6 +13,7 @@ import (
 type srv struct {
 	rentalRepository  repository.RentalRepository
 	premiseRepository repository.PremiseRepository
+	paymentRepository repository.PaymentRepository
 	txManager         db.TxManager
 }
 
@@ -20,11 +21,13 @@ type srv struct {
 func NewService(
 	rentalRepo repository.RentalRepository,
 	premiseRepo repository.PremiseRepository,
+	paymentRepository repository.PaymentRepository,
 	txManager db.TxManager,
 ) service.RentalService {
 	return &srv{
 		rentalRepository:  rentalRepo,
 		premiseRepository: premiseRepo,
+		paymentRepository: paymentRepository,
 		txManager:         txManager,
 	}
 }

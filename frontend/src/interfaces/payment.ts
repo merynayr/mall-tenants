@@ -7,7 +7,7 @@ export interface Payment {
   status: boolean;
 	start_date: string;
 	end_date: string;
-	paid_months: number;
+	payment_date: string;
 	created_at: string;
 	updated_at?: string;
 }

@@ -7,6 +7,7 @@ import { Client } from '@/interfaces/client';
 import { ClientsTable } from '@/pages/Clients/ClientsTable/ClientsTable';
 import { useHasRole } from '@/hooks/Role';
 import { AxiosError } from 'axios';
+import { toast } from 'react-toastify';
 
 export function PageClients() {
 	const [clients, setClients] = useState<Client[]>([]);
@@ -21,6 +22,12 @@ export function PageClients() {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [offset]);
 
+	useEffect(() => {
+		if (error) {
+			toast.error(error);
+		}
+	}, [error]);
+	
 	const fetchClients = async () => {
 		try {
 			setIsLoading(true);
@@ -60,7 +67,6 @@ export function PageClients() {
 		</div>
 
 		<div>
-			{error && <div className={styles.error}>{error}</div>}
 			{isLoading ? (
 				<div>Загрузка...</div>
 			) : (

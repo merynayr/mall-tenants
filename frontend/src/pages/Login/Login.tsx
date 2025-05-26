@@ -7,6 +7,7 @@ import Headling from '@/components/Headling/Headling';
 import Input from '@/components/Input/Input';
 import { AppDispath, RootState } from '@/store/store';
 import { getProfile, login, userActions } from '@/store/user.slice';
+import { toast } from 'react-toastify';
 
 export type LoginForm = {
 	email: {
@@ -21,6 +22,12 @@ export function Login() {
 	const navigate = useNavigate();
 	const dispatch = useDispatch<AppDispath>();
 	const { jwt, loginErrorMessage } = useSelector((s: RootState) => s.user);
+
+	useEffect(() => {
+		if (loginErrorMessage) {
+			toast.error(loginErrorMessage);
+		}
+	}, [loginErrorMessage]);
 
 	useEffect(() => {
 		if (jwt) {
@@ -43,7 +50,6 @@ export function Login() {
 
 	return <div className={styles['login']}>
 		<Headling>Вход</Headling>
-		{loginErrorMessage && <div className={styles['error']}>{loginErrorMessage}</div>}
 		<form className={styles['form']} onSubmit={submit}>
 			<div className={styles['field']}>
 				<label htmlFor="email">Ваш email</label>

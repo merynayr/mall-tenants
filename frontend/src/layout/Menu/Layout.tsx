@@ -63,7 +63,7 @@ export function Layout() {
 						{useHasRole('moderator') && (
 						<>
 							<NavLink to="/applications" className={({ isActive }) => cn(styles['link'], { [styles.active]: isActive })}>
-								<img src="/application-icon.svg" alt="Иконка договоров" className={styles['icon']} />
+								<img src="/application-icon.svg" alt="Иконка заявок" className={styles['icon']} />
 								{isSidebarOpen && 'Заявки'}
 							</NavLink>
 						</>
@@ -96,6 +96,10 @@ export function Layout() {
 							<NavLink to="/my-rents" className={({ isActive }) => cn(styles['link'], { [styles.active]: isActive })}>
 								<img src="/rent-icon.svg" alt="Иконка договоров" className={styles['icon']} />
 								{isSidebarOpen && 'Мои аренды'}
+							</NavLink>
+							<NavLink to="/my-payments" className={({ isActive }) => cn(styles['link'], { [styles.active]: isActive })}>
+								<img src="/payment-icon.svg" alt="Иконка оплат" className={styles['icon']} />
+								{isSidebarOpen && 'Мои платежи'}
 							</NavLink>
 						</>
 					)}

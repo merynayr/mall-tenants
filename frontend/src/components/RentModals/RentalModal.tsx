@@ -10,7 +10,7 @@ interface RentModalProps {
   onStartDateChange: (value: string) => void;
   onEndDateChange: (value: string) => void;
   onCancel: () => void;
-  onNext: () => void;
+  onConfirm: () => void; 
 }
 
 export function RentalModal({
@@ -23,7 +23,7 @@ export function RentalModal({
   onStartDateChange,
   onEndDateChange,
   onCancel,
-  onNext
+  onConfirm
 }: RentModalProps) {
   return (
     <div className={styles['modal-overlay']}>
@@ -47,13 +47,13 @@ export function RentalModal({
           <>
             <p><strong>Срок аренды:</strong> {durationMonths} мес.</p>
             <p><strong>Аренда/мес:</strong> {rentPerMonth} ₽</p>
-            <p><strong>К оплате сейчас (2 мес):</strong> {rentPerMonth * 2} ₽</p>
+            <p><strong>Итого к оплате:</strong> {durationMonths * rentPerMonth} ₽</p>
           </>
         )}
 
         <div className={styles['modal-actions']}>
           <button onClick={onCancel}>Отмена</button>
-          <button onClick={onNext} disabled={!durationMonths}>Оплатить</button>
+          <button onClick={onConfirm} disabled={!durationMonths}>Арендовать</button>
         </div>
       </div>
     </div>

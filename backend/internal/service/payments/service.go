@@ -34,12 +34,41 @@ func NewService(
 	}
 }
 
-func (s *srv) CreatePayment(ctx context.Context, p model.Payment) (int64, error) {
+func (s *srv) CreatePayment(ctx context.Context, p model.Payment) error {
 	if p.Amount <= 0 {
-		return 0, errors.New("amount must be greater than 0")
+		return errors.New("amount must be greater than 0")
 	}
 
-	return s.paymentRepository.CreatePayment(ctx, p)
+	start := p.PeriodStart
+	end := p.PeriodEnd
+	payments := make([]model.Payment, 0)
+
+	currentStart := start
+
+	for currentStart.Before(end) {
+		nextMonth := currentStart.AddDate(0, 1, 0)
+
+		var currentEnd time.Time
+		if nextMonth.After(end) {
+			currentEnd = end
+		} else {
+			currentEnd = nextMonth.AddDate(0, 0, -1)
+		}
+
+		payment := model.Payment{
+			RentalID:    p.RentalID,
+			PeriodStart: currentStart,
+			PeriodEnd:   currentEnd,
+			Amount:      int(p.Amount),
+			IsPaid:      false,
+			CreatedAt:   time.Now().UTC(),
+		}
+		payments = append(payments, payment)
+
+		currentStart = nextMonth
+	}
+
+	return s.paymentRepository.CreatePayment(ctx, payments)
 }
 
 func (s *srv) MarkAsPaid(ctx context.Context, id int64) error {
@@ -105,7 +134,18 @@ func (s *srv) GetByID(ctx context.Context, id int64) (model.Payment, error) {
 	return s.paymentRepository.GetByID(ctx, id)
 }
 
-func (s *srv) ListPayments(ctx context.Context, filter model.PaymentFilter) ([]model.Payment, error) {
+func (s *srv) GetByClientID(ctx context.Context, id int64, filter model.PaymentFilter) ([]model.PaymentList, error) {
+	payments, err := s.paymentRepository.GetByClientID(ctx, id, filter)
+	if err != nil {
+		return nil, err
+	}
+	if len(payments) == 0 {
+		return nil, sys.PaymentsNotFoundError
+	}
+	return payments, nil
+}
+
+func (s *srv) ListPayments(ctx context.Context, filter model.PaymentFilter) ([]model.PaymentList, error) {
 	payments, err := s.paymentRepository.List(ctx, filter)
 	if err != nil {
 		return nil, err

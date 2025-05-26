@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './PremiseCreateModal.module.css';
 import api from '@/helpers/API';
+import { toast } from 'react-toastify';
+import { AxiosError } from 'axios';
 
 interface Props {
 	onClose: () => void;
@@ -18,6 +20,12 @@ export const PremiseCreateModal: React.FC<Props> = ({ onClose, onCreated }) => {
 	const [air, setAir] = useState('YES');
 	const [error, setError] = useState<string | null>(null);
 
+	useEffect(() => {
+		if (error) {
+			toast.error(error);
+		}
+	}, [error]);
+	
 	const handleSubmit = async () => {
 		const codeNum = Number(premiseCode);
 		const floorNum = Number(floor);
@@ -26,9 +34,9 @@ export const PremiseCreateModal: React.FC<Props> = ({ onClose, onCreated }) => {
 
 		if (
 			!codeNum || codeNum <= 0 ||
-			!floorNum || floorNum < 0 ||
+			!floorNum || floorNum <= 0 ||
 			!areaNum || areaNum <= 0 ||
-			!rentNum || rentNum < 0
+			!rentNum || rentNum <= 0
 		) {
 			setError('Пожалуйста, заполните все числовые поля корректными значениями');
 			return;
@@ -49,7 +57,9 @@ export const PremiseCreateModal: React.FC<Props> = ({ onClose, onCreated }) => {
 			onClose();
 		} catch (e) {
 			console.error(e);
-			setError('Ошибка при создании помещения');
+			if (e instanceof AxiosError) {
+				setError(e.response?.data.error);
+			}
 		}
 	};
 
@@ -101,8 +111,6 @@ export const PremiseCreateModal: React.FC<Props> = ({ onClose, onCreated }) => {
 					<option value="YES">Кондиционирование</option>
 					<option value="NO">Нет кондиционирования</option>
 				</select>
-
-				{error && <p className={styles.error}>{error}</p>}
 
 				<div className={styles.buttons}>
 					<button onClick={handleSubmit}>Создать</button>

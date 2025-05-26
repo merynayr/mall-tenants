@@ -7,6 +7,7 @@ import { ApplicationsTable } from './ApplicationsTable/ApplicationsTable';
 import { ClientCreateModal } from '@/components/Clients/ClientCreateModal';
 import { ProcessChoiceModal } from '@/components/Applications/ProcessChoiceModal/ProcessChoiceModal';
 import Button from '@/components/Button/Button';
+import { toast } from 'react-toastify';
 
 export function PageApplications() {
 	const [applications, setApplications] = useState<Application[]>([]);
@@ -25,6 +26,12 @@ export function PageApplications() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [offset, filter]);
 
+	useEffect(() => {
+		if (error) {
+			toast.error(error);
+		}
+	}, [error]);
+	
 	const fetchApplications = async () => {
 		try {
 			setIsLoading(true);
@@ -99,9 +106,7 @@ export function PageApplications() {
 			</div>
 
 		
-			{error ? (
-				<div className={styles.error}>{error}</div>
-			) : isLoading ? (
+			{isLoading ? (
 				<div>Загрузка...</div>
 			) : (
 				<>

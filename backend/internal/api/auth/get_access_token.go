@@ -15,13 +15,19 @@ func (a *API) GetAccessToken(c *gin.Context) {
 		return
 	}
 
-	token, err := a.authService.GetAccessToken(c.Request.Context(), refreshToken)
+	accessToken, err := a.authService.GetAccessToken(c.Request.Context(), refreshToken)
 	if err != nil {
 		sys.HandleError(c, err)
 		return
 	}
 
-	a.setCookies(c, "", token)
+	refreshToken, err = a.authService.GetRefreshToken(c.Request.Context(), refreshToken)
+	if err != nil {
+		sys.HandleError(c, sys.InvalidRefreshTokenError)
+		return
+	}
 
-	c.JSON(http.StatusOK, gin.H{"access_token": token})
+	a.setCookies(c, refreshToken, accessToken)
+
+	c.JSON(http.StatusOK, gin.H{"access_token": accessToken, "refresh_token": refreshToken})
 }

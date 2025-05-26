@@ -343,6 +343,7 @@ func (s *serviceProvider) RentalService(ctx context.Context) service.RentalServi
 		s.rentalService = rentalService.NewService(
 			s.RentalRepository(ctx),
 			s.PremiseRepository(ctx),
+			s.PaymentRepository(ctx),
 			s.TxManager(ctx),
 		)
 	}

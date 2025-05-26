@@ -28,18 +28,19 @@ type PremiseRepository interface {
 // RentalRepository - интерфейс репо слоя для аренд
 type RentalRepository interface {
 	GetRentalsByID(ctx context.Context, id int64) ([]model.Rental, error)
-	CreateRental(ctx context.Context, rental *model.Rental) error
+	CreateRental(ctx context.Context, rental *model.Rental) (int64, error)
 	UpdateRental(ctx context.Context, rental *model.Rental) error
 	GetAgreements(ctx context.Context, limit, offset uint64) ([]model.Agreements, error)
 }
 
 // PaymentRepository - интерфейс репо слоя для платежей
 type PaymentRepository interface {
-	CreatePayment(ctx context.Context, p model.Payment) (int64, error)
+	CreatePayment(ctx context.Context, payments []model.Payment) error
 	MarkAsPaid(ctx context.Context, id int64, paidAt time.Time) error
 	MarkAsPaidMany(ctx context.Context, ids []int64, paymentDate time.Time) error
 	GetByID(ctx context.Context, id int64) (model.Payment, error)
-	List(ctx context.Context, f model.PaymentFilter) ([]model.Payment, error)
+	GetByClientID(ctx context.Context, id int64, filter model.PaymentFilter) ([]model.PaymentList, error)
+	List(ctx context.Context, f model.PaymentFilter) ([]model.PaymentList, error)
 }
 
 // FloorPlanRepository - интерфейс репо слоя для плана здания

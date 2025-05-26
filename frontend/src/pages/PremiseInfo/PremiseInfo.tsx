@@ -6,11 +6,12 @@ import Button from '@/components/Button/Button';
 import api from '@/helpers/API';
 import { Premises } from '@/interfaces/premises';
 import { RootState } from '@/store/store';
-import { PaymentModal } from '@/components/RentModals/PaymentModal';
 import { RentalModal } from '@/components/RentModals/RentalModal';
 import { useHasRole } from '@/hooks/Role';
 import LeaveRequestModal from '@/components/Applications/LeaveRequestModal';
 import { AxiosError } from 'axios';
+import { calculateRentalDuration } from '@/helpers/CountMonth';
+import { toast } from 'react-toastify';
 
 export function PremiseInfo() {
 	const { id } = useParams<{ id: string }>();
@@ -27,50 +28,27 @@ export function PremiseInfo() {
 	const [endDate, setEndDate] = useState<string>(''); 
 	const [durationMonths, setDurationMonths] = useState<number | null>(null);
 	const [dateError, setDateError] = useState<string | null>(null);
-	const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-	const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
 	const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
 	const hasRole = useHasRole('client', 'moderator', 'director');
 	
 	useEffect(() => {
 		if (startDate && endDate) {
-			const start = new Date(startDate);
-			const end = new Date(endDate);
-	
-			if (start > end) {
-				setDateError('Дата начала позже даты окончания');
+			const duration = calculateRentalDuration(startDate, endDate);
+			if (duration === null) {
+				setDateError('Неверный диапазон дат');
 				setDurationMonths(null);
-				return;
+			} else {
+				setDateError(null);
+				setDurationMonths(duration);
 			}
-
-			const today = new Date();
-			today.setHours(0, 0, 0, 0);
-
-			if (start <= today) {
-				setDateError('Дата начала должна быть позже сегодняшнего дня');
-				setDurationMonths(null);
-				return;
-			}
-
-			if (start.getDate() !== end.getDate()) {
-				setDateError('Даты должны быть в один и тот же день месяца (например, с 1 по 1)');
-				setDurationMonths(null);
-				return;
-			}
-	
-			const monthsDiff = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
-	
-			if (monthsDiff < 1) {
-				setDateError('Минимальный срок аренды — 1 месяц');
-				setDurationMonths(null);
-				return;
-			}
-	
-			setDateError(null);
-			setDurationMonths(monthsDiff);
 		}
 	}, [startDate, endDate]);
 
+	useEffect(() => {
+		if (error) {
+			toast.error(error);
+		}
+	}, [error]);
 	
 	useEffect(() => {
 		if (!premise && id) {
@@ -91,18 +69,15 @@ export function PremiseInfo() {
 		setStartDate('');
 		setEndDate('');
 		setDurationMonths(null);
-		setSelectedPayment(null);
 		setDateError(null);
 	};
 	
 	const closeAllModals = () => {
 		setIsModalOpen(false);
-		setIsPaymentModalOpen(false);
 		setStartDate('');
 		setEndDate('');
 		setDurationMonths(null);
 		setDateError(null);
-		setSelectedPayment(null);
 	};
 		
 	const getReadableType = (type: string) => {
@@ -148,23 +123,23 @@ export function PremiseInfo() {
 		}
 	};
 
-	const handlePaymentSubmit = async () => {
-		if (!premise || !durationMonths || !startDate || !endDate || !selectedPayment) return;
+	const handleRentSubmit = async () => {
+		if (!premise || !durationMonths || !startDate || !endDate) return;
 		try {
 			await api.post('/rental/', {
 				space_code: Number(premise.code),
 				client_id: profile?.user_id,
 				start_date: new Date(startDate).toISOString(),
 				end_date: new Date(endDate).toISOString(),
-				paid_months: 2,
+				paid_months: 0,
 				created_at: new Date().toISOString()
 			});
 	
-			alert('Оплата прошла успешно!');
+			alert('Вы успешно арнедовали помещение!');
 			closeAllModals();
 		} catch (error) {
 			console.error('Ошибка при отправке аренды:', error);
-			alert('Ошибка при оплате. Попробуйте позже.');
+			alert('Ошибка при аренде. Попробуйте позже.');
 		}
 	};
 	
@@ -172,7 +147,6 @@ export function PremiseInfo() {
 	return (
 		<>
 			<h1>Помещение {premise?.floor} - {premise?.code}</h1><div>
-				{error && <p style={{ color: 'red' }}>{error}</p>}
 				{isLoading && <p>Загружаем данные...</p>}
 				{!isLoading && premise && (
 					<div className={styles['premise-info']}>
@@ -215,29 +189,9 @@ export function PremiseInfo() {
 						setIsModalOpen(false);
 						resetForm();
 					}}
-					onNext={() => {
-						if (durationMonths) {
-							setIsModalOpen(false);
-							setIsPaymentModalOpen(true);
-						}
-					}}
-				/>
-			)}
-
-			{isPaymentModalOpen && premise && (
-				<PaymentModal
-					amount={premise.rent_per_month * 2}
-					selectedPayment={selectedPayment}
-					onSelectPayment={setSelectedPayment}
-					onCancel={() => {
-						setIsPaymentModalOpen(false);
-						setIsModalOpen(true);
-					}}
 					onConfirm={() => {
-						if (selectedPayment) {
-							handlePaymentSubmit();
-							closeAllModals();
-						}
+						handleRentSubmit();
+						closeAllModals();
 					}}
 				/>
 			)}

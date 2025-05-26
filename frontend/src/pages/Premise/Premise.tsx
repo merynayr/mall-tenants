@@ -7,6 +7,7 @@ import api from '@/helpers/API';
 import { useHasRole } from '@/hooks/Role';
 import { Premises } from '@/interfaces/premises';
 import { PremiseList } from '@/pages/Premise/PremisesList/PremisesList';
+import { toast } from 'react-toastify';
 
 
 export function PagePremises() {
@@ -20,7 +21,12 @@ export function PagePremises() {
 		getPremises();
 	}, []);
 
-
+	useEffect(() => {
+		if (error) {
+			toast.error(error);
+		}
+	}, [error]);
+	
 	const getPremises = async () => {
 		try {
 			setIsLoading(true);
@@ -46,7 +52,6 @@ export function PagePremises() {
 		</div>
 
 		<div>
-			{error && <>{error}</>}
 			{!isLoading && premises.length > 0 && <PremiseList premises={premises} />}
 			{isLoading && <>Загружаем помещения...</>}
 			{!isLoading && premises.length === 0 && !error &&<>Не найдено помещений по запросу</>}

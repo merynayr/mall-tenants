@@ -46,11 +46,12 @@ type RentalService interface {
 
 // PaymentService - интерфейс репо слоя для платежей
 type PaymentService interface {
-	CreatePayment(ctx context.Context, p model.Payment) (int64, error)
+	CreatePayment(ctx context.Context, p model.Payment) error
 	MarkAsPaid(ctx context.Context, id int64) error
 	MarkPaymentsAsPaid(ctx context.Context, paymentIDs []int64) error
 	GetByID(ctx context.Context, id int64) (model.Payment, error)
-	ListPayments(ctx context.Context, filter model.PaymentFilter) ([]model.Payment, error)
+	GetByClientID(ctx context.Context, id int64, filter model.PaymentFilter) ([]model.PaymentList, error)
+	ListPayments(ctx context.Context, filter model.PaymentFilter) ([]model.PaymentList, error)
 }
 
 // FloorPlanService интерфейс сервисного слоя план этажей

@@ -9,6 +9,7 @@ import { PolygonInfoModal } from '@/components/PolygonLayer/PolygonInfoModal';
 import api from '@/helpers/API';
 import { Point, Polygon, PolygonFromAPI } from '@/interfaces/floorplan';
 import '@/store/storage';
+import { toast } from 'react-toastify';
 
 export function PremisesMapperPage() {
 	const [isDrawing, setIsDrawing] = useState(false);
@@ -19,6 +20,7 @@ export function PremisesMapperPage() {
 	const [showModal, setShowModal] = useState(false);
 	const [selectedPolygonIndex, setSelectedPolygonIndex] = useState<number | null>(null);
 	const [showAddFloorPlanModal, setShowAddFloorPlanModal] = useState(false);
+	const [error, setError] = useState<string | null>(null);
 
 
 	useEffect(() => {
@@ -29,6 +31,12 @@ export function PremisesMapperPage() {
 		fetchPolygons(floor);
 	}, [floor]);
 
+	useEffect(() => {
+		if (error) {
+			toast.error(error);
+		}
+	}, [error]);
+	
 	const navigate = useNavigate();
 
 	const handlePolygonDoubleClick = (premiseCode: number) => {
@@ -72,8 +80,9 @@ export function PremisesMapperPage() {
 			};
 			reader.readAsDataURL(blob);
 		} catch (e) {
+			console.error(e);
 			if (e instanceof AxiosError) {
-				console.error(e.response?.data.error);
+				setError(e.response?.data.error);
 			}
 		}
 	};
@@ -82,7 +91,6 @@ export function PremisesMapperPage() {
 
 	const fetchPolygons = async (floor: number) => {
 		try {
-			console.log(floor)
 			const { data } = await api.get<PolygonFromAPI[]>(`/floor-plan/polygons/${floor}`);
 			const parsed = data.map((poly) => ({
 				points: poly.points.split(' ').map((pair) => {
@@ -96,7 +104,10 @@ export function PremisesMapperPage() {
 			}));
 			setPolygons(parsed);
 		} catch (e) {
-			if (e instanceof AxiosError) console.error(e.response?.data.error);
+			console.error(e);
+			if (e instanceof AxiosError) {
+				setError(e.response?.data.error);
+			}
 		}
 	};
 
@@ -109,7 +120,10 @@ export function PremisesMapperPage() {
 			});
 			return true;
 		} catch (e) {
-			if (e instanceof AxiosError) console.error(e.response?.data.error);
+			console.error(e);
+			if (e instanceof AxiosError) {
+				setError(e.response?.data.error);
+			}
 			return false;
 		}
 	};
@@ -128,9 +142,11 @@ export function PremisesMapperPage() {
 			newPolygons.splice(selectedPolygonIndex, 1);
 			setPolygons(newPolygons);
 			setSelectedPolygonIndex(null);
-		} catch (error) {
-			alert('Ошибка при удалении полигона');
-			console.error(error);
+		} catch (e) {
+			console.error(e);
+			if (e instanceof AxiosError) {
+				setError(e.response?.data.error);
+			}
 		}
 	};
 

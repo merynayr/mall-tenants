@@ -31,6 +31,7 @@ func (api *API) RegisterRoutes(router *gin.Engine) {
 		paymentGroup.PATCH("/mark-paid", api.MarkPaymentsPaid)
 		paymentGroup.GET(":id", api.GetPayment)
 		paymentGroup.GET("", api.ListPayments)
+		paymentGroup.GET("/client/:id", api.ListClientPayments)
 	}
 }
 
@@ -50,13 +51,13 @@ func (api *API) CreatePayment(c *gin.Context) {
 		return
 	}
 
-	id, err := api.paymentService.CreatePayment(c.Request.Context(), p)
+	err := api.paymentService.CreatePayment(c.Request.Context(), p)
 	if err != nil {
 		sys.HandleError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"id": id})
+	c.Status(http.StatusCreated)
 }
 
 // MarkAsPaid godoc
@@ -139,17 +140,84 @@ func (api *API) GetPayment(c *gin.Context) {
 	c.JSON(http.StatusOK, p)
 }
 
+// ListClientPayments godoc
+// @Summary      Получить список платёжных операций клиента по ID
+// @Description  Возвращает список платежей конкретного клиента с фильтрацией, поиском и сортировкой
+// @Tags         payments
+// @Accept       json
+// @Produce      json
+// @Param        id           path      int    true   "ID клиента"
+// @Param        is_paid      query     bool   false  "Фильтрация по статусу оплаты (true/false)"
+// @Param        sort_by      query     string false  "Поле сортировки (например, period_start)"
+// @Param        sort_order   query     string false  "Порядок сортировки: asc или desc"
+// @Param        limit        query     int    false  "Количество записей на страницу (по умолчанию 20)"
+// @Param        offset       query     int    false  "Смещение (offset) от начала выборки"
+// @Success      200          {array}  model.Payment
+// @Failure      400          {object}  sys.ErrorResponse "Некорректный запрос"
+// @Failure      500          {object}  sys.ErrorResponse "Внутренняя ошибка сервера"
+// @Router       /payments/client/{id} [get]
+func (api *API) ListClientPayments(c *gin.Context) {
+	var filter model.PaymentFilter
+
+	clientIDStr := c.Param("id")
+	clientID, err := strconv.ParseInt(clientIDStr, 10, 64)
+	if err != nil {
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
+		return
+	}
+
+	if isPaidStr := c.Query("is_paid"); isPaidStr != "" {
+		isPaid, err := strconv.ParseBool(isPaidStr)
+		if err != nil {
+			sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
+			return
+		}
+		filter.IsPaid = &isPaid
+	}
+
+	filter.SortBy = c.DefaultQuery("sort_by", "period_start")
+	filter.SortOrder = c.DefaultQuery("sort_order", "desc")
+
+	limitStr := c.DefaultQuery("limit", "20")
+	limit, err := strconv.ParseUint(limitStr, 10, 64)
+	if err != nil {
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
+		return
+	}
+	filter.Limit = limit
+
+	offsetStr := c.DefaultQuery("offset", "0")
+	offset, err := strconv.ParseUint(offsetStr, 10, 64)
+	if err != nil {
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
+		return
+	}
+	filter.Offset = offset
+
+	payments, err := api.paymentService.GetByClientID(c.Request.Context(), clientID, filter)
+	if err != nil {
+		sys.HandleError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, payments)
+}
+
 // ListPayments godoc
-// @Summary Получить список платежей
-// @Tags payments
-// @Produce json
-// @Security BearerAuth
-// @Param is_paid query string false "Фильтрация по статусу оплаты" Enums(true, false)
-// @Param limit  query  int  false "Максимальное количество договоров" default(20)
-// @Param offset query  int  false "Смещение для пагинации" default(0)
-// @Success 200 {array} model.Payment
-// @Failure 400,500 {object} sys.ErrorResponse
-// @Router /payments [get]
+// @Summary      Получить список платёжных операций
+// @Description  Возвращает список платежей с фильтрацией, поиском и сортировкой
+// @Tags         payments
+// @Accept       json
+// @Produce      json
+// @Param        is_paid     query     bool   false  "Фильтрация по статусу оплаты (true/false)"
+// @Param        client      query     string false  "Поиск по имени клиента (нечёткий поиск)"
+// @Param        sort_by     query     string false  "Поле сортировки (например, period_start)"
+// @Param        sort_order  query     string false  "Порядок сортировки: asc или desc"
+// @Param        limit       query     int    false  "Количество записей на страницу (по умолчанию 20)"
+// @Param        offset      query     int    false  "Смещение (offset) от начала выборки"
+// @Success      200         {array}   model.Payment
+// @Failure      400         {object}  sys.ErrorResponse "Некорректный запрос"
+// @Failure      500         {object}  sys.ErrorResponse "Внутренняя ошибка сервера"
+// @Router       /payments [get]
 func (api *API) ListPayments(c *gin.Context) {
 	var filter model.PaymentFilter
 
@@ -161,6 +229,11 @@ func (api *API) ListPayments(c *gin.Context) {
 		}
 		filter.IsPaid = &isPaid
 	}
+
+	filter.Client = c.Query("client")
+
+	filter.SortBy = c.DefaultQuery("sort_by", "period_start")
+	filter.SortOrder = c.DefaultQuery("sort_order", "desc")
 
 	limitStr := c.DefaultQuery("limit", "20")
 	limit, err := strconv.ParseUint(limitStr, 10, 64)

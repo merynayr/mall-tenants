@@ -74,7 +74,7 @@ const userSlice = createSlice({
 			state.jwt = action.payload.access_token;
 		});
 		builder.addCase(login.rejected, (state, action) => {
-			state.loginErrorMessage = action.error.message;
+			state.loginErrorMessage = action.payload as string;
 		});
 		builder.addCase(getProfile.fulfilled, (state, action) => {
 			state.profile = action.payload;
