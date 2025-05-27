@@ -3,6 +3,10 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import { Provider } from 'react-redux';
 import { RouterProvider, createBrowserRouter  } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import { PageApplications } from './pages/Applications/Applications';
+import PageMyPayments from './pages/MyPayments/MyPayments';
+import PageMyRents from './pages/MyRents/MyRents';
 import { RequireAuth } from '@/helpers/RequireAuth';
 import { AuthLayout } from '@/layout/Auth/AuthLayout';
 import { Layout } from '@/layout/Menu/Layout';
@@ -15,10 +19,6 @@ import PremiseInfo from '@/pages/PremiseInfo/PremiseInfo';
 import PremisesMapperPage from '@/pages/PremisesMapper/PremisesMapperPage';
 import PageRents from '@/pages/Rents/Rents';
 import { store } from '@/store/store';
-import PageMyRents from './pages/MyRents/MyRents';
-import { PageApplications } from './pages/Applications/Applications';
-import PageMyPayments from './pages/MyPayments/MyPayments';
-import { ToastContainer } from 'react-toastify';
 
 const router = createBrowserRouter([
 	{

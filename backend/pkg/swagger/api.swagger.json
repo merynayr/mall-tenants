@@ -11,6 +11,168 @@
     },
     "host": "localhost:8080",
     "paths": {
+        "/applications/": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает список всех заявок. Можно указать ?processed=true/false для фильтрации",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "summary": "Получить все заявки",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "Фильтрация по статусу обработки",
+                        "name": "processed",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 20,
+                        "description": "Максимальное количество договоров",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Смещение для пагинации",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Application"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Создаёт новую заявку на аренду помещения",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "summary": "Создать заявку",
+                "parameters": [
+                    {
+                        "description": "Данные заявки",
+                        "name": "application",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Application"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "message: Application submitted successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/applications/{id}/status": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Обновляет флаг processed заявки по ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "summary": "Обновить статус заявки",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID заявки",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Статус заявки",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/application.updateStatusInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "description": "Аутентифицирует пользователя и возвращает JWT-токен",
@@ -378,17 +540,17 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Возвращает raw SVG‑контент для указанного этажа",
+                "description": "Возвращает raw PNG‑контент для указанного этажа",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
-                    "image/svg+xml"
+                    "image/png"
                 ],
                 "tags": [
                     "floor-plans"
                 ],
-                "summary": "Получить SVG‑план этажа",
+                "summary": "Получить PNG‑план этажа",
                 "parameters": [
                     {
                         "type": "integer",
@@ -400,7 +562,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "SVG‑план этажа",
+                        "description": "PNG‑план этажа",
                         "schema": {
                             "type": "file"
                         }
@@ -425,7 +587,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Принимает multipart/form-data с полем file и сохраняет SVG на диск + в БД",
+                "description": "Принимает multipart/form-data с полем file и сохраняет файл на диск + в БД",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -435,7 +597,7 @@
                 "tags": [
                     "floor-plans"
                 ],
-                "summary": "Загрузить SVG‑план этажа",
+                "summary": "Загрузить план этажа",
                 "parameters": [
                     {
                         "type": "integer",
@@ -446,7 +608,7 @@
                     },
                     {
                         "type": "file",
-                        "description": "SVG‑файл плана этажа",
+                        "description": "Файл плана этажа (.svg или .png)",
                         "name": "file",
                         "in": "formData",
                         "required": true
@@ -479,35 +641,51 @@
         },
         "/payments": {
             "get": {
+                "description": "Возвращает список платежей с фильтрацией, поиском и сортировкой",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "payments"
                 ],
-                "summary": "Получить список платежей",
+                "summary": "Получить список платёжных операций",
                 "parameters": [
                     {
-                        "enum": [
-                            "true",
-                            "false"
-                        ],
-                        "type": "string",
-                        "description": "Фильтрация по статусу оплаты",
+                        "type": "boolean",
+                        "description": "Фильтрация по статусу оплаты (true/false)",
                         "name": "is_paid",
                         "in": "query"
                     },
                     {
+                        "type": "string",
+                        "description": "Поиск по имени клиента (нечёткий поиск)",
+                        "name": "client",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Поле сортировки (например, period_start)",
+                        "name": "sort_by",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Порядок сортировки: asc или desc",
+                        "name": "sort_order",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
-                        "default": 20,
-                        "description": "Максимальное количество договоров",
+                        "description": "Количество записей на страницу (по умолчанию 20)",
                         "name": "limit",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "default": 0,
-                        "description": "Смещение для пагинации",
+                        "description": "Смещение (offset) от начала выборки",
                         "name": "offset",
                         "in": "query"
                     }
@@ -523,13 +701,13 @@
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Некорректный запрос",
                         "schema": {
                             "$ref": "#/definitions/sys.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Внутренняя ошибка сервера",
                         "schema": {
                             "$ref": "#/definitions/sys.ErrorResponse"
                         }
@@ -583,8 +761,90 @@
                 }
             }
         },
+        "/payments/client/{id}": {
+            "get": {
+                "description": "Возвращает список платежей конкретного клиента с фильтрацией, поиском и сортировкой",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "summary": "Получить список платёжных операций клиента по ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID клиента",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Фильтрация по статусу оплаты (true/false)",
+                        "name": "is_paid",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Поле сортировки (например, period_start)",
+                        "name": "sort_by",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Порядок сортировки: asc или desc",
+                        "name": "sort_order",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Количество записей на страницу (по умолчанию 20)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Смещение (offset) от начала выборки",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Payment"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/sys.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/payments/mark-paid": {
             "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Обновляет статус is_paid и увеличивает paid_months у аренды",
                 "consumes": [
                     "application/json"
@@ -628,6 +888,11 @@
         },
         "/payments/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1085,7 +1350,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Rental"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Rental"
+                            }
                         }
                     },
                     "400": {
@@ -1185,6 +1453,55 @@
         }
     },
     "definitions": {
+        "application.updateStatusInput": {
+            "type": "object",
+            "required": [
+                "processed"
+            ],
+            "properties": {
+                "processed": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "model.Application": {
+            "type": "object",
+            "properties": {
+                "additionalInfo": {
+                    "type": "string"
+                },
+                "address": {
+                    "type": "string"
+                },
+                "contactPerson": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isProcessed": {
+                    "type": "boolean"
+                },
+                "organizationName": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "premiseNumber": {
+                    "type": "string"
+                },
+                "requisites": {
+                    "type": "string"
+                }
+            }
+        },
         "model.AuthRequest": {
             "type": "object",
             "required": [
@@ -1255,6 +1572,9 @@
                 "created_at": {
                     "type": "string"
                 },
+                "end_date": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -1264,14 +1584,11 @@
                 "payment_date": {
                     "type": "string"
                 },
-                "period_end": {
-                    "type": "string"
-                },
-                "period_start": {
-                    "type": "string"
-                },
                 "rental_id": {
                     "type": "integer"
+                },
+                "start_date": {
+                    "type": "string"
                 },
                 "updated_at": {
                     "type": "string"
