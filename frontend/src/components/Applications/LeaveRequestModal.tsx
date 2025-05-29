@@ -4,7 +4,7 @@ import Button from '@/components/Button/Button';
 import api from '@/helpers/API';
 
 interface Props {
-	premiseNumber: string;
+	premiseNumber: number;
 	onClose: () => void;
 }
 
@@ -16,7 +16,8 @@ export default function LeaveRequestModal({ premiseNumber, onClose }: Props) {
 	const [requisites, setRequisites] = useState('');
 	const [email, setEmail] = useState('');
 	const [additionalInfo, setadditionalInfo] = useState('');
-
+	const [startDate, setStartDate] = useState<string>('');
+	const [endDate, setEndDate] = useState<string>(''); 
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const handleSubmit = async () => {
@@ -27,13 +28,14 @@ export default function LeaveRequestModal({ premiseNumber, onClose }: Props) {
 			phone,
 			requisites,
 			email,
-			premiseNumber,       
+			premiseNumber,
+			startDate: new Date(startDate).toISOString(),
+			endDate: new Date(endDate).toISOString(),       
 			additionalInfo: additionalInfo || undefined,
 		};
 	
 		try {
 			setIsSubmitting(true);
-			console.log(payload);
 			await api.post('/applications/', payload);
 			alert('Заявка отправлена. Мы свяжемся с вами.');
 			onClose();
@@ -56,6 +58,15 @@ export default function LeaveRequestModal({ premiseNumber, onClose }: Props) {
               	<input type="email" placeholder="Электронная почта" value={email} onChange={(e) => setEmail(e.target.value)} />
                 <input type="text" placeholder="Адрес" value={address} onChange={(e) => setAddress(e.target.value)} />
 				<input type="text" placeholder="Реквизиты" value={requisites} onChange={(e) => setRequisites(e.target.value)} />
+				<label>
+          Дата начала:
+          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+        </label>
+
+        <label>
+          Дата окончания:
+          <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+        </label>
 				<input type="text" placeholder="Дополнительная информация" value={additionalInfo} onChange={(e) => setadditionalInfo(e.target.value)} />
 
 				<div className={styles.actions}>

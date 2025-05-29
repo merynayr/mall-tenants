@@ -18,7 +18,7 @@ type Payment struct {
 // PaymentFilter - структура фильтрации для платежей
 type PaymentFilter struct {
 	IsPaid    *bool
-	Client    string
+	Search    interface{}
 	SortBy    string
 	SortOrder string
 	Limit     uint64

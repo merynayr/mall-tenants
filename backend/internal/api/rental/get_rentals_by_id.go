@@ -15,7 +15,7 @@ import (
 // @Accept  json
 // @Produce  json
 // @Security BearerAuth
-// @Param id path int64 true "Код аренды"
+// @Param id path int64 true "Код кдиента"
 // @Success 200 {array} model.Rental
 // @Failure 400 {object} sys.ErrorResponse
 // @Failure 401 {object} sys.ErrorResponse

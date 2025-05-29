@@ -2,11 +2,17 @@ package rentals
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"io"
+	"os"
 	"time"
 
 	"github.com/merynayr/mall-tenants/internal/model"
 	"github.com/merynayr/mall-tenants/internal/sys"
 )
+
+const ContractPath = "contracts/final"
 
 func (s *srv) CreateRental(ctx context.Context, rental model.Rental) error {
 	premise, exist, err := s.premiseRepository.GetPremisesByCode(ctx, rental.SpaceID)
@@ -24,51 +30,50 @@ func (s *srv) CreateRental(ctx context.Context, rental model.Rental) error {
 	}
 
 	err = s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
-		var rentalID int64
-		var errTx error
-		if rentalID, errTx = s.rentalRepository.CreateRental(ctx, &rental); errTx != nil {
-			return errTx
+		rentalID, err := s.rentalRepository.CreateRental(ctx, &rental)
+		if err != nil {
+			return err
 		}
 
-		updatePremise := model.Premises{
-			Code:   rental.SpaceID,
-			Status: string(model.Occupied),
-		}
-		if errTx := s.premiseRepository.UpdatePremise(ctx, &updatePremise); errTx != nil {
-			return errTx
+		// Сохраняем загруженный договор
+		if rental.TemplateFile == nil {
+			return errors.New("договор не загружен")
 		}
 
-		start := rental.StartDate
-		end := rental.EndDate
-		payments := make([]model.Payment, 0)
+		src, err := rental.TemplateFile.Open()
+		if err != nil {
+			return fmt.Errorf("ошибка при открытии файла договора: %w", err)
+		}
+		defer src.Close()
 
-		currentStart := start
-
-		for currentStart.Before(end) {
-			nextMonth := currentStart.AddDate(0, 1, 0)
-
-			var currentEnd time.Time
-			if nextMonth.After(end) {
-				currentEnd = end
-			} else {
-				currentEnd = nextMonth.AddDate(0, 0, -1)
-			}
-
-			payment := model.Payment{
-				RentalID:    rentalID,
-				PeriodStart: currentStart,
-				PeriodEnd:   currentEnd,
-				Amount:      int(premise.RentPerMonth),
-				IsPaid:      false,
-				CreatedAt:   time.Now().UTC(),
-			}
-			payments = append(payments, payment)
-
-			currentStart = nextMonth
+		// Создание пути, если не существует
+		if err := os.MkdirAll(ContractPath, os.ModePerm); err != nil {
+			return fmt.Errorf("ошибка при создании директории: %w", err)
 		}
 
-		if errTx := s.paymentRepository.CreatePayment(ctx, payments); errTx != nil {
-			return errTx
+		// Сохраняем файл в /contracts/final/contract_rental_<id>.pdf
+		filename := fmt.Sprintf("%s/contract_rental_%d.pdf", ContractPath, rentalID)
+		dst, err := os.Create(filename)
+		if err != nil {
+			return fmt.Errorf("ошибка при создании файла договора: %w", err)
+		}
+		defer dst.Close()
+
+		if _, err := io.Copy(dst, src); err != nil {
+			return fmt.Errorf("ошибка при сохранении договора: %w", err)
+		}
+
+		// Создаём запись о договоре
+		contract := model.Contract{
+			RentalID:  rentalID,
+			FilePath:  filename,
+			IsActive:  false,
+			IsSigned:  false,
+			CreatedAt: time.Now().UTC(),
+		}
+
+		if err := s.contractRepository.CreateContract(ctx, &contract); err != nil {
+			return fmt.Errorf("ошибка при создании записи о договоре: %w", err)
 		}
 
 		return nil

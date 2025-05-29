@@ -8,6 +8,7 @@ import (
 	"github.com/merynayr/mall-tenants/internal/model"
 	"github.com/merynayr/mall-tenants/internal/service"
 	"github.com/merynayr/mall-tenants/internal/sys"
+	"github.com/merynayr/mall-tenants/internal/sys/codes"
 )
 
 // API структура для работы с Payment и Rental сервисами
@@ -31,7 +32,7 @@ func (api *API) RegisterRoutes(router *gin.Engine) {
 		paymentGroup.PATCH("/mark-paid", api.MarkPaymentsPaid)
 		paymentGroup.GET(":id", api.GetPayment)
 		paymentGroup.GET("", api.ListPayments)
-		paymentGroup.GET("/client/:id", api.ListClientPayments)
+		paymentGroup.GET("/client", api.ListClientPayments)
 	}
 }
 
@@ -146,7 +147,7 @@ func (api *API) GetPayment(c *gin.Context) {
 // @Tags         payments
 // @Accept       json
 // @Produce      json
-// @Param        id           path      int    true   "ID клиента"
+// @Param        rental_id       query     string false  "Поиск по номеру договора (нечёткий поиск)"
 // @Param        is_paid      query     bool   false  "Фильтрация по статусу оплаты (true/false)"
 // @Param        sort_by      query     string false  "Поле сортировки (например, period_start)"
 // @Param        sort_order   query     string false  "Порядок сортировки: asc или desc"
@@ -155,16 +156,11 @@ func (api *API) GetPayment(c *gin.Context) {
 // @Success      200          {array}  model.Payment
 // @Failure      400          {object}  sys.ErrorResponse "Некорректный запрос"
 // @Failure      500          {object}  sys.ErrorResponse "Внутренняя ошибка сервера"
-// @Router       /payments/client/{id} [get]
+// @Router       /payments/client/ [get]
 func (api *API) ListClientPayments(c *gin.Context) {
 	var filter model.PaymentFilter
 
-	clientIDStr := c.Param("id")
-	clientID, err := strconv.ParseInt(clientIDStr, 10, 64)
-	if err != nil {
-		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
-		return
-	}
+	clientID := c.GetInt64("user_id")
 
 	if isPaidStr := c.Query("is_paid"); isPaidStr != "" {
 		isPaid, err := strconv.ParseBool(isPaidStr)
@@ -175,6 +171,14 @@ func (api *API) ListClientPayments(c *gin.Context) {
 		filter.IsPaid = &isPaid
 	}
 
+	if searchStr := c.Query("rental_id"); searchStr != "" {
+		search, err := strconv.ParseInt(searchStr, 10, 64)
+		if err != nil {
+			sys.HandleError(c, sys.Wrap(err, sys.NewCommonError("Неверный формат поиска", codes.BadRequest)))
+			return
+		}
+		filter.Search = search
+	}
 	filter.SortBy = c.DefaultQuery("sort_by", "period_start")
 	filter.SortOrder = c.DefaultQuery("sort_order", "desc")
 
@@ -230,8 +234,7 @@ func (api *API) ListPayments(c *gin.Context) {
 		filter.IsPaid = &isPaid
 	}
 
-	filter.Client = c.Query("client")
-
+	filter.Search = c.Query("client")
 	filter.SortBy = c.DefaultQuery("sort_by", "period_start")
 	filter.SortOrder = c.DefaultQuery("sort_order", "desc")
 

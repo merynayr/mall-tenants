@@ -1,6 +1,9 @@
 package model
 
-import "time"
+import (
+	"mime/multipart"
+	"time"
+)
 
 // Rental представляет собой модель данных для аренды
 type Rental struct {
@@ -12,6 +15,8 @@ type Rental struct {
 	PaidMonths int64      `json:"paid_months" db:"paid_months"`
 	CreatedAt  time.Time  `json:"created_at" db:"created_at"`
 	UpdatedAt  *time.Time `json:"updated_at,omitempty" db:"updated_at"`
+
+	TemplateFile *multipart.FileHeader `json:"-" form:"template_file"`
 }
 
 // Agreements представляет собой модель данных для аренды
@@ -24,4 +29,14 @@ type Agreements struct {
 	PaidMonths int64      `json:"paid_months"`
 	CreatedAt  time.Time  `json:"created_at"`
 	UpdatedAt  *time.Time `json:"updated_at,omitempty"`
+}
+
+type RentalWithContract struct {
+	RentalID  int64       `json:"rental_id,omitempty" db:"rental_id"`
+	SpaceID   int64       `json:"space_code" db:"space_id"`
+	ClientID  int64       `json:"client_id" db:"client_id"`
+	StartDate time.Time   `json:"start_date" db:"start_date"`
+	EndDate   time.Time   `json:"end_date" db:"end_date"`
+	CreatedAt time.Time   `json:"created_at" db:"created_at"`
+	Contracts []Contracts `json:"contracts"`
 }

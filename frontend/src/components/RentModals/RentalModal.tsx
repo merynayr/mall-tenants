@@ -53,7 +53,7 @@ export function RentalModal({
 
         <div className={styles['modal-actions']}>
           <button onClick={onCancel}>Отмена</button>
-          <button onClick={onConfirm} disabled={!durationMonths}>Арендовать</button>
+          <button onClick={onConfirm} disabled={!durationMonths}>Оставить заявку</button>
         </div>
       </div>
     </div>

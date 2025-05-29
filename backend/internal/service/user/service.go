@@ -81,3 +81,12 @@ func (s *userService) CreateClient(ctx context.Context, req model.RegisterReques
 
 	return err
 }
+
+func (s *userService) GetUserID(ctx context.Context, email string) (int64, error) {
+	userID, err := s.userRepository.GetUserID(ctx, email)
+	if err != nil {
+		return 0, err
+	}
+
+	return userID, nil
+}

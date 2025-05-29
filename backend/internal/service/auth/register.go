@@ -22,12 +22,13 @@ func (s *srv) Register(ctx context.Context, req model.RegisterRequest) (*model.A
 		return nil, sys.UserAlreadyExistsError
 	}
 
-	_, err = s.userRepository.CreateUser(ctx, &req)
+	UserID, err := s.userRepository.CreateUser(ctx, &req)
 	if err != nil {
 		return nil, err
 	}
 
 	userInfo := &model.UserClaims{
+		ID:    UserID,
 		Email: req.Email,
 		Role:  model.RoleClient,
 	}

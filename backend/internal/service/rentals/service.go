@@ -11,10 +11,11 @@ import (
 )
 
 type srv struct {
-	rentalRepository  repository.RentalRepository
-	premiseRepository repository.PremiseRepository
-	paymentRepository repository.PaymentRepository
-	txManager         db.TxManager
+	rentalRepository   repository.RentalRepository
+	premiseRepository  repository.PremiseRepository
+	paymentRepository  repository.PaymentRepository
+	contractRepository repository.ContractRepository
+	txManager          db.TxManager
 }
 
 // NewService возвращает новый объект сервисного слоя mall-tenants
@@ -22,13 +23,15 @@ func NewService(
 	rentalRepo repository.RentalRepository,
 	premiseRepo repository.PremiseRepository,
 	paymentRepository repository.PaymentRepository,
+	contractRepository repository.ContractRepository,
 	txManager db.TxManager,
 ) service.RentalService {
 	return &srv{
-		rentalRepository:  rentalRepo,
-		premiseRepository: premiseRepo,
-		paymentRepository: paymentRepository,
-		txManager:         txManager,
+		rentalRepository:   rentalRepo,
+		premiseRepository:  premiseRepo,
+		paymentRepository:  paymentRepository,
+		contractRepository: contractRepository,
+		txManager:          txManager,
 	}
 }
 

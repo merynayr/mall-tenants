@@ -6,11 +6,10 @@ import { toast } from 'react-toastify';
 
 interface Props {
 	onClose: () => void;
-	onCreated: () => void;
 	initialData?: Partial<Application>;
 }
 
-export const ClientCreateModal: React.FC<Props> = ({ onClose, onCreated, initialData = {} }) => {
+export const ClientCreateModal: React.FC<Props> = ({ onClose, initialData = {} }) => {
 	const [organizationName, setOrganizationName] = useState(initialData.organizationName || '');
 	const [contactPerson, setContactPerson] = useState(initialData.contactPerson || '');
 	const [address, setAddress] = useState(initialData.address || '');
@@ -42,7 +41,6 @@ export const ClientCreateModal: React.FC<Props> = ({ onClose, onCreated, initial
 				role: role
 			});
 			setError(null);
-			onCreated();
 			onClose(); 
 		} catch (e) {
 			console.error(e);

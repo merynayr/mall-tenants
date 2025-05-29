@@ -23,7 +23,6 @@ CREATE TABLE clients (
 -- Индексы для ускорения поиска
 CREATE INDEX idx_clients_organization_name ON clients (organization_name);
 CREATE INDEX idx_clients_phone ON clients (phone);
-CREATE INDEX idx_users_email ON users (email);
 -- +goose StatementEnd
 
 -- +goose Down

@@ -25,6 +25,7 @@ func (s *srv) Login(ctx context.Context, email string, password string) (*model.
 	}
 
 	userInfo := &model.UserClaims{
+		ID:    user.UserID,
 		Email: email,
 		Role:  model.UserRole(user.Role),
 	}

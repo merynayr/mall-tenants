@@ -13,6 +13,7 @@ type UserService interface {
 	GetUserByEmail(ctx context.Context, email string) (*model.User, error)
 	GetClients(ctx context.Context, limit, offset uint64) ([]model.Client, error)
 	CreateClient(ctx context.Context, req model.RegisterRequest) error
+	GetUserID(ctx context.Context, email string) (int64, error)
 }
 
 // AuthService интерфейс сервисного слоя auth
@@ -25,7 +26,7 @@ type AuthService interface {
 
 // AccessService интерфейс сервисного слоя access
 type AccessService interface {
-	Check(ctx *gin.Context, endpointAddress string) (string, error)
+	Check(ctx *gin.Context, endpointAddress string) error
 }
 
 // PremiseService интерфейс сервисного слоя access
@@ -38,7 +39,7 @@ type PremiseService interface {
 
 // RentalService - интерфейс репо слоя для аренд
 type RentalService interface {
-	GetRentalByID(ctx context.Context, code int64) ([]model.Rental, error)
+	GetRentalByID(ctx context.Context, code int64) ([]model.RentalWithContract, error)
 	CreateRental(ctx context.Context, rental model.Rental) error
 	UpdateRental(ctx context.Context, rental model.Rental) error
 	GetAgreements(ctx context.Context, limit, offset uint64) ([]model.Agreements, error)
@@ -68,4 +69,11 @@ type ApplicationService interface {
 	CreateApplication(ctx context.Context, a *model.Application) error
 	GetApplications(ctx context.Context, filter model.ApplicationFilter) ([]*model.Application, error)
 	UpdateApplicationStatus(ctx context.Context, id int64, isProcessed bool) error
+}
+
+// ContractService интерфейс сервисного слоя договоров
+type ContractService interface {
+	GetByContractID(ctx context.Context, contractID int64) (*model.Contracts, error)
+	CreateContract(ctx context.Context, c model.Contract) error
+	GetAllContracts(ctx context.Context) ([]model.Contract, error)
 }

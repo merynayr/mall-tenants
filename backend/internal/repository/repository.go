@@ -15,6 +15,7 @@ type UserRepository interface {
 	GetUserByEmail(ctx context.Context, email string) (*model.User, bool, error)
 	IsEmailExist(ctx context.Context, email string) (bool, error)
 	GetClients(ctx context.Context, limit, offset uint64) ([]model.Client, error)
+	GetUserID(ctx context.Context, email string) (int64, error)
 }
 
 // PremiseRepository - интерфейс репо слоя для помещений
@@ -58,4 +59,13 @@ type ApplicationRepository interface {
 	Create(ctx context.Context, a *model.Application) error
 	GetAll(ctx context.Context, filter model.ApplicationFilter) ([]*model.Application, error)
 	SetProcessedStatus(ctx context.Context, id int64, isProcessed bool) error
+}
+
+// ContractRepository - интерфейс репо слоя для договоров
+type ContractRepository interface {
+	CreateContract(ctx context.Context, c *model.Contract) error
+	UpdateContractSignature(ctx context.Context, c *model.Contract) error
+	GetByRentalID(ctx context.Context, rentalID int64) ([]model.Contracts, error)
+	GetAll(ctx context.Context) ([]model.Contract, error)
+	GetByContractID(ctx context.Context, contractID int64) (*model.Contracts, error)
 }

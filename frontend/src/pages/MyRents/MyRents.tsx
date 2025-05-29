@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Rent } from '@/interfaces/rent';
+import { RentalWithContract } from '@/interfaces/rent';
 import api from '@/helpers/API';
 import { RootState } from '@/store/store';
 import { useSelector } from 'react-redux';
@@ -9,7 +9,7 @@ import { AxiosError } from 'axios';
 import { toast } from 'react-toastify';
 
 const PageMyRents: React.FC = () => {
-	const [rents, setRents] = useState<Rent[]>([]);
+	const [rents, setRents] = useState<RentalWithContract[]>([]);
 	const [loading, setLoading] = useState(true);
 	const { profile } = useSelector((state: RootState) => state.user);
 	const [error, setError] = useState<string | null>(null);
@@ -24,8 +24,9 @@ const PageMyRents: React.FC = () => {
 	useEffect(() => {
 		const fetchRents = async (id: number | undefined) => {
 			try {
-				const response = await api.get<Rent[]>(`/rental/${id}`);
+				const response = await api.get<RentalWithContract[]>(`/rental/${id}`);
 				setRents(response.data);
+				console.log(response.data)
 			} catch (e) {
 				console.error(e);
 				if (e instanceof AxiosError) {

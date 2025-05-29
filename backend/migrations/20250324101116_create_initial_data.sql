@@ -30,23 +30,5 @@ INSERT INTO premises (code, floor, area, type, rent_per_month, status, security_
 (6, 1, 90, 'retail', 47000, 'available', 'NO', 'YES'),
 (7, 1, 110, 'retail', 55000, 'maintenance', 'YES', 'YES');
 
--- Вставка аренды
-INSERT INTO rentals (client_id, space_code, start_date, end_date, paid_months, created_at) VALUES
-(1, 3, '2024-01-01T00:00:00Z', '2025-01-01T00:00:00Z', 0, '2024-01-01T10:00:00Z'),
-(2, 4, '2024-02-15T00:00:00Z', '2025-02-15T00:00:00Z', 0, '2024-02-15T11:30:00Z'),
-(3, 5, '2024-03-10T00:00:00Z', '2025-03-10T00:00:00Z', 0, '2024-03-10T09:45:00Z');
-
--- Обновление статуса помещений на 'occupied'
-UPDATE premises
-SET status = 'occupied'
-WHERE code IN (3, 4, 5);
-
--- -- Вставка платежей
--- INSERT INTO payments (rent_id, payment_date, amount) VALUES
--- (1, '2024-01-01T10:05:00Z', 150000),
--- (2, '2024-02-15T11:35:00Z', 60000),
--- (2, '2024-03-15T11:40:00Z', 60000),
--- (3, '2024-03-10T09:50:00Z', 220000),
--- (4, '2024-04-05T12:20:00Z', 45000);
 
 -- +goose StatementEnd

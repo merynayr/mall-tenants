@@ -1,23 +1,22 @@
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { useParams, useLocation } from 'react-router-dom';
 import styles from './Premises.module.css';
 import Button from '@/components/Button/Button';
 import api from '@/helpers/API';
 import { Premises } from '@/interfaces/premises';
-import { RootState } from '@/store/store';
 import { RentalModal } from '@/components/RentModals/RentalModal';
 import { useHasRole } from '@/hooks/Role';
 import LeaveRequestModal from '@/components/Applications/LeaveRequestModal';
 import { AxiosError } from 'axios';
 import { calculateRentalDuration } from '@/helpers/CountMonth';
 import { toast } from 'react-toastify';
+import { RootState } from '@/store/store';
+import { useSelector } from 'react-redux';
 
 export function PremiseInfo() {
 	const { id } = useParams<{ id: string }>();
 	const location = useLocation();
 	const initialPremise = location.state?.premise as Premises | undefined;
-	const { profile } = useSelector((state: RootState) => state.user);
 
 	const [premise, setPremise] = useState<Premises | null>(initialPremise || null);
 	const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +29,8 @@ export function PremiseInfo() {
 	const [dateError, setDateError] = useState<string | null>(null);
 	const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
 	const hasRole = useHasRole('client', 'moderator', 'director');
-	
+	const { profile } = useSelector((state: RootState) => state.user);
+
 	useEffect(() => {
 		if (startDate && endDate) {
 			const duration = calculateRentalDuration(startDate, endDate);
@@ -124,22 +124,20 @@ export function PremiseInfo() {
 	};
 
 	const handleRentSubmit = async () => {
-		if (!premise || !durationMonths || !startDate || !endDate) return;
+		if (!premise || !startDate || !endDate) return;
 		try {
-			await api.post('/rental/', {
-				space_code: Number(premise.code),
-				client_id: profile?.user_id,
-				start_date: new Date(startDate).toISOString(),
-				end_date: new Date(endDate).toISOString(),
-				paid_months: 0,
-				created_at: new Date().toISOString()
+			await api.post('/applications/', {
+				premiseNumber: Number(premise.code),
+				email: profile?.email,
+				startDate: new Date(startDate).toISOString(),
+				endDate: new Date(endDate).toISOString(),
 			});
 	
-			alert('Вы успешно арнедовали помещение!');
+			alert('Заявка отправлена. Мы свяжемся с вами.');
 			closeAllModals();
 		} catch (error) {
-			console.error('Ошибка при отправке аренды:', error);
-			alert('Ошибка при аренде. Попробуйте позже.');
+			console.error('Ошибка при отправке заявки: ', error);
+			alert('Ошибка при отправке заявки. Попробуйте позже.');
 		}
 	};
 	
@@ -170,7 +168,7 @@ export function PremiseInfo() {
 							}
 						}}
 					>
-						{hasRole ? "Арендовать" : "Оставить заявку"}
+						Оставить заявку
 					</Button>
 				</div>
 			</div>
@@ -198,7 +196,7 @@ export function PremiseInfo() {
 
 			{isRequestModalOpen && premise && (
 				<LeaveRequestModal
-					premiseNumber={String(premise.code)}
+					premiseNumber={premise.code}
 					onClose={() => setIsRequestModalOpen(false)}
 				/>
 			)}

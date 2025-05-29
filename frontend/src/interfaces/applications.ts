@@ -6,7 +6,9 @@ export interface Application {
 	phone: string;
 	requisites: string;
 	email: string;
-	premiseNumber: string;
+	premiseNumber: number;
+	startDate: string;
+	endDate: string;
 	additionalInfo?: string;
 	isProcessed: boolean;
 	createdAt: string;

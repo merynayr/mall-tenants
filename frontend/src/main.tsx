@@ -19,6 +19,7 @@ import PremiseInfo from '@/pages/PremiseInfo/PremiseInfo';
 import PremisesMapperPage from '@/pages/PremisesMapper/PremisesMapperPage';
 import PageRents from '@/pages/Rents/Rents';
 import { store } from '@/store/store';
+import Modal from 'react-modal';
 
 const router = createBrowserRouter([
 	{
@@ -89,6 +90,7 @@ const router = createBrowserRouter([
 	}
 ]);
 
+Modal.setAppElement('#root');
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
 	<React.StrictMode>

@@ -7,14 +7,37 @@ import (
 	"github.com/merynayr/mall-tenants/internal/sys"
 )
 
-func (s *srv) GetRentalByID(ctx context.Context, code int64) ([]model.Rental, error) {
-	rentals, err := s.rentalRepository.GetRentalsByID(ctx, code)
-	if err != nil {
-		return nil, err
-	}
-	if len(rentals) == 0 {
-		return nil, sys.RentalsNotFoundError
-	}
+func (s *srv) GetRentalByID(ctx context.Context, code int64) ([]model.RentalWithContract, error) {
+	var rents []model.RentalWithContract
+	err := s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
+		var errTx error
+		rentals, errTx := s.rentalRepository.GetRentalsByID(ctx, code)
+		if errTx != nil {
+			return errTx
+		}
+		if len(rentals) == 0 {
+			return sys.RentalsNotFoundError
+		}
 
-	return rentals, nil
+		for _, r := range rentals {
+			contracts, err := s.contractRepository.GetByRentalID(ctx, r.RentalID)
+			if err != nil {
+				return err
+			}
+
+			rents = append(rents, model.RentalWithContract{
+				RentalID:  r.RentalID,
+				SpaceID:   r.SpaceID,
+				ClientID:  r.ClientID,
+				StartDate: r.StartDate,
+				EndDate:   r.EndDate,
+				CreatedAt: r.CreatedAt,
+				Contracts: contracts,
+			})
+		}
+
+		return nil
+	})
+
+	return rents, err
 }

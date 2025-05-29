@@ -28,14 +28,13 @@ func (m *Middleware) Check() gin.HandlerFunc {
 		path := c.FullPath()
 		endpoint := method + ":" + path
 
-		email, err := m.accessService.Check(c, endpoint)
+		err := m.accessService.Check(c, endpoint)
 		if err != nil {
 			sys.HandleError(c, err)
 			c.Abort()
 			return
 		}
 
-		c.Set("email", email)
 		c.Next()
 	}
 }

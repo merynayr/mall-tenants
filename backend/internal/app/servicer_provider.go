@@ -15,6 +15,7 @@ import (
 
 	"github.com/merynayr/mall-tenants/internal/api/application"
 	"github.com/merynayr/mall-tenants/internal/api/auth"
+	"github.com/merynayr/mall-tenants/internal/api/contract"
 	"github.com/merynayr/mall-tenants/internal/api/payment"
 	"github.com/merynayr/mall-tenants/internal/api/premise"
 	"github.com/merynayr/mall-tenants/internal/api/rental"
@@ -32,6 +33,9 @@ import (
 
 	premiseRepository "github.com/merynayr/mall-tenants/internal/repository/premises"
 	premiseService "github.com/merynayr/mall-tenants/internal/service/premises"
+
+	contractRepository "github.com/merynayr/mall-tenants/internal/repository/contracts"
+	contractService "github.com/merynayr/mall-tenants/internal/service/contracts"
 
 	rentalRepository "github.com/merynayr/mall-tenants/internal/repository/rentals"
 	rentalService "github.com/merynayr/mall-tenants/internal/service/rentals"
@@ -75,6 +79,10 @@ type serviceProvider struct {
 	rentalAPI        *rental.API
 	rentalService    service.RentalService
 	rentalRepository repository.RentalRepository
+
+	contractAPI        *contract.API
+	contractService    service.ContractService
+	contractRepository repository.ContractRepository
 
 	paymentAPI        *payment.API
 	paymentService    service.PaymentService
@@ -344,6 +352,7 @@ func (s *serviceProvider) RentalService(ctx context.Context) service.RentalServi
 			s.RentalRepository(ctx),
 			s.PremiseRepository(ctx),
 			s.PaymentRepository(ctx),
+			s.ContractRepository(ctx),
 			s.TxManager(ctx),
 		)
 	}
@@ -411,4 +420,30 @@ func (s *serviceProvider) ApplicationRepository(ctx context.Context) repository.
 		s.applicationRepository = applicationRepository.NewRepository(s.DBClient(ctx))
 	}
 	return s.applicationRepository
+}
+
+// ContractAPI инициализирует API-слой для договорв
+func (s *serviceProvider) ContractAPI(ctx context.Context) *contract.API {
+	if s.contractAPI == nil {
+		s.contractAPI = contract.NewAPI(s.ContractService(ctx))
+	}
+	return s.contractAPI
+}
+
+// ContractService инициализирует сервисный слой для договоров
+func (s *serviceProvider) ContractService(ctx context.Context) service.ContractService {
+	if s.contractService == nil {
+		s.contractService = contractService.NewService(
+			s.ContractRepository(ctx),
+		)
+	}
+	return s.contractService
+}
+
+// ContractRepository инициализирует репозиторий для договоров
+func (s *serviceProvider) ContractRepository(ctx context.Context) repository.ContractRepository {
+	if s.contractRepository == nil {
+		s.contractRepository = contractRepository.NewRepository(s.DBClient(ctx))
+	}
+	return s.contractRepository
 }

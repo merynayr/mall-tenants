@@ -30,6 +30,7 @@ type AuthResponse struct {
 // UserClaims структура claims jwt-токена
 type UserClaims struct {
 	jwt.StandardClaims
+	ID    int64    `json:"user_id"`
 	Email string   `json:"email"`
 	Role  UserRole `json:"role"`
 }

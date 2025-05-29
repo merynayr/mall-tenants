@@ -24,6 +24,7 @@ func NewService(applicationRepo repository.ApplicationRepository) service.Applic
 func (s *srv) CreateApplication(ctx context.Context, a *model.Application) error {
 	a.CreatedAt = time.Now().UTC()
 	a.IsProcessed = false
+
 	err := s.applicationRepository.Create(ctx, a)
 	return err
 }

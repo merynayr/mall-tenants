@@ -9,7 +9,8 @@ interface Props {
 export function ApplicationsTable({ applications, onProcess }: Props) {
 	if (applications.length === 0) {
 		return <p>Нет заявок для отображения.</p>;
-	}
+	}	
+	console.log(applications)
 
 	return (
 		<div className={styles.cardList}>
@@ -32,6 +33,10 @@ export function ApplicationsTable({ applications, onProcess }: Props) {
 					</div>
 					<div className={styles.row}>
 						<strong>№ помещения:</strong> {a.premiseNumber}
+					</div>
+					<div className={styles.row}>
+						<strong>Даты аренды:</strong>{' '}	
+						{`с ${new Date(a.startDate).toLocaleDateString('ru-RU')} по ${new Date(a.endDate).toLocaleDateString('ru-RU')}`}
 					</div>
 					<div className={styles.row}>
 						<strong>Обработана:</strong> {a.isProcessed ? 'Да' : 'Нет'}

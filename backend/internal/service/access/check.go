@@ -16,7 +16,7 @@ const (
 )
 
 // Check проверяет, имеет ли пользователь доступ к эндпоинту
-func (s *srv) Check(ctx *gin.Context, endpointAddress string) (string, error) {
+func (s *srv) Check(ctx *gin.Context, endpointAddress string) error {
 	isProtected := false
 	for _, accessMap := range s.userAccesses {
 		if _, ok := accessMap[endpointAddress]; ok {
@@ -26,39 +26,43 @@ func (s *srv) Check(ctx *gin.Context, endpointAddress string) (string, error) {
 	}
 	if !isProtected {
 		// Не защищённый путь — доступ разрешён без проверки токена
-		return "", nil
+		return nil
 	}
 
 	accessToken, err := ctx.Cookie(authCookieName)
 	if err != nil {
 		authHeader := ctx.GetHeader(authHeader)
 		if authHeader == "" {
-			return "", sys.AuthHeaderMissingError
+			return sys.AuthHeaderMissingError
 		}
 
 		if !strings.HasPrefix(authHeader, authPrefix) {
-			return "", sys.AuthHeaderInvalidFormatError
+			return sys.AuthHeaderInvalidFormatError
 		}
 
 		accessToken = strings.TrimPrefix(authHeader, authPrefix)
 		if len(accessToken) == 0 {
-			return "", sys.AuthHeaderInvalidFormatError
+			return sys.AuthHeaderInvalidFormatError
 		}
 	}
 
 	claims, err := jwt.VerifyToken(accessToken, s.authConfig.AccessTokenSecretKey())
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	roleAccessMap, ok := s.userAccesses[model.UserRole(claims.Role)]
 	if !ok {
-		return "", sys.AccessDeniedError
+		return sys.AccessDeniedError
 	}
 
 	if _, allowed := roleAccessMap[endpointAddress]; !allowed {
-		return "", sys.AccessDeniedError
+		return sys.AccessDeniedError
 	}
 
-	return claims.Email, nil
+	ctx.Set("user_id", claims.ID)
+	ctx.Set("email", claims.Email)
+	ctx.Set("role", claims.Role)
+
+	return nil
 }

@@ -129,6 +129,9 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 	a.serviceProvider.MallAPI(ctx)
 	a.serviceProvider.mallAPI.RegisterRoutes(router)
 
+	a.serviceProvider.ContractAPI(ctx)
+	a.serviceProvider.contractAPI.RegisterRoutes(router)
+
 	a.serviceProvider.RentalAPI(ctx)
 	a.serviceProvider.rentalAPI.RegisterRoutes(router)
 

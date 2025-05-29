@@ -60,7 +60,7 @@ func (r *repo) CreatePayment(ctx context.Context, payments []model.Payment) erro
 	}
 
 	q := db.Query{
-		Name:     "payment_repository.CreatePaymentBatch",
+		Name:     "payment_repository.CreatePayment",
 		QueryRaw: query,
 	}
 
@@ -171,6 +171,10 @@ func (r *repo) GetByClientID(ctx context.Context, id int64, f model.PaymentFilte
 		qb = qb.Where(sq.Eq{"p." + IsPaidColumn: *f.IsPaid})
 	}
 
+	if f.Search != nil {
+		qb = qb.Where(sq.Eq{"r.rental_id": f.Search.(int64)})
+	}
+
 	validSortFields := map[string]string{
 		"period_start": "p.period_start",
 		"created_at":   "p.created_at",
@@ -221,15 +225,14 @@ func (r *repo) List(ctx context.Context, f model.PaymentFilter) ([]model.Payment
 		Join("rentals r ON p.rental_id = r.rental_id").
 		Join("premises pr ON r.space_code = pr.code").
 		Join("clients c ON r.client_id = c.client_id").
-		Where(sq.LtOrEq{"p." + PeriodStartCol: time.Now().AddDate(0, 0, -3)}).
 		PlaceholderFormat(sq.Dollar)
 
 	if f.IsPaid != nil {
 		qb = qb.Where(sq.Eq{"p." + IsPaidColumn: *f.IsPaid})
 	}
 
-	if f.Client != "" {
-		qb = qb.Where(sq.ILike{"c.organization_name": "%" + f.Client + "%"})
+	if f.Search != "" {
+		qb = qb.Where(sq.ILike{"c.organization_name": "%" + f.Search.(string) + "%"})
 	}
 
 	validSortFields := map[string]string{

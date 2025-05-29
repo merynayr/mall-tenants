@@ -29,6 +29,7 @@ func (api *API) RegisterRoutes(router *gin.Engine) {
 		authGroup.GET("/", api.GetClients)
 		authGroup.POST("/", api.CreateClient)
 		authGroup.GET("/profile", api.GetProfile)
+		authGroup.GET("/:email", api.GetUserID)
 	}
 }
 
@@ -121,4 +122,28 @@ func (api *API) GetProfile(c *gin.Context) {
 	client.Password = ""
 
 	c.JSON(http.StatusOK, client)
+}
+
+// GetUserID godoc
+// @Summary      Проверить существует ли клиент
+// @Description  Проверяет существует ли клиент по email (path-параметр), возвращает userID
+// @Tags         Клиенты
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        email path string true "Email клиента"
+// @Success      200 {object} struct{UserID int64 `json:"userId"`}
+// @Failure      400 {object} sys.ErrorResponse
+// @Failure      500 {object} sys.ErrorResponse
+// @Router       /clients/{email} [get]
+func (api *API) GetUserID(c *gin.Context) {
+	email := c.Param("email")
+
+	userID, err := api.userService.GetUserID(c.Request.Context(), email)
+	if err != nil {
+		sys.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"userID": userID})
 }

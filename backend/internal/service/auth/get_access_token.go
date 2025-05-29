@@ -24,6 +24,7 @@ func (s *srv) GetAccessToken(ctx context.Context, refreshToken string) (string, 
 	}
 
 	userInfo := &model.UserClaims{
+		ID:    user.UserID,
 		Email: user.Email,
 		Role:  model.UserRole(user.Role),
 	}

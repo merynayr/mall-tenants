@@ -231,32 +231,53 @@ func (r *repo) UpdateUser(ctx context.Context, user *model.UserUpdate) error {
 	return nil
 }
 
-// IsEmailExist проверяет, существует ли в БД указанный email
-func (r *repo) IsEmailExist(ctx context.Context, email string) (bool, error) {
-	query, args, err := sq.Select("1").
+// GetUserID возвращяет userUD по email
+func (r *repo) GetUserID(ctx context.Context, email string) (int64, error) {
+	query, args, err := sq.Select(UserIDColumn).
 		From(usersTable).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{EmailColumn: email}).
 		Limit(1).ToSql()
 
 	if err != nil {
-		return false, err
+		return 0, err
 	}
+
+	q := db.Query{
+		Name:     "user_repository.GetUserID",
+		QueryRaw: query,
+	}
+
+	var userID int64
+	err = r.db.DB().ScanOneContext(ctx, &userID, q, args...)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return 0, nil
+		}
+		return 0, err
+	}
+
+	return userID, nil
+}
+
+// IsEmailExist проверяет, существует ли в БД указанный email
+func (r *repo) IsEmailExist(ctx context.Context, email string) (bool, error) {
+	query := `
+		SELECT EXISTS (
+			SELECT 1 FROM ` + usersTable + ` WHERE ` + EmailColumn + ` = $1
+		)
+	`
 
 	q := db.Query{
 		Name:     "user_repository.IsEmailExist",
 		QueryRaw: query,
 	}
 
-	var one int
-
-	err = r.db.DB().QueryRowContext(ctx, q, args...).Scan(&one)
+	var exists bool
+	err := r.db.DB().ScanOneContext(ctx, &exists, q, email)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return false, nil
-		}
 		return false, err
 	}
 
-	return true, nil
+	return exists, nil
 }

@@ -21,6 +21,8 @@ const (
 	AddressColumn          = "address"
 	PhoneColumn            = "phone"
 	RequisitesColumn       = "requisites"
+	StartDateColumn        = "start_date"
+	EndDateColumn          = "end_date"
 	AdditionalInfoColumn   = "additional_info"
 	IsProcessedColumn      = "is_processed"
 	CreatedAtColumn        = "created_at"
@@ -39,8 +41,8 @@ func NewRepository(db db.Client) repository.ApplicationRepository {
 func (r *repo) Create(ctx context.Context, a *model.Application) error {
 	query, args, err := squirrel.
 		Insert(applicationsTable).
-		Columns(OrganizationNameColumn, ContactPersonColumn, AddressColumn, PhoneColumn, RequisitesColumn, EmailColumn, PremiseNumberColumn, AdditionalInfoColumn, IsProcessedColumn, CreatedAtColumn).
-		Values(a.OrganizationName, a.ContactPerson, a.Address, a.Phone, a.Requisites, a.Email, a.PremiseNumber, a.AdditionalInfo, a.IsProcessed, a.CreatedAt).
+		Columns(OrganizationNameColumn, ContactPersonColumn, AddressColumn, PhoneColumn, RequisitesColumn, EmailColumn, PremiseNumberColumn, StartDateColumn, EndDateColumn, AdditionalInfoColumn, IsProcessedColumn, CreatedAtColumn).
+		Values(a.OrganizationName, a.ContactPerson, a.Address, a.Phone, a.Requisites, a.Email, a.PremiseNumber, a.StartDate, a.EndDate, a.AdditionalInfo, a.IsProcessed, a.CreatedAt).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
 
@@ -68,6 +70,8 @@ func (r *repo) GetAll(ctx context.Context, filter model.ApplicationFilter) ([]*m
 			RequisitesColumn,
 			EmailColumn,
 			PremiseNumberColumn,
+			StartDateColumn,
+			EndDateColumn,
 			AdditionalInfoColumn,
 			CreatedAtColumn,
 			IsProcessedColumn,

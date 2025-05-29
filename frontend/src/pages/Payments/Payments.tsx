@@ -15,7 +15,7 @@ export function PagePayments() {
 	const [offset, setOffset] = useState(0);
 	const [status, setStatus] = useState<'all' | 'paid' | 'unpaid'>('all');
 	const [searchQuery, setSearchQuery] = useState('');
-	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
 	useEffect(() => {
 		fetchPayments();
