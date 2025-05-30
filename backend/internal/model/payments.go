@@ -15,16 +15,6 @@ type Payment struct {
 	UpdatedAt   time.Time  `json:"updated_at"`
 }
 
-// PaymentFilter - структура фильтрации для платежей
-type PaymentFilter struct {
-	IsPaid    *bool
-	Search    interface{}
-	SortBy    string
-	SortOrder string
-	Limit     uint64
-	Offset    uint64
-}
-
 // MarkPaymentsPaidRequest - структура
 type MarkPaymentsPaidRequest struct {
 	PaymentIDs []int64 `json:"payment_ids" swaggertype:"array,integer"`

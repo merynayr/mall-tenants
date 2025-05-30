@@ -29,6 +29,7 @@ const (
 	ErrInternalServer            = "Внутренняя ошибка сервера"
 
 	// Авторизация и токены
+	//nolint:gosec
 	ErrInvalidPassword         = "Неверный пароль"
 	ErrInvalidCredentials      = "Неверный логин или пароль"
 	ErrPasswordsDoNotMatch     = "Пароль и пароль подтверждения не совпадают"

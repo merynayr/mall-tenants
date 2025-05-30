@@ -8,6 +8,7 @@ import { ClientsTable } from '@/pages/Clients/ClientsTable/ClientsTable';
 import { useHasRole } from '@/hooks/Role';
 import { AxiosError } from 'axios';
 import { toast } from 'react-toastify';
+import Pagination from '@/components/Pagination/Pagination';
 
 export function PageClients() {
 	const [clients, setClients] = useState<Client[]>([]);
@@ -72,13 +73,16 @@ export function PageClients() {
 			) : (
 				<>
 					<ClientsTable clients={clients} />
-					<div className={styles.pagination}>
-						<Button className={styles['small']} onClick={handlePrev} disabled={offset === 0}>Назад</Button>
-						<span>Показано с {offset + 1} по {offset + clients.length}</span>
-						<Button className={styles['small']} onClick={handleNext} disabled={clients.length < limit}>Вперёд</Button>
-					</div>
+				
+					<Pagination
+						offset={offset}
+						limit={limit}
+						total={clients.length}
+						onNext={handleNext}
+						onPrev={handlePrev}
+					/>
 
-					{showModal && <ClientCreateModal onClose={handleCloseModal} onCreated={fetchClients} />}
+					{showModal && <ClientCreateModal onClose={handleCloseModal}/>}
 				</>
 			)}
 		</div>

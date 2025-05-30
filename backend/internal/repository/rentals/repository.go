@@ -2,6 +2,7 @@ package rental
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -153,29 +154,58 @@ func (r *repo) UpdateRental(ctx context.Context, rental *model.Rental) error {
 	return nil
 }
 
-func (r *repo) GetAgreements(ctx context.Context, limit, offset uint64) ([]model.Agreements, error) {
-	query, args, err := sq.Select(
-		"r."+IDColumn,
-		"r."+SpaceIDColumn,
-		"c.organization_name",
-		"r."+StartDateColumn,
-		"r."+EndDateColumn,
-		"r."+PaidMonthsColumn,
-		"r."+CreatedAtColumn,
-	).
-		From(RentalTable + " r").
+func (r *repo) GetAgreements(ctx context.Context, f model.RentFilter) ([]model.Agreements, error) {
+	qb := sq.
+		Select(
+			"r.rental_id",
+			"r.space_code",
+			"c.organization_name",
+			"r.start_date",
+			"r.end_date",
+			"r.paid_months",
+			"r.created_at",
+		).
+		From("rentals r").
 		Join("clients c ON c.client_id = r.client_id").
-		PlaceholderFormat(sq.Dollar).
-		Limit(limit).
-		Offset(offset).
-		ToSql()
+		Where("EXISTS (" +
+			"SELECT 1 FROM contracts ct " +
+			"WHERE ct.rental_id = r.rental_id " +
+			"AND ct.is_signed = TRUE " +
+			"AND ct.is_active = TRUE" +
+			")").
+		PlaceholderFormat(sq.Dollar)
 
+	if f.Search != "" {
+		qb = qb.Where(sq.ILike{"c.organization_name": "%" + f.Search.(string) + "%"})
+	}
+
+	validSortFields := map[string]string{
+		"start_date": "r.start_date",
+		"created_at": "r.created_at",
+		"end_date":   "r.end_date",
+	}
+
+	sortField, ok := validSortFields[f.SortBy]
+	if !ok {
+		sortField = "r.created_at"
+	}
+
+	order := "DESC"
+	if strings.ToLower(f.SortOrder) == "asc" {
+		order = "ASC"
+	}
+
+	qb = qb.OrderBy(sortField + " " + order).
+		Limit(f.Limit).
+		Offset(f.Offset)
+
+	query, args, err := qb.ToSql()
 	if err != nil {
 		return nil, err
 	}
 
 	q := db.Query{
-		Name:     "rental_repository.GetAgreements",
+		Name:     "rental_repository.GetAgreementsWithActiveContracts",
 		QueryRaw: query,
 	}
 

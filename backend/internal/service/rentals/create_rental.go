@@ -12,6 +12,7 @@ import (
 	"github.com/merynayr/mall-tenants/internal/sys"
 )
 
+// ContractPath - путь, куда складываются документы с договорами
 const ContractPath = "contracts/final"
 
 func (s *srv) CreateRental(ctx context.Context, rental model.Rental) error {
@@ -29,7 +30,7 @@ func (s *srv) CreateRental(ctx context.Context, rental model.Rental) error {
 		return sys.PremiseUnderRepairError
 	}
 
-	err = s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
+	err = s.txManager.ReadCommitted(ctx, func(ctx context.Context) (err error) {
 		rentalID, err := s.rentalRepository.CreateRental(ctx, &rental)
 		if err != nil {
 			return err
@@ -44,10 +45,14 @@ func (s *srv) CreateRental(ctx context.Context, rental model.Rental) error {
 		if err != nil {
 			return fmt.Errorf("ошибка при открытии файла договора: %w", err)
 		}
-		defer src.Close()
+		defer func() {
+			if cerr := src.Close(); cerr != nil && err == nil {
+				err = cerr
+			}
+		}()
 
 		// Создание пути, если не существует
-		if err := os.MkdirAll(ContractPath, os.ModePerm); err != nil {
+		if err := os.MkdirAll(ContractPath, 0750); err != nil {
 			return fmt.Errorf("ошибка при создании директории: %w", err)
 		}
 
@@ -57,7 +62,11 @@ func (s *srv) CreateRental(ctx context.Context, rental model.Rental) error {
 		if err != nil {
 			return fmt.Errorf("ошибка при создании файла договора: %w", err)
 		}
-		defer dst.Close()
+		defer func() {
+			if cerr := dst.Close(); cerr != nil && err == nil {
+				err = cerr
+			}
+		}()
 
 		if _, err := io.Copy(dst, src); err != nil {
 			return fmt.Errorf("ошибка при сохранении договора: %w", err)

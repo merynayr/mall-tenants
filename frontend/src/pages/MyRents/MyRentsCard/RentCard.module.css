@@ -84,6 +84,11 @@
 	gap: 4px;
 }
 
+.action-inline {
+	white-space: nowrap;
+	flex-shrink: 0; 
+}
+
 .action-btn:hover {
 	transform: translateY(-2px);
 	color: #2563eb;
@@ -140,4 +145,15 @@ button {
 	align-items: center;
 	gap: 1rem;
 	margin-bottom: 0.5rem;
+}
+
+.status-text {
+	flex: 1;
+	text-align: center;
+	font-size: 0.85rem;
+	color: #374151;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
 }

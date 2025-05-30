@@ -59,10 +59,16 @@ export const PaymentsTable: React.FC<Props> = ({ payments, selectedIds, onToggle
             <td>{payment.client_name}</td>
             <td>{calculateRentalDuration(payment.start_date, payment.end_date)} мес.</td>
             <td>{payment.amount}</td>
-            <td>{payment.status ? 'Оплачено' : 'Не оплачено'}</td>
-            <td>{new Date(payment.start_date).toLocaleDateString()}</td>
-            <td>{new Date(payment.end_date).toLocaleDateString()}</td>
-            <td>{payment.payment_date ? new Date(payment.payment_date).toLocaleDateString() : ''}</td>
+            <td className={payment.status ? styles.paid : styles.unpaid}>
+							{payment.status ? 'Оплачено' : 'Не оплачено'}
+						</td>
+						<td>{new Date(payment.start_date).toLocaleDateString()}</td>
+						<td>{new Date(payment.end_date).toLocaleDateString()}</td>
+						<td>
+							{payment.payment_date
+								? new Date(payment.payment_date).toLocaleDateString()
+								: <span>—</span>}
+						</td>
           </tr>
         ))}
       </tbody>

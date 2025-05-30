@@ -434,8 +434,11 @@ func (s *serviceProvider) ContractAPI(ctx context.Context) *contract.API {
 func (s *serviceProvider) ContractService(ctx context.Context) service.ContractService {
 	if s.contractService == nil {
 		s.contractService = contractService.NewService(
+			s.RentalRepository(ctx),
+			s.PremiseRepository(ctx),
+			s.PaymentRepository(ctx),
 			s.ContractRepository(ctx),
-		)
+			s.TxManager(ctx))
 	}
 	return s.contractService
 }

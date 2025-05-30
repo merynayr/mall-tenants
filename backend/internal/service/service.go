@@ -42,7 +42,7 @@ type RentalService interface {
 	GetRentalByID(ctx context.Context, code int64) ([]model.RentalWithContract, error)
 	CreateRental(ctx context.Context, rental model.Rental) error
 	UpdateRental(ctx context.Context, rental model.Rental) error
-	GetAgreements(ctx context.Context, limit, offset uint64) ([]model.Agreements, error)
+	GetAgreements(ctx context.Context, filter model.RentFilter) ([]model.Agreements, error)
 }
 
 // PaymentService - интерфейс репо слоя для платежей
@@ -74,6 +74,6 @@ type ApplicationService interface {
 // ContractService интерфейс сервисного слоя договоров
 type ContractService interface {
 	GetByContractID(ctx context.Context, contractID int64) (*model.Contracts, error)
-	CreateContract(ctx context.Context, c model.Contract) error
-	GetAllContracts(ctx context.Context) ([]model.Contract, error)
+	SignContract(ctx context.Context, contractID int64, rent model.RentalWithContract) error
+	DeleteContract(ctx context.Context, contractID int64) error
 }

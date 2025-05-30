@@ -2,10 +2,12 @@ package contract
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/merynayr/mall-tenants/internal/model"
 	"github.com/merynayr/mall-tenants/internal/service"
 	"github.com/merynayr/mall-tenants/internal/sys"
 )
@@ -26,10 +28,9 @@ func NewAPI(contractService service.ContractService) *API {
 func (API *API) RegisterRoutes(router *gin.Engine) {
 	contractGroup := router.Group("/contracts")
 	{
-		// contractGroup.POST("", API.CreateContract)
-		// contractGroup.GET("", API.GetAllContracts)
+		contractGroup.POST("/:contract_id/sign", API.SignContract)
 		contractGroup.GET("/:contract_id", API.DownloadContract)
-
+		contractGroup.DELETE("/:contract_id", API.DeleteContract)
 	}
 }
 
@@ -45,15 +46,15 @@ func (API *API) RegisterRoutes(router *gin.Engine) {
 // @Failure 404 {object} sys.ErrorResponse "Договор не найден"
 // @Failure 500 {object} sys.ErrorResponse
 // @Router /contracts/{contract_id} [get]
-func (a *API) DownloadContract(c *gin.Context) {
+func (API *API) DownloadContract(c *gin.Context) {
 	contractIDParam := c.Param("contract_id")
 	contractID, err := strconv.ParseInt(contractIDParam, 10, 64)
 	if err != nil {
-		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidIDFormatError))
 		return
 	}
 
-	contract, err := a.contractService.GetByContractID(c.Request.Context(), contractID)
+	contract, err := API.contractService.GetByContractID(c.Request.Context(), contractID)
 	if err != nil {
 		sys.HandleError(c, err)
 		return
@@ -64,73 +65,84 @@ func (a *API) DownloadContract(c *gin.Context) {
 		sys.HandleError(c, err)
 		return
 	}
-	defer file.Close()
-	fmt.Println(contract)
+	defer func() {
+		if err := file.Close(); err == nil {
+			sys.HandleError(c, err)
+			return
+		}
+	}()
 
 	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=contract-%d.pdf", contract.ContractID))
 	c.Header("Content-Type", "application/pdf")
 	c.File(contract.FilePath)
 }
 
-// type CreateContractInput struct {
-// 	RentalID  int    `json:"rentalId" binding:"required"`
-// 	FilePath  string `json:"filePath" binding:"required"`
-// 	Signature string `json:"signature" binding:"required"` // base64
-// 	PublicKey string `json:"publicKey" binding:"required"`
-// }
+// SignContract подписывает контракт и сохраняет аренду
+// @Summary Подписать контракт
+// @Description Подписывает контракт по его идентификатору и сохраняет связанную аренду
+// @Tags contracts
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param contract_id path int64 true "ID контракта"
+// @Param rental body model.RentalWithContract true "Данные аренды, связанные с контрактом"
+// @Success 200 {object} map[string]string "Сообщение об успешной подписи контракта"
+// @Failure 400 {object} sys.ErrorResponse "Некорректный запрос"
+// @Failure 401 {object} sys.ErrorResponse "Неавторизован"
+// @Failure 404 {object} sys.ErrorResponse "Контракт не найден"
+// @Failure 500 {object} sys.ErrorResponse "Внутренняя ошибка сервера"
+// @Router /contracts/{contract_id}/sign [post]
+func (API *API) SignContract(c *gin.Context) {
+	contractIDParam := c.Param("contract_id")
+	contractID, err := strconv.ParseInt(contractIDParam, 10, 64)
+	if err != nil {
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidIDFormatError))
+		return
+	}
 
-// func (api *API) CreateContract(c *gin.Context) {
-// 	var input CreateContractInput
-// 	if err := c.ShouldBindJSON(&input); err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-// 		return
-// 	}
+	var rent model.RentalWithContract
+	if err := c.ShouldBindJSON(&rent); err != nil {
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
+		return
+	}
 
-// 	sigBytes, err := decodeBase64(input.Signature)
-// 	if err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid signature"})
-// 		return
-// 	}
+	err = API.contractService.SignContract(c.Request.Context(), contractID, rent)
+	if err != nil {
+		sys.HandleError(c, err)
+		return
+	}
 
-// 	contract := model.Contract{
-// 		RentalID:  input.RentalID,
-// 		FilePath:  input.FilePath,
-// 		Signature: sigBytes,
-// 		PublicKey: input.PublicKey,
-// 		IsActive:  true,
-// 		SignedAt:  time.Now(),
-// 	}
+	c.JSON(http.StatusOK, gin.H{"message": "contract signed"})
+}
 
-// 	if err := api.service.CreateContract(c.Request.Context(), contract); err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 		return
-// 	}
+// DeleteContract удаляет существующий контракт.
+// @Summary Удалить контракт
+// @Description Удаляет контракт по идентификатору, если он существует.
+// @Tags contracts
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "ID контракта"
+// @Success 200 {string} string "ok"
+// @Failure 400 {object} sys.ErrorResponse "Некорректный идентификатор"
+// @Failure 401 {object} sys.ErrorResponse "Неавторизован"
+// @Failure 404 {object} sys.ErrorResponse "Контракт не найден"
+// @Failure 500 {object} sys.ErrorResponse "Внутренняя ошибка сервера"
+// @Router /contracts/{contract_id} [delete]
+func (API *API) DeleteContract(c *gin.Context) {
+	codeParam := c.Param("contract_id")
 
-// 	c.JSON(http.StatusCreated, gin.H{"message": "contract created"})
-// }
+	id, err := strconv.ParseInt(codeParam, 10, 64)
+	if err != nil {
+		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
+		return
+	}
 
-// func (api *API) GetContractsByRental(c *gin.Context) {
-// 	rentalID, err := parseIntParam(c, "rentalId")
-// 	if err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid rental id"})
-// 		return
-// 	}
+	err = API.contractService.DeleteContract(c.Request.Context(), id)
+	if err != nil {
+		sys.HandleError(c, err)
+		return
+	}
 
-// 	contracts, err := api.service.GetContractsByRental(c.Request.Context(), rentalID)
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusOK, contracts)
-// }
-
-// func (api *API) GetAllContracts(c *gin.Context) {
-// 	contracts, err := api.service.GetAllContracts(c.Request.Context())
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusOK, contracts)
-// }
+	c.Status(http.StatusOK)
+}

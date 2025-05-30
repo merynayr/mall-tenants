@@ -1,23 +1,25 @@
 import { useEffect, useState } from 'react';
 import styles from './Rents.module.css';
-import Button from '@/components/Button/Button';
 import api from '@/helpers/API';
 import { Rent } from '@/interfaces/rent';
 import { RentsTable } from '@/pages/Rents/RentsTable/RentsTable';
 import { AxiosError } from 'axios';
 import { toast } from 'react-toastify';
+import Pagination from '@/components/Pagination/Pagination';
 
 export function PageRents() {
 	const [rents, setRents] = useState<Rent[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const [limit] = useState(20);
+	const [limit] = useState(11);
 	const [offset, setOffset] = useState(0);
-	
+	const [searchQuery, setSearchQuery] = useState('');
+	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
 	useEffect(() => {
 		fetchRents();
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [offset]);
+	}, [offset, searchQuery, sortOrder]);
 
 	useEffect(() => {
 		if (error) {
@@ -29,7 +31,13 @@ export function PageRents() {
 		try {
 			setIsLoading(true);
 			const { data } = await api.get<Rent[]>('/rental', {
-				params: { limit, offset }
+				params: {
+					limit,
+					offset,
+					client: searchQuery.trim() || undefined,
+					sort_by: 'created_at',
+					sort_order: sortOrder,
+				}
 			});
 			setRents(data);
 		} catch (e) {
@@ -52,17 +60,33 @@ export function PageRents() {
 			<h1>Договора аренды</h1>
 		</div>
 
+		<div className={styles.filters}>
+			<input
+				type="text"
+				placeholder="Поиск по имени клиента..."
+				value={searchQuery}
+				onChange={(e) => setSearchQuery(e.target.value)}
+			/>
+
+			<select value={sortOrder} onChange={(e) => setSortOrder(e.target.value as any)}>
+				<option value="desc">Сначала новые</option>
+				<option value="asc">Сначала старые</option>
+			</select>
+		</div>
 		<div>
 			{isLoading ? (
 				<div>Загрузка...</div>
 			) : (
 				<>
 					<RentsTable rents={rents} />
-					<div className={styles.pagination}>
-						<Button className={styles['small']} onClick={handlePrev} disabled={offset === 0}>Назад</Button>
-						<span>Показано с {offset + 1} по {offset + rents.length}</span>
-						<Button className={styles['small']} onClick={handleNext} disabled={rents.length < limit}>Вперёд</Button>
-					</div>
+
+					<Pagination
+						offset={offset}
+						limit={limit}
+						total={rents.length}
+						onNext={handleNext}
+						onPrev={handlePrev}
+					/>
 				</>
 			)}
 		</div>

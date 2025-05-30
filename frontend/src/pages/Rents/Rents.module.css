@@ -4,36 +4,25 @@
 	align-items: center;
 }
 
-.page {
-  padding: 2rem;
-}
-.page h1 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-}
-
-.pagination {
+.filters {
 	display: flex;
-	justify-content: center;
+	flex-wrap: wrap;
 	align-items: center;
-	margin-top: 16px;
-	gap: 8px;
+	gap: 12px;
+	margin-bottom: 20px;
 }
 
-.pageButton {
-	padding: 6px 12px;
-	background-color: #f0f0f0;
+.filters input,
+.filters select {
+	padding: 6px 10px;
+	font-size: 14px;
 	border: 1px solid #ccc;
-	border-radius: 4px;
-	cursor: pointer;
+	border-radius: 6px;
+	outline: none;
+	transition: border-color 0.2s;
 }
 
-.pageButton:hover {
-	background-color: #e0e0e0;
-}
-
-.pageButton.active {
-	background-color: #007bff;
-	color: white;
-	border-color: #007bff;
+.filters input:focus,
+.filters select:focus {
+	border-color: #0070f3;
 }

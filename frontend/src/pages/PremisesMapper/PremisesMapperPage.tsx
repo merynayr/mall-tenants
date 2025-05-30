@@ -53,6 +53,7 @@ export function PremisesMapperPage() {
 
 	const handleUploaded = () => {
 		setShowAddFloorPlanModal(false);
+		fetchFloorPlan(floor);
 	};
 
 	const finishDrawing = async () => {
@@ -86,8 +87,6 @@ export function PremisesMapperPage() {
 			}
 		}
 	};
-
-
 
 	const fetchPolygons = async (floor: number) => {
 		try {
@@ -181,7 +180,7 @@ export function PremisesMapperPage() {
 		};
 		const isSaved = await savePolygon(newPolygon);
 		if (isSaved) {
-			setPolygons([...polygons, newPolygon]);
+			await fetchPolygons(floor);
 			setCurrentPoints([]);
 			setIsDrawing(false);
 			setShowModal(false);

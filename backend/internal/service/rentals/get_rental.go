@@ -24,6 +24,9 @@ func (s *srv) GetRentalByID(ctx context.Context, code int64) ([]model.RentalWith
 			if err != nil {
 				return err
 			}
+			if len(contracts) == 0 {
+				continue
+			}
 
 			rents = append(rents, model.RentalWithContract{
 				RentalID:  r.RentalID,

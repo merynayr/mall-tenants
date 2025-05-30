@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/merynayr/mall-tenants/internal/model"
 	"github.com/merynayr/mall-tenants/internal/service"
 	"github.com/merynayr/mall-tenants/internal/sys"
 )
@@ -39,29 +40,38 @@ func (api *API) RegisterRoutes(router *gin.Engine) {
 // @Accept       json
 // @Produce      json
 // @Security BearerAuth
-// @Param        limit  query     int  false  "Максимальное количество договоров" default(20)
+// @Param        client      query     string false  "Поиск по имени клиента (нечёткий поиск)"
+// @Param        sort_by     query     string false  "Поле сортировки (например, period_start)"
+// @Param        sort_order  query     string false  "Порядок сортировки: asc или desc"
+// @Param        limit  query     int  false  "Максимальное количество договоров" default(11)
 // @Param        offset query     int  false  "Смещение для пагинации" default(0)
 // @Success      200    {array}   model.Rental
 // @Failure      400    {object}  sys.ErrorResponse
 // @Failure      500    {object}  sys.ErrorResponse
 // @Router       /rental/ [get]
 func (api *API) GetAgreements(c *gin.Context) {
-	limitStr := c.DefaultQuery("limit", "20")
-	offsetStr := c.DefaultQuery("offset", "0")
+	var filter model.RentFilter
+	filter.Search = c.Query("client")
+	filter.SortBy = c.DefaultQuery("sort_by", "created_at")
+	filter.SortOrder = c.DefaultQuery("sort_order", "desc")
 
+	limitStr := c.DefaultQuery("limit", "11")
 	limit, err := strconv.ParseUint(limitStr, 10, 64)
 	if err != nil {
 		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
 		return
 	}
+	filter.Limit = limit
 
+	offsetStr := c.DefaultQuery("offset", "0")
 	offset, err := strconv.ParseUint(offsetStr, 10, 64)
 	if err != nil {
 		sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
 		return
 	}
+	filter.Offset = offset
 
-	agreements, err := api.rentalService.GetAgreements(c.Request.Context(), limit, offset)
+	agreements, err := api.rentalService.GetAgreements(c.Request.Context(), filter)
 	if err != nil {
 		sys.HandleError(c, err)
 		return

@@ -39,7 +39,10 @@ export function ApplicationsTable({ applications, onProcess }: Props) {
 						{`с ${new Date(a.startDate).toLocaleDateString('ru-RU')} по ${new Date(a.endDate).toLocaleDateString('ru-RU')}`}
 					</div>
 					<div className={styles.row}>
-						<strong>Обработана:</strong> {a.isProcessed ? 'Да' : 'Нет'}
+						<strong>Обработана:</strong>{' '}
+						<span className={a.isProcessed ? styles.processed : styles.unprocessed}>
+							{a.isProcessed ? 'Да' : 'Нет'}
+						</span>
 					</div>
 					<div className={styles.row}>
 						<strong>Создана:</strong> {new Date(a.createdAt).toLocaleString()}

@@ -22,25 +22,25 @@ const PageMyRents: React.FC = () => {
 	}, [error]);
 	
 	useEffect(() => {
-		const fetchRents = async (id: number | undefined) => {
-			try {
-				const response = await api.get<RentalWithContract[]>(`/rental/${id}`);
-				setRents(response.data);
-				console.log(response.data)
-			} catch (e) {
-				console.error(e);
-				if (e instanceof AxiosError) {
-					setError(e.response?.data.error);
-				}
-			} finally {
-				setLoading(false);
-			}
-		};
-
 		if (profile?.user_id) {
 			fetchRents(profile.user_id);
 		}
 	}, [profile?.user_id]);
+
+	const fetchRents = async (id: number | undefined) => {
+		if (!id) return;
+		try {
+			const response = await api.get<RentalWithContract[]>(`/rental/${id}`);
+			setRents(response.data);
+		} catch (e) {
+			console.error(e);
+			if (e instanceof AxiosError) {
+				setError(e.response?.data.error);
+			}
+		} finally {
+			setLoading(false);
+		}
+	};
 
 	if (loading) return <p>Загрузка...</p>;
 	if (!rents.length) return <p>У вас нет аренд.</p>;
@@ -53,7 +53,11 @@ const PageMyRents: React.FC = () => {
 			
 			<div className={styles['rents-grid']}>
 				{rents.map((rent) => (
-					<RentCard key={rent.rental_id} rent={rent} />
+					<RentCard
+						key={rent.rental_id}
+						rent={rent}
+						onRefresh={() => fetchRents(profile?.user_id)}
+					/>
 				))}
 			</div></>
 	);

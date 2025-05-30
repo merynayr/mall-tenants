@@ -31,7 +31,7 @@ type RentalRepository interface {
 	GetRentalsByID(ctx context.Context, id int64) ([]model.Rental, error)
 	CreateRental(ctx context.Context, rental *model.Rental) (int64, error)
 	UpdateRental(ctx context.Context, rental *model.Rental) error
-	GetAgreements(ctx context.Context, limit, offset uint64) ([]model.Agreements, error)
+	GetAgreements(ctx context.Context, filter model.RentFilter) ([]model.Agreements, error)
 }
 
 // PaymentRepository - интерфейс репо слоя для платежей
@@ -64,8 +64,9 @@ type ApplicationRepository interface {
 // ContractRepository - интерфейс репо слоя для договоров
 type ContractRepository interface {
 	CreateContract(ctx context.Context, c *model.Contract) error
-	UpdateContractSignature(ctx context.Context, c *model.Contract) error
+	UpdateSignature(ctx context.Context, contractID int64, signature []byte, publicKey string) error
 	GetByRentalID(ctx context.Context, rentalID int64) ([]model.Contracts, error)
+	DeleteContract(ctx context.Context, contractID int64) error
 	GetAll(ctx context.Context) ([]model.Contract, error)
 	GetByContractID(ctx context.Context, contractID int64) (*model.Contracts, error)
 }

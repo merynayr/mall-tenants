@@ -9,6 +9,7 @@ import { AxiosError } from 'axios';
 import { toast } from 'react-toastify';
 import { PaymentModal } from '@/components/PaymentModal/PaymentModal';
 import { formatDate } from '@/helpers/FormatDate';
+import Pagination from '@/components/Pagination/Pagination';
 
 export function PageMyPayments() {
 	const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -141,11 +142,14 @@ export function PageMyPayments() {
 							onToggleSelectAll={handleToggleSelectAll}
 						/>
 
-						<div className={styles.pagination}>
-							<Button className={styles['small']} onClick={handlePrev} disabled={offset === 0}>Назад</Button>
-							<span>Показано с {offset + 1} по {offset + payments.length}</span>
-							<Button className={styles['small']} onClick={handleNext} disabled={payments.length < limit}>Вперёд</Button>
-						</div>
+						
+						<Pagination
+							offset={offset}
+							limit={limit}
+							total={payments.length}
+							onNext={handleNext}
+							onPrev={handlePrev}
+						/>
 					</>
 				)}
 			</div>

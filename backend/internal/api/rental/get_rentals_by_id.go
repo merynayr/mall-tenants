@@ -8,7 +8,7 @@ import (
 	"github.com/merynayr/mall-tenants/internal/sys"
 )
 
-// GetRentalByID получает данные о аренде
+// GetRentalsByID получает данные о аренде
 // @Summary Получить данные о аренде
 // @Description Получает данные о аренде по коду
 // @Tags rental

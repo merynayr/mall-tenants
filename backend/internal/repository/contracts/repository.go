@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/merynayr/mall-tenants/internal/client/db"
@@ -65,14 +66,14 @@ func (r *repo) CreateContract(ctx context.Context, c *model.Contract) error {
 	return err
 }
 
-func (r *repo) UpdateContractSignature(ctx context.Context, c *model.Contract) error {
+func (r *repo) UpdateSignature(ctx context.Context, contractID int64, signature []byte, publicKey string) error {
 	query, args, err := sq.Update(contractTable).
-		Set(colSignature, c.Signature).
-		Set(colPublicKey, c.PublicKey).
+		Set(colSignature, signature).
+		Set(colPublicKey, publicKey).
 		Set(colIsSigned, true).
 		Set(colIsActive, true).
-		Set(colSignedAt, c.SignedAt).
-		Where(sq.Eq{colContractID: c.ContractID}).
+		Set(colSignedAt, time.Now().UTC()).
+		Where(sq.Eq{colContractID: contractID}).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 
@@ -81,7 +82,7 @@ func (r *repo) UpdateContractSignature(ctx context.Context, c *model.Contract) e
 	}
 
 	q := db.Query{
-		Name:     "contract_repository.UpdateContractSignature",
+		Name:     "contract_repository.UpdateSignature",
 		QueryRaw: query,
 	}
 
@@ -139,6 +140,29 @@ func (r *repo) GetByContractID(ctx context.Context, contractID int64) (*model.Co
 	}
 
 	return &contract, nil
+}
+
+func (r *repo) DeleteContract(ctx context.Context, contractID int64) error {
+	query, args, err := sq.Delete(contractTable).
+		Where(sq.Eq{colContractID: contractID}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return err
+	}
+
+	q := db.Query{
+		Name:     "contract_repository.GetByRentalID",
+		QueryRaw: query,
+	}
+
+	_, err = r.db.DB().ExecContext(ctx, q, args...)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *repo) GetAll(ctx context.Context) ([]model.Contract, error) {

@@ -15,6 +15,7 @@ type Contract struct {
 	CreatedAt  time.Time  `json:"created_at" db:"created_at"`
 }
 
+// Contracts - модель для получения данных о договорах из БД
 type Contracts struct {
 	ContractID int64      `json:"contract_id" db:"contract_id"`
 	RentalID   int64      `json:"rental_id" db:"rental_id"`

@@ -47,3 +47,19 @@
 .actions button:hover {
 	background-color: #0056b3;
 }
+
+.processed {
+	background-color: #e0f7e9;
+	color: #2e7d32;
+	font-weight: 500;
+	padding: 2px 6px;
+	border-radius: 6px;
+}
+
+.unprocessed {
+	background-color: #fff3e0;
+	color: #ef6c00;
+	font-weight: 500;
+	padding: 2px 6px;
+	border-radius: 6px;
+}

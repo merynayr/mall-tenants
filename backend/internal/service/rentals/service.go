@@ -35,18 +35,30 @@ func NewService(
 	}
 }
 
-func (s *srv) GetAgreements(ctx context.Context, limit, offset uint64) ([]model.Agreements, error) {
-	if limit <= 0 {
-		limit = 20
-	}
+func (s *srv) GetAgreements(ctx context.Context, filter model.RentFilter) ([]model.Agreements, error) {
+	var rentals []model.Agreements
+	err := s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
+		var errTx error
 
-	rental, err := s.rentalRepository.GetAgreements(ctx, limit, offset)
-	if err != nil {
-		return nil, err
-	}
-	if len(rental) == 0 {
-		return nil, sys.RentalsNotFoundError
-	}
+		rentals, errTx = s.rentalRepository.GetAgreements(ctx, filter)
+		if errTx != nil {
+			return errTx
+		}
+		if len(rentals) == 0 {
+			return sys.RentalsNotFoundError
+		}
 
-	return rental, nil
+		for i := range rentals {
+			contracts, err := s.contractRepository.GetByRentalID(ctx, rentals[i].RentalID)
+			if err != nil {
+				return err
+			}
+
+			rentals[i].Contracts = contracts
+		}
+
+		return nil
+	})
+
+	return rentals, err
 }

@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
 import styles from './Payments.module.css';
-import Button from '@/components/Button/Button';
 import api from '@/helpers/API';
 import { Payment } from '@/interfaces/payment';
 import { PaymentsTable } from '@/pages/Payments/PaymetnsTable/PaymetnsTable';
 import { AxiosError } from 'axios';
 import { toast } from 'react-toastify';
+import Pagination from '@/components/Pagination/Pagination';
 
 export function PagePayments() {
 	const [payments, setPayments] = useState<Payment[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const [limit] = useState(20);
+	const [limit] = useState(11);
 	const [offset, setOffset] = useState(0);
 	const [status, setStatus] = useState<'all' | 'paid' | 'unpaid'>('all');
 	const [searchQuery, setSearchQuery] = useState('');
@@ -91,11 +91,14 @@ export function PagePayments() {
 				<>
 					
 					<PaymentsTable payments={payments} />
-					<div className={styles.pagination}>
-						<Button className={styles['small']} onClick={handlePrev} disabled={offset === 0}>Назад</Button>
-						<span>Показано с {offset + 1} по {offset + payments.length}</span>
-						<Button className={styles['small']} onClick={handleNext} disabled={payments.length < limit}>Вперёд</Button>
-					</div>
+					
+					<Pagination
+						offset={offset}
+						limit={limit}
+						total={payments.length}
+						onNext={handleNext}
+						onPrev={handlePrev}
+					/>
 				</>
 			)}
 		

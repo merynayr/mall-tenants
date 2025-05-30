@@ -21,16 +21,18 @@ type Rental struct {
 
 // Agreements представляет собой модель данных для аренды
 type Agreements struct {
-	RentalID   int64      `json:"rental_id,omitempty"`
-	SpaceID    int64      `json:"space_code"`
-	ClientName string     `json:"client_name"`
-	StartDate  time.Time  `json:"start_date"`
-	EndDate    time.Time  `json:"end_date"`
-	PaidMonths int64      `json:"paid_months"`
-	CreatedAt  time.Time  `json:"created_at"`
-	UpdatedAt  *time.Time `json:"updated_at,omitempty"`
+	RentalID   int64       `json:"rental_id,omitempty"`
+	SpaceID    int64       `json:"space_code"`
+	ClientName string      `json:"client_name"`
+	StartDate  time.Time   `json:"start_date"`
+	EndDate    time.Time   `json:"end_date"`
+	PaidMonths int64       `json:"paid_months"`
+	CreatedAt  time.Time   `json:"created_at"`
+	UpdatedAt  *time.Time  `json:"updated_at,omitempty"`
+	Contracts  []Contracts `json:"contracts"`
 }
 
+// RentalWithContract модель данных для полуения списка аренд с договорами
 type RentalWithContract struct {
 	RentalID  int64       `json:"rental_id,omitempty" db:"rental_id"`
 	SpaceID   int64       `json:"space_code" db:"space_id"`

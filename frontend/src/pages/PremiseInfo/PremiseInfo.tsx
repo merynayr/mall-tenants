@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import styles from './Premises.module.css';
+import styles from './PremiseInfo.module.css';
 import Button from '@/components/Button/Button';
 import api from '@/helpers/API';
 import { Premises } from '@/interfaces/premises';

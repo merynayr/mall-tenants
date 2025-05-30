@@ -36,9 +36,6 @@ export function Layout() {
 				</div>
 
 			</div>
-			<div className={styles['header-right']}>
-				<button className={styles['settings-button']}>⚙️</button>
-			</div>
 		</header>
 		<div className={styles['layout']}>
 			<div className={cn(styles.sidebar, { [styles['sidebar-closed']]: !isSidebarOpen })}>

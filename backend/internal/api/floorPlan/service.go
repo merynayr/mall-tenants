@@ -68,8 +68,12 @@ func (api *API) UploadFloorPlan(c *gin.Context) {
 		sys.HandleError(c, err)
 		return
 	}
-	defer file.Close()
-
+	defer func() {
+		if err := file.Close(); err == nil {
+			sys.HandleError(c, err)
+			return
+		}
+	}()
 	// Определим тип файла
 	buffer := make([]byte, 512)
 	if _, err := file.Read(buffer); err != nil {

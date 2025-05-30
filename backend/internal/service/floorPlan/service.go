@@ -27,7 +27,7 @@ func NewService(premiseRepo repository.FloorPlanRepository) service.FloorPlanSer
 }
 
 // SaveFloorPlan сохраняет SVG или PNG-файл и создаёт запись в БД
-func (s *srv) SaveFloorPlan(ctx context.Context, floor int64, reader io.Reader, mimeType string) error {
+func (s *srv) SaveFloorPlan(ctx context.Context, floor int64, reader io.Reader, mimeType string) (err error) {
 	if floor < 0 {
 		return sys.FloorNumberInvalidError
 	}
@@ -53,7 +53,11 @@ func (s *srv) SaveFloorPlan(ctx context.Context, floor int64, reader io.Reader, 
 	if err != nil {
 		return fmt.Errorf("failed to create file: %w", err)
 	}
-	defer f.Close()
+	defer func() {
+		if cerr := f.Close(); cerr != nil && err == nil {
+			err = cerr
+		}
+	}()
 
 	if _, err := io.Copy(f, reader); err != nil {
 		return fmt.Errorf("failed to write file data: %w", err)

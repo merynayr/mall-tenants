@@ -216,7 +216,7 @@ func (api *API) ListClientPayments(c *gin.Context) {
 // @Param        client      query     string false  "Поиск по имени клиента (нечёткий поиск)"
 // @Param        sort_by     query     string false  "Поле сортировки (например, period_start)"
 // @Param        sort_order  query     string false  "Порядок сортировки: asc или desc"
-// @Param        limit       query     int    false  "Количество записей на страницу (по умолчанию 20)"
+// @Param        limit       query     int    false  "Количество записей на страницу (по умолчанию 11)"
 // @Param        offset      query     int    false  "Смещение (offset) от начала выборки"
 // @Success      200         {array}   model.Payment
 // @Failure      400         {object}  sys.ErrorResponse "Некорректный запрос"

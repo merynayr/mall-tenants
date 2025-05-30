@@ -23,15 +23,18 @@
 }
 
 .sidebar {
-  width: 250px;  
-  padding: 30px;
-  border-right: 1px solid var(--separator-color);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  transition: width 0.3s ease;  
+	width: 250px;
+	padding: 30px;
+	border-right: 1px solid var(--separator-color);
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	overflow: hidden;
+	transition: width 0.3s ease;
 	position: fixed;
 	margin-top: 64px;
+	bottom: 0; 
+	top: 0px;
 }
 
 .sidebar-closed {
@@ -53,7 +56,7 @@
 }
 
 .exit {
-	margin-top: 30%;
+	margin-top: auto;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -125,12 +128,6 @@
 	font-size: 20px;
 	font-weight: 700;
 	color: var(--text-color);
-}
-
-.header-right {
-	display: flex;
-	align-items: center;
-	gap: 12px;
 }
 
 .settings-button {

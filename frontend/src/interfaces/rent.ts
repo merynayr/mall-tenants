@@ -7,6 +7,7 @@ export interface Rent {
 	paid_months: number;
 	created_at: string;
 	updated_at?: string;
+	contracts: Contract[];
 }
 
 export interface Contract {
