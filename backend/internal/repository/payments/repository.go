@@ -171,6 +171,13 @@ func (r *repo) GetByClientID(ctx context.Context, id int64, f model.PaymentFilte
 		qb = qb.Where(sq.Eq{"p." + IsPaidColumn: *f.IsPaid})
 	}
 
+	if f.OverdueOnly {
+		qb = qb.Where(sq.Lt{"p.period_end": time.Now()})
+		if f.IsPaid == nil {
+			qb = qb.Where(sq.Eq{"p.is_paid": false})
+		}
+	}
+
 	if f.Search != nil {
 		qb = qb.Where(sq.Eq{"r.rental_id": f.Search.(int64)})
 	}
@@ -229,6 +236,13 @@ func (r *repo) List(ctx context.Context, f model.PaymentFilter) ([]model.Payment
 
 	if f.IsPaid != nil {
 		qb = qb.Where(sq.Eq{"p." + IsPaidColumn: *f.IsPaid})
+	}
+
+	if f.OverdueOnly {
+		qb = qb.Where(sq.Lt{"p.period_end": time.Now()})
+		if f.IsPaid == nil {
+			qb = qb.Where(sq.Eq{"p.is_paid": false})
+		}
 	}
 
 	if f.Search != "" {

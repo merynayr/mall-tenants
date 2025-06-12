@@ -48,7 +48,8 @@ export function ApplicationsTable({ applications, onProcess }: Props) {
 						<strong>Создана:</strong> {new Date(a.createdAt).toLocaleString()}
 					</div>
 					<div className={styles.row}>
-						<strong>Доп. информация:</strong> {a.additionalInfo || '—'}
+						<strong>Доп. информация:</strong>
+						<span className={styles.value}>{a.additionalInfo || '—'}</span>
 					</div>
 					<div className={styles.actions}>
 						<button onClick={() => onProcess(a)}>Обработать</button>

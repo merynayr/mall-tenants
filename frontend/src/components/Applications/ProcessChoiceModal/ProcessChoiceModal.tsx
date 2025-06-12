@@ -8,16 +8,16 @@ interface ProcessChoiceModalProps {
   selectedApp: Application;
   onClose: () => void;
   onCreateClient: () => void;
+  handleContractSaved: () => void;
   onReject: () => void;
-	onCreated: () => void;
 }
 
 export const ProcessChoiceModal: React.FC<ProcessChoiceModalProps> = ({
   selectedApp,
   onClose,
   onCreateClient,
+  handleContractSaved,
   onReject,
-  onCreated,
 }) => {
   const [clientExists, setClientExists] = useState<boolean | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -49,61 +49,58 @@ export const ProcessChoiceModal: React.FC<ProcessChoiceModalProps> = ({
     }
   }, [selectedApp]);
 
-return (
-  <div className={styles.overlay}>
-    <div className={styles.modal}>
-      <h2>Обработка заявки</h2>
+  return (
+    <div className={styles.overlay}>
+      <div className={styles.modal}>
+        <h2>Обработка заявки</h2>
 
-      <div>
-        <p><strong>Организация:</strong> {selectedApp.organizationName}</p>
-        <p><strong>Email:</strong> {selectedApp.email}</p>
+        <div>
+          <p><strong>Организация:</strong> {selectedApp.organizationName}</p>
+          <p><strong>Email:</strong> {selectedApp.email}</p>
+        </div>
+
+        {loading ? (
+          <p>Проверка клиента...</p>
+        ) : (
+          <>
+            {clientExists && showContractForm && (
+              <SaveContractForm
+                clientId={userID}
+                applicationData={{
+                  spaceCode: selectedApp.premiseNumber,
+                  startDate: selectedApp.startDate,
+                  endDate: selectedApp.endDate,
+                }}
+                onSuccess={handleContractSaved}
+              />
+            )}
+
+            <div className={styles.buttonsContainer}>
+              <div className={styles.leftButtons}>
+                <button className={styles.danger} onClick={onReject}>
+                  Отклонить
+                </button>
+              </div>
+
+              <div className={styles.rightButtons}>
+                {!clientExists && (
+                  <button className={styles.primary} onClick={onCreateClient}>
+                    Создать клиента
+                  </button>
+                )}
+                {clientExists && !showContractForm && (
+                  <button className={styles.upload} onClick={() => setShowContractForm(true)}>
+                    Загрузить договор
+                  </button>
+                )}
+                <button className={styles.secondary} onClick={onClose}>
+                  Закрыть
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
-
-      {loading ? (
-        <p>Проверка клиента...</p>
-      ) : (
-        <>
-          {clientExists && showContractForm && (
-            <SaveContractForm
-              clientId={userID}
-              applicationData={{
-                spaceCode: selectedApp.premiseNumber,
-                startDate: selectedApp.startDate,
-                endDate: selectedApp.endDate,
-              }}
-              onSuccess={() => {
-                onCreated();
-                setShowContractForm(false);
-                onClose();
-              }}
-            />
-          )}
-
-          <div className={styles.buttonsContainer}>
-            <div className={styles.leftButtons}>
-              <button className={styles.danger} onClick={onReject}>
-                Отклонить
-              </button>
-            </div>
-
-            <div className={styles.rightButtons}>
-              {!clientExists && (
-                <button className={styles.primary} onClick={onCreateClient}>
-                  Создать клиента
-                </button>
-              )}
-              {clientExists && !showContractForm && (
-                <button className={styles.upload} onClick={() => setShowContractForm(true)}>
-                  Загрузить договор
-                </button>
-              )}
-              <button className={styles.secondary} onClick={onClose}>
-                Закрыть
-              </button>
-            </div>
-          </div>
-        </>
-      )}
     </div>
-  </div>
-)};
+  );
+};

@@ -1,6 +1,7 @@
 volumes:
   postgres_volume_local:
   assets_volume:
+  contracts_volume:
 
 services:
   # Сервис для приложения
@@ -14,10 +15,22 @@ services:
       - "${SWAGGER_PORT}:${SWAGGER_PORT}" 
     volumes:
       - assets_volume:/app/assets/floor_plans
+      - contracts_volume:/app/contracts/final
     depends_on:
       db:
         condition: service_healthy
     restart: always
+    env_file:
+      - .env
+  client:
+    container_name: mall-client
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "${CLIENT_PORT}:80"
+    depends_on:
+      - app
     env_file:
       - .env
 

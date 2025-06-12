@@ -145,7 +145,7 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 	a.serviceProvider.applicationAPI.RegisterRoutes(router)
 
 	corsMiddleware := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:5173", "http://localhost:8090"},
+		AllowedOrigins:   []string{"http://localhost:3000", "http://localhost:8090"},
 		AllowedMethods:   []string{"GET", "POST", "PATCH", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Content-Type", "Content-Length", "Authorization"},
 		AllowCredentials: true,

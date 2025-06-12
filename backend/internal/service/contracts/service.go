@@ -49,12 +49,12 @@ func (s *srv) SignContract(ctx context.Context, contractID int64, rent model.Ren
 		return fmt.Errorf("contract not found or already signed")
 	}
 
-	signature, err := crypto.SignFileHash(contract.FilePath, "C:/keys/private_key.pem")
+	signature, err := crypto.SignFile(contract.FilePath)
 	if err != nil {
 		return err
 	}
 
-	publicKey, err := crypto.LoadPublicKeyPEM("C:/keys/public_key.pem")
+	publicKey, err := crypto.GetPublicKeyPEM()
 	if err != nil {
 		return err
 	}

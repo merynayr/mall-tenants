@@ -16,12 +16,13 @@ export function PagePayments() {
 	const [status, setStatus] = useState<'all' | 'paid' | 'unpaid'>('all');
 	const [searchQuery, setSearchQuery] = useState('');
 	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+	const [showOverdue, setShowOverdue] = useState(false);
 
 	useEffect(() => {
 		fetchPayments();
 		setError("");
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [offset, status, searchQuery, sortOrder]);
+	}, [offset, status, searchQuery, sortOrder, showOverdue]);
 
 	useEffect(() => {
 		if (error) {
@@ -33,7 +34,6 @@ export function PagePayments() {
 		try {
 			setIsLoading(true);
 			const isPaidParam = status === 'all' ? undefined : status === 'paid';
-
 			const { data } = await api.get<Payment[]>('/payments', {
 				params: {
 					limit,
@@ -42,13 +42,18 @@ export function PagePayments() {
 					client: searchQuery.trim() || undefined,
 					sort_by: 'period_start',
 					sort_order: sortOrder,
+					is_overdue: showOverdue || undefined,
 				}
 			});
+
 			setPayments(data);
 		} catch (e) {
 			console.error(e);
 			if (e instanceof AxiosError) {
 				setError(e.response?.data.error);
+				if (e.response?.data.error === "Платежи не найдены") {
+      		setPayments([]);
+				}
 			}
 		} finally {
 			setIsLoading(false);
@@ -82,6 +87,17 @@ export function PagePayments() {
 				<option value="desc">Сначала новые</option>
 				<option value="asc">Сначала старые</option>
 			</select>
+
+			<div className={styles.checkboxWrapper}>
+				<label className={styles.checkboxLabel}>
+					<input
+						type="checkbox"
+						checked={showOverdue}
+						onChange={(e) => setShowOverdue(e.target.checked)}
+					/>
+					<span>Просроченные</span>
+				</label>
+			</div>
 		</div>
 
 		<div>

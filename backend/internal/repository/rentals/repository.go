@@ -170,9 +170,7 @@ func (r *repo) GetAgreements(ctx context.Context, f model.RentFilter) ([]model.A
 		Where("EXISTS (" +
 			"SELECT 1 FROM contracts ct " +
 			"WHERE ct.rental_id = r.rental_id " +
-			"AND ct.is_signed = TRUE " +
-			"AND ct.is_active = TRUE" +
-			")").
+			"AND ct.is_signed = TRUE " + ")").
 		PlaceholderFormat(sq.Dollar)
 
 	if f.Search != "" {

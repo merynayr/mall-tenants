@@ -66,7 +66,7 @@ func (API *API) DownloadContract(c *gin.Context) {
 		return
 	}
 	defer func() {
-		if err := file.Close(); err == nil {
+		if err := file.Close(); err != nil {
 			sys.HandleError(c, err)
 			return
 		}

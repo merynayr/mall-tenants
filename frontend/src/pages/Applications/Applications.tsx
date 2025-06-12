@@ -71,25 +71,22 @@ export function PageApplications() {
 		setShowProcessChoiceModal(false);
 	};
 
+	  const handleContractSaved = async () => {
+    try {
+			if (!selectedApp) return;
+      await api.patch(`/applications/${selectedApp.id}/status`, { processed: true });
+      await fetchApplications();
+    } catch (e) {
+      console.error('Ошибка при обновлении статуса заявки:', e);
+    } finally {
+ 			setShowProcessChoiceModal(false);
+    	setSelectedApp(null);     
+    }
+  };
+
 	const handleCreateClient = () => {
 		setShowProcessChoiceModal(false);
 		setShowCreateClientModal(true);
-	};
-
-	const handleAppIsDone = async () => {
-		if (!selectedApp) return;
-
-		try {
-			await api.patch(`/applications/${selectedApp.id}/status`, { processed: true });
-			await fetchApplications();
-		} catch (e) {
-			console.error(e);
-			if (e instanceof AxiosError) {
-					setError(e.response?.data.error);
-				}	
-		} finally {
-			setShowCreateClientModal(false);
-		}
 	};
 
 	const handleNext = () => setOffset((prev) => prev + limit);
@@ -136,8 +133,8 @@ export function PageApplications() {
 					selectedApp={selectedApp}
 					onClose={() => setShowProcessChoiceModal(false)}
 					onCreateClient={handleCreateClient}
+					handleContractSaved={handleContractSaved}
 					onReject={handleReject}
-					onCreated={handleAppIsDone}
 				/>
 			)}
 

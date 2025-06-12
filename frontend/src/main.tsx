@@ -20,6 +20,7 @@ import PremisesMapperPage from '@/pages/PremisesMapper/PremisesMapperPage';
 import PageRents from '@/pages/Rents/Rents';
 import { store } from '@/store/store';
 import Modal from 'react-modal';
+import { PageAnalytics } from './pages/Analytics/Analytics';
 
 const router = createBrowserRouter([
 	{
@@ -71,6 +72,10 @@ const router = createBrowserRouter([
 			{
 				path: '/applications',
 				element: <PageApplications />
+			},
+			{
+				path: '/analytics',
+				element: <PageAnalytics />
 			}
 		]
 	},

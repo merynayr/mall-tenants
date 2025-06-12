@@ -151,6 +151,7 @@ func (api *API) GetPayment(c *gin.Context) {
 // @Param        is_paid      query     bool   false  "Фильтрация по статусу оплаты (true/false)"
 // @Param        sort_by      query     string false  "Поле сортировки (например, period_start)"
 // @Param        sort_order   query     string false  "Порядок сортировки: asc или desc"
+// @Param        is_overdue query bool false "Показывать только просроченные платежи (is_paid=false и due_date < сегодня)"
 // @Param        limit        query     int    false  "Количество записей на страницу (по умолчанию 20)"
 // @Param        offset       query     int    false  "Смещение (offset) от начала выборки"
 // @Success      200          {array}  model.Payment
@@ -178,6 +179,15 @@ func (api *API) ListClientPayments(c *gin.Context) {
 			return
 		}
 		filter.Search = search
+	}
+
+	if overdueStr := c.Query("is_overdue"); overdueStr != "" {
+		overdue, err := strconv.ParseBool(overdueStr)
+		if err != nil {
+			sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
+			return
+		}
+		filter.OverdueOnly = overdue
 	}
 	filter.SortBy = c.DefaultQuery("sort_by", "period_start")
 	filter.SortOrder = c.DefaultQuery("sort_order", "desc")
@@ -216,6 +226,7 @@ func (api *API) ListClientPayments(c *gin.Context) {
 // @Param        client      query     string false  "Поиск по имени клиента (нечёткий поиск)"
 // @Param        sort_by     query     string false  "Поле сортировки (например, period_start)"
 // @Param        sort_order  query     string false  "Порядок сортировки: asc или desc"
+// @Param        is_overdue query bool false "Показывать только просроченные платежи (is_paid=false и due_date < сегодня)"
 // @Param        limit       query     int    false  "Количество записей на страницу (по умолчанию 11)"
 // @Param        offset      query     int    false  "Смещение (offset) от начала выборки"
 // @Success      200         {array}   model.Payment
@@ -232,6 +243,15 @@ func (api *API) ListPayments(c *gin.Context) {
 			return
 		}
 		filter.IsPaid = &isPaid
+	}
+
+	if overdueStr := c.Query("is_overdue"); overdueStr != "" {
+		overdue, err := strconv.ParseBool(overdueStr)
+		if err != nil {
+			sys.HandleError(c, sys.Wrap(err, sys.InvalidRequestError))
+			return
+		}
+		filter.OverdueOnly = overdue
 	}
 
 	filter.Search = c.Query("client")

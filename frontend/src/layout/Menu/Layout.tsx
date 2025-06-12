@@ -43,7 +43,11 @@ export function Layout() {
 					{isSidebarOpen && (
 						<>
 							<div>
-								<div className={styles['email']}>{profile?.email}</div>
+								{profile ? (
+									<div className={styles['email']}>{profile.email}</div>
+								) : (
+									<div className={styles['unauthorized']}>Вы не авторизованы</div>
+								)}
 							</div>
 						</>
 					)}
@@ -71,22 +75,38 @@ export function Layout() {
 								{isSidebarOpen && 'Помещения'}
 							</NavLink>
 
-						{useHasRole('moderator', 'director') && (
+						{useHasRole('moderator') && (
 						<>
 							<NavLink to="/clients" className={({ isActive }) => cn(styles['link'], { [styles.active]: isActive })}>
 								<img src="/client-icon.svg" alt="Иконка клиентов" className={styles['icon']} />
 								{isSidebarOpen && 'Клиенты'}
-							</NavLink>
-							<NavLink to="/payments" className={({ isActive }) => cn(styles['link'], { [styles.active]: isActive })}>
-								<img src="/payment-icon.svg" alt="Иконка оплат" className={styles['icon']} />
-								{isSidebarOpen && 'Оплаты'}
 							</NavLink>
 							<NavLink to="/rents" className={({ isActive }) => cn(styles['link'], { [styles.active]: isActive })}>
 								<img src="/rent-icon.svg" alt="Иконка договоров" className={styles['icon']} />
 								{isSidebarOpen && 'Договора'}
 							</NavLink>
 						</>
-					)}
+						)}
+						{useHasRole('director') && (
+							<>
+								<NavLink to="/clients" className={({ isActive }) => cn(styles['link'], { [styles.active]: isActive })}>
+									<img src="/client-icon.svg" alt="Иконка клиентов" className={styles['icon']} />
+									{isSidebarOpen && 'Клиенты'}
+								</NavLink>
+								<NavLink to="/payments" className={({ isActive }) => cn(styles['link'], { [styles.active]: isActive })}>
+									<img src="/payment-icon.svg" alt="Иконка оплат" className={styles['icon']} />
+									{isSidebarOpen && 'Оплаты'}
+								</NavLink>
+								<NavLink to="/rents" className={({ isActive }) => cn(styles['link'], { [styles.active]: isActive })}>
+									<img src="/rent-icon.svg" alt="Иконка договоров" className={styles['icon']} />
+									{isSidebarOpen && 'Договора'}
+								</NavLink>
+								<NavLink to="/analytics" className={({ isActive }) => cn(styles['link'], { [styles.active]: isActive })}>
+									<img src="/analytics-icon.svg" alt="Иконка дашборда" className={styles['icon']} />
+									{isSidebarOpen && 'Аналитика'}
+								</NavLink>
+							</>
+						)}
 
 						{useHasRole('client') && (
 						<>

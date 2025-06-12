@@ -41,6 +41,7 @@ export const ClientCreateModal: React.FC<Props> = ({ onClose, initialData = {} }
 				role: role
 			});
 			setError(null);
+			toast.success('Клиент успешно создан');
 			onClose(); 
 		} catch (e) {
 			console.error(e);

@@ -25,6 +25,7 @@ export function PageMyPayments() {
 	const [status, setStatus] = useState<'all' | 'paid' | 'unpaid'>(searchParams.get('status') as any || 'all');
 	const [searchQuery, setSearchQuery] = useState(searchParams.get('rental_id') || '');
 	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(searchParams.get('sort') as any || 'asc');
+	const [showOverdue, setShowOverdue] = useState(false);
 
 	const selectedPayments = payments.filter(p => selectedIds.includes(p.id));
 
@@ -39,7 +40,7 @@ export function PageMyPayments() {
 	useEffect(() => {
 		setError("");
 		fetchPayments();
-	}, [offset, status, searchQuery, sortOrder]);
+	}, [offset, status, searchQuery, sortOrder, showOverdue]);
 
 	useEffect(() => {
 		if (error) toast.error(error);
@@ -66,6 +67,7 @@ export function PageMyPayments() {
 					is_paid: isPaidParam,
 					sort_by: 'period_start',
 					sort_order: sortOrder,
+					is_overdue: showOverdue || undefined,
 				}
 			});
 			setPayments(data);
@@ -73,6 +75,9 @@ export function PageMyPayments() {
 			console.error(e);
 			if (e instanceof AxiosError) {
 				setError(e.response?.data.error || 'Ошибка загрузки данных');
+				if (e.response?.data.error === "Платежи не найдены") {
+      		setPayments([]);
+				}
 			}
 		} finally {
 			setIsLoading(false);
@@ -123,6 +128,17 @@ export function PageMyPayments() {
 					<option value="desc">Сначала новые</option>
 					<option value="asc">Сначала старые</option>
 				</select>
+
+				<div className={styles.checkboxWrapper}>
+					<label className={styles.checkboxLabel}>
+						<input
+							type="checkbox"
+							checked={showOverdue}
+							onChange={(e) => setShowOverdue(e.target.checked)}
+						/>
+						<span>Просроченные</span>
+					</label>
+				</div>
 
 				{selectedIds.length > 0 && (
 					<Button onClick={() => setIsModalOpen(true)}>Оплатить выбранные</Button>

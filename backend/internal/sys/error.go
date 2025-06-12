@@ -79,7 +79,7 @@ func HandleError(c *gin.Context, err error) {
 		return
 	}
 
-	logger.Error(errors.WithStack(err).Error())
+	logger.Error(err.Error())
 	c.JSON(http.StatusInternalServerError, gin.H{
 		"error": "internal server error",
 		"code":  http.StatusInternalServerError,
